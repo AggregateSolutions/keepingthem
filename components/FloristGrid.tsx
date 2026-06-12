@@ -8,6 +8,14 @@ function PhoneIcon() {
   );
 }
 
+function PinIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ color: "var(--text-dim)", flexShrink: 0 }}>
+      <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" /><circle cx="12" cy="9" r="2.5" />
+    </svg>
+  );
+}
+
 export default function FloristGrid({ florists }: { florists: MemorialConfig["florists"] }) {
   return (
     <>
@@ -31,24 +39,32 @@ export default function FloristGrid({ florists }: { florists: MemorialConfig["fl
               padding: "1rem 1.25rem",
             }}
           >
-            <h4 style={{ fontFamily: "var(--font-serif)", fontSize: "1rem", color: "var(--cream)", marginBottom: "0.4rem" }}>
+            <h4 style={{ fontFamily: "var(--font-serif)", fontSize: "1rem", color: "var(--cream)", marginBottom: "0.5rem" }}>
               {f.name}
             </h4>
-            <div style={{ display: "flex", alignItems: "center", gap: "0.4rem", marginTop: "0.4rem" }}>
-              <PhoneIcon />
-              <a
-                href={`tel:${f.phone.replace(/\D/g, "")}`}
-                style={{ color: "var(--gold)", fontSize: "0.85rem", textDecoration: "none" }}
-              >
-                {f.phone}
-              </a>
-            </div>
+            {f.address && (
+              <div style={{ display: "flex", alignItems: "flex-start", gap: "0.4rem", marginBottom: "0.3rem" }}>
+                <PinIcon />
+                <span style={{ fontSize: "0.82rem", color: "var(--text-muted)", lineHeight: 1.4 }}>{f.address}</span>
+              </div>
+            )}
+            {f.phone && (
+              <div style={{ display: "flex", alignItems: "center", gap: "0.4rem", marginBottom: "0.3rem" }}>
+                <PhoneIcon />
+                <a
+                  href={`tel:${f.phone.replace(/\D/g, "")}`}
+                  style={{ color: "var(--gold)", fontSize: "0.85rem", textDecoration: "none" }}
+                >
+                  {f.phone}
+                </a>
+              </div>
+            )}
             {f.url && (
               <a
                 href={f.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                style={{ color: "var(--gold)", fontSize: "0.85rem", display: "block", marginTop: "0.4rem", textDecoration: "none" }}
+                style={{ color: "var(--gold)", fontSize: "0.82rem", display: "block", marginTop: "0.4rem", textDecoration: "none" }}
               >
                 Visit website ↗
               </a>

@@ -28,9 +28,10 @@ const config: MemorialConfig = {
     label: "Watch the service live",
   },
   florists: [
-    { name: "Petal & Grace Flowers",  phone: "(770) 555-0200", url: "" },
-    { name: "Blooms by Adwoa",        phone: "(770) 555-0311", url: "" },
-    { name: "Garden of Remembrance",  phone: "(770) 555-0445", url: "" },
+    { name: "Flower Jazz",             phone: "(770) 781-9465", url: "https://www.flowerjazz.net",             address: "1862 Auburn Rd Suite 106, Dacula, GA" },
+    { name: "The Velvet Stem",         phone: "(678) 575-4840", url: "https://www.velvetstem.com",             address: "1854 Granite Hill Ct, Hoschton, GA" },
+    { name: "Kroger Floral Buford",    phone: "(770) 614-1081", url: "https://www.kroger.com/stores/floral/ga/buford", address: "3300 Hamilton Mill Rd, Buford, GA" },
+    { name: "Design House of Flowers", phone: "(770) 904-4488", url: "https://www.designhouseofflowers.com",   address: "1605 Buford Hwy Suite D, Buford, GA" },
   ],
   program: {
     officiant: "Rev. Emmanuel Asare",

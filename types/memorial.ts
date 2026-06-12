@@ -25,6 +25,7 @@ export interface MemorialConfig {
     name: string;
     phone: string;
     url: string;
+    address?: string;
   }[];
   program: {
     officiant: string;
