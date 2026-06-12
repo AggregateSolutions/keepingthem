@@ -8,8 +8,7 @@ const config: MemorialConfig = {
   tribute:
     "A man of quiet wisdom, unshakeable dignity, and deep roots. Born of Akropong, he carried the spirit of the Akan people across generations and oceans. His counsel was sought by many; his laughter was remembered by all.",
   photos: [
-    // { src: "/photos/kofi-1.jpg", alt: "Kofi Acheampong" },
-    // { src: "/photos/kofi-2.jpg", alt: "Kofi Acheampong" },
+    { src: "/Papa_62.png", alt: "Memorial photo" },
   ],
   funeralService: {
     name: "Hamilton Mill Memorial Chapel & Gardens",
