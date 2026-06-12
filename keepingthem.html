@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Memorial — [Name]</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  /* ============================================================
+     SITE CONFIGURATION — EDIT EVERYTHING IN THIS SECTION
+     ============================================================ */
+  :root {
+    --name:            "Benjamin Kwadwo Kwayisi";
+    --years:           "1936 – 2026";
+    --title:           "Elder, Father, Okyeame";
+    --tribute:         "A man of quiet wisdom, unshakeable dignity, and deep roots. Born of Akropong, he carried the spirit of the Akan people across generations and oceans. His counsel was sought by many; his laughter was remembered by all.";
+    --photo1:          "";       /* URL or relative path to primary photo */
+    --photo2:          "";       /* URL or relative path to second photo — leave blank to hide */
+    --funeral-name:    "Hamilton Mill Memorial Chapel & Gardens";
+    --funeral-address: "3481 Hamilton Mill Rd, Buford, GA 30501";
+    --funeral-phone:   "(770) 945-6924";
+    --funeral-date:    "Saturday, June 27, 2026";
+    --funeral-time:    "11:00 AM";
+    --thanksgiving-date: "Sunday, July 28, 2026";
+    --thanksgiving-time: "1:00 PM";
+    --thanksgiving-location: "2029 Mapmaker Dr, Dacula, Ga 30019";
+    --stream-url:      "";       /* Paste livestream URL here when available */
+    --stream-label:    "Watch the service live";
+    --florist1-name:   "Petal & Grace Flowers";
+    --florist1-phone:  "(770) 555-0200";
+    --florist1-url:    "";
+    --florist2-name:   "Blooms by Adwoa";
+    --florist2-phone:  "(770) 555-0311";
+    --florist2-url:    "";
+    --florist3-name:   "Garden of Remembrance";
+    --florist3-phone:  "(770) 555-0445";
+    --florist3-url:    "";
+    --program-officiant:    "Rev. Emmanuel Asare";
+    --program-scripture1:   "Processional & Opening Prayer";
+    --program-scripture2:   "Scripture Reading — Psalm 23";
+    --program-hymn1:        "Hymn — Yen Ara Asase Ni";
+    --program-tribute1:     "Family Tribute";
+    --program-tribute2:     "Community Tribute";
+    --program-sermon:       "Homily";
+    --program-hymn2:        "Closing Hymn";
+    --program-committal:    "Committal & Benediction";
+    --adinkra-symbol:       "Gye Nyame";
+    --adinkra-meaning:      "Except for God — symbol of supremacy and omnipotence of God";
+  }
+  /* ============================================================ */
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: #1a1410;
+    color: #e8e0d4;
+    min-height: 100vh;
+    font-size: 16px;
+    line-height: 1.7;
+  }
+
+  .site-header {
+    background: #0f0c09;
+    border-bottom: 1px solid #3d2e1a;
+    padding: 2.5rem 1.5rem 2rem;
+    text-align: center;
+  }
+
+  .kente-stripe {
+    height: 6px;
+    background: repeating-linear-gradient(
+      90deg,
+      #c8962e 0px, #c8962e 14px,
+      #1a3a1a 14px, #1a3a1a 28px,
+      #8b1a1a 28px, #8b1a1a 42px,
+      #0d2a4a 42px, #0d2a4a 56px,
+      #c8962e 56px, #c8962e 70px,
+      #2a1a0a 70px, #2a1a0a 84px
+    );
+    margin-bottom: 2rem;
+  }
+
+  .adinkra-glyph {
+    font-size: 48px;
+    color: #c8962e;
+    margin-bottom: 0.5rem;
+    display: block;
+    font-family: serif;
+  }
+
+  .site-header h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(2rem, 6vw, 3.2rem);
+    font-weight: 500;
+    color: #f5ead8;
+    letter-spacing: 0.03em;
+    margin-bottom: 0.2rem;
+  }
+
+  .years {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.2rem;
+    color: #c8962e;
+    letter-spacing: 0.15em;
+    margin-bottom: 0.4rem;
+  }
+
+  .subtitle {
+    font-size: 0.9rem;
+    color: #9e8e78;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  nav {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0;
+    background: #0f0c09;
+    border-bottom: 1px solid #3d2e1a;
+    padding: 0 1rem;
+  }
+
+  nav a {
+    color: #c8962e;
+    text-decoration: none;
+    font-size: 0.8rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 0.85rem 1.1rem;
+    border-bottom: 2px solid transparent;
+    transition: border-color 0.2s, color 0.2s;
+  }
+  nav a:hover { color: #f5ead8; border-bottom-color: #c8962e; }
+
+  main { max-width: 780px; margin: 0 auto; padding: 2rem 1.25rem 4rem; }
+
+  section { margin-bottom: 3rem; }
+
+  .section-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.5rem;
+    font-weight: 500;
+    color: #f5ead8;
+    border-bottom: 1px solid #3d2e1a;
+    padding-bottom: 0.5rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+
+  .section-title::before {
+    content: '';
+    display: inline-block;
+    width: 4px;
+    height: 1.2em;
+    background: #c8962e;
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+
+  .tribute-text {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.15rem;
+    font-style: italic;
+    color: #d4c4aa;
+    line-height: 1.9;
+    border-left: 2px solid #c8962e;
+    padding-left: 1.25rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .photos-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .photo-frame {
+    aspect-ratio: 3/4;
+    background: #2a1e10;
+    border: 1px solid #3d2e1a;
+    border-radius: 4px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .photo-frame img { width: 100%; height: 100%; object-fit: cover; }
+
+  .photo-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    color: #5a4a32;
+    font-size: 0.8rem;
+    text-align: center;
+    padding: 1rem;
+  }
+
+  .photo-placeholder svg { width: 40px; height: 40px; opacity: 0.4; }
+
+  .info-card {
+    background: #0f0c09;
+    border: 1px solid #3d2e1a;
+    border-radius: 6px;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .info-card h3 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.1rem;
+    color: #c8962e;
+    margin-bottom: 0.6rem;
+  }
+
+  .info-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+    font-size: 0.9rem;
+    color: #c4b49a;
+    margin-bottom: 0.35rem;
+  }
+  .info-row svg { flex-shrink: 0; margin-top: 3px; color: #7a6040; }
+
+  .stream-banner {
+    background: #0d1f0d;
+    border: 1px solid #1a4a1a;
+    border-radius: 6px;
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+  .stream-banner.pending { background: #1a1410; border-color: #3d2e1a; }
+  .stream-dot { width: 10px; height: 10px; background: #4caf50; border-radius: 50%; flex-shrink: 0; }
+  .stream-dot.pending { background: #7a6040; }
+  .stream-info { flex: 1; }
+  .stream-info p { font-size: 0.85rem; color: #9e8e78; margin-top: 0.2rem; }
+  .stream-btn {
+    background: #1a4a1a;
+    color: #8fd68f;
+    border: 1px solid #2a6a2a;
+    border-radius: 4px;
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+    text-decoration: none;
+    white-space: nowrap;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.2s;
+  }
+  .stream-btn:hover { background: #2a6a2a; }
+  .stream-btn.pending { background: #2a1e10; color: #7a6040; border-color: #3d2e1a; cursor: default; }
+
+  .florist-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+  }
+
+  .florist-card {
+    background: #0f0c09;
+    border: 1px solid #3d2e1a;
+    border-radius: 6px;
+    padding: 1rem 1.25rem;
+  }
+  .florist-card h4 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1rem;
+    color: #f5ead8;
+    margin-bottom: 0.4rem;
+  }
+  .florist-card a {
+    color: #c8962e;
+    font-size: 0.85rem;
+    display: block;
+    text-decoration: none;
+    margin-top: 0.4rem;
+  }
+  .florist-card a:hover { color: #f5ead8; }
+
+  .program-list { list-style: none; }
+  .program-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 0.7rem 0;
+    border-bottom: 1px solid #2a1e10;
+    font-size: 0.95rem;
+    color: #c4b49a;
+  }
+  .program-list li:last-child { border-bottom: none; }
+  .prog-num {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1rem;
+    color: #c8962e;
+    min-width: 1.5rem;
+    padding-top: 1px;
+  }
+  .prog-item { flex: 1; }
+  .prog-item strong { color: #e8e0d4; font-weight: 500; display: block; }
+  .prog-item span { font-size: 0.82rem; color: #7a6a52; }
+
+  .rsvp-form { display: flex; flex-direction: column; gap: 1rem; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  @media(max-width: 500px) { .form-row { grid-template-columns: 1fr; } }
+
+  label { font-size: 0.8rem; color: #9e8e78; letter-spacing: 0.04em; text-transform: uppercase; display: block; margin-bottom: 0.3rem; }
+
+  input[type=text], input[type=email], input[type=tel], select, textarea {
+    width: 100%;
+    background: #0f0c09;
+    border: 1px solid #3d2e1a;
+    border-radius: 4px;
+    color: #e8e0d4;
+    padding: 0.6rem 0.9rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  input:focus, select:focus, textarea:focus { border-color: #c8962e; }
+  select option { background: #1a1410; }
+  textarea { resize: vertical; min-height: 80px; }
+
+  .checkbox-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-top: 0.3rem;
+  }
+  .checkbox-group label {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    text-transform: none;
+    font-size: 0.9rem;
+    color: #c4b49a;
+    cursor: pointer;
+    letter-spacing: 0;
+  }
+  input[type=checkbox] {
+    width: 16px;
+    height: 16px;
+    accent-color: #c8962e;
+    cursor: pointer;
+  }
+
+  .submit-btn {
+    background: #c8962e;
+    color: #0f0c09;
+    border: none;
+    border-radius: 4px;
+    padding: 0.75rem 2rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    letter-spacing: 0.04em;
+    transition: background 0.2s;
+    align-self: flex-start;
+  }
+  .submit-btn:hover { background: #e0ab3e; }
+
+  .success-msg {
+    display: none;
+    background: #0d1f0d;
+    border: 1px solid #1a4a1a;
+    border-radius: 6px;
+    padding: 1rem 1.25rem;
+    color: #8fd68f;
+    font-size: 0.9rem;
+  }
+
+  .adinkra-footer {
+    text-align: center;
+    padding: 2rem 1rem 1rem;
+    color: #5a4a32;
+    font-size: 0.8rem;
+  }
+  .adinkra-footer .symbol { font-family: serif; font-size: 2rem; color: #3d2e1a; margin-bottom: 0.5rem; }
+  .adinkra-footer p { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 0.95rem; color: #5a4a32; }
+
+  .site-footer {
+    background: #0f0c09;
+    border-top: 1px solid #3d2e1a;
+    text-align: center;
+    padding: 1.25rem;
+    font-size: 0.75rem;
+    color: #5a4a32;
+  }
+</style>
+</head>
+<body>
+
+<div class="kente-stripe"></div>
+
+<header class="site-header" id="top">
+  <span class="adinkra-glyph">☥</span>
+  <h1 id="h-name">Loading…</h1>
+  <div class="years" id="h-years"></div>
+  <div class="subtitle" id="h-title"></div>
+</header>
+
+<nav>
+  <a href="#remembrance">Remembrance</a>
+  <a href="#service">Service Details</a>
+  <a href="#stream">Watch Live</a>
+  <a href="#flowers">Send Flowers</a>
+  <a href="#program">Program</a>
+  <a href="#rsvp">RSVP</a>
+</nav>
+
+<main>
+
+  <!-- REMEMBRANCE -->
+  <section id="remembrance">
+    <div class="section-title">In remembrance</div>
+    <p class="tribute-text" id="tribute-text"></p>
+    <div class="photos-grid" id="photos-grid"></div>
+  </section>
+
+  <!-- SERVICE DETAILS -->
+  <section id="service">
+    <div class="section-title">Service details</div>
+
+    <div class="info-card">
+      <h3>Funeral service</h3>
+      <div class="info-row">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <span id="funeral-datetime"></span>
+      </div>
+      <div class="info-row">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+        <span id="funeral-address"></span>
+      </div>
+      <div class="info-row">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.8a19.79 19.79 0 01-3.07-8.63A2 2 0 012 .18h3a2 2 0 012 1.72c.13.96.36 1.9.69 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.91.33 1.85.56 2.81.69A2 2 0 0122 14.92z"/></svg>
+        <a id="funeral-phone-link" style="color:#c8962e; text-decoration:none;"></a>
+      </div>
+      <div class="info-row">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        <span id="funeral-name-text"></span>
+      </div>
+    </div>
+
+    <div class="info-card">
+      <h3>Thanksgiving celebration</h3>
+      <div class="info-row">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <span id="thanksgiving-datetime"></span>
+      </div>
+      <div class="info-row">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+        <span id="thanksgiving-location"></span>
+      </div>
+      <p style="font-size:0.82rem; color:#7a6a52; margin-top:0.6rem; font-family:'Cormorant Garamond',serif; font-style:italic;">A celebration of a life well-lived, held in the tradition of our people.</p>
+    </div>
+  </section>
+
+  <!-- STREAM -->
+  <section id="stream">
+    <div class="section-title">Watch live</div>
+    <div class="stream-banner" id="stream-banner">
+      <div class="stream-dot" id="stream-dot"></div>
+      <div class="stream-info">
+        <strong id="stream-heading"></strong>
+        <p id="stream-sub"></p>
+      </div>
+      <a id="stream-btn" class="stream-btn"></a>
+    </div>
+    <p style="font-size:0.82rem; color:#5a4a32;">The streaming link will be shared here once confirmed by the service provider. Please check back closer to the date.</p>
+  </section>
+
+  <!-- FLOWERS -->
+  <section id="flowers">
+    <div class="section-title">Send flowers</div>
+    <p style="font-size:0.9rem; color:#9e8e78; margin-bottom:1.25rem;">Honor the family with flowers from a local florist. Please contact them directly to place your order and mention it is for this service.</p>
+    <div class="florist-grid" id="florist-grid"></div>
+  </section>
+
+  <!-- PROGRAM -->
+  <section id="program">
+    <div class="section-title">Order of service</div>
+    <div class="info-card" style="margin-bottom:1rem;">
+      <div style="font-size:0.8rem; color:#7a6a52; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:0.3rem;">Officiant</div>
+      <div id="officiant-name" style="color:#c4b49a;"></div>
+    </div>
+    <ul class="program-list" id="program-list"></ul>
+    <div class="info-card" style="margin-top:1.5rem; border-color:#5a3a1a;">
+      <div style="font-size:0.8rem; color:#c8962e; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:0.4rem; font-family:'DM Sans',sans-serif;">Adinkra symbol</div>
+      <div style="font-family:'Cormorant Garamond',serif; font-size:1.4rem; color:#f5ead8; margin-bottom:0.3rem;" id="adinkra-name"></div>
+      <div style="font-size:0.85rem; color:#9e8e78; font-style:italic; font-family:'Cormorant Garamond',serif;" id="adinkra-meaning"></div>
+    </div>
+  </section>
+
+  <!-- RSVP -->
+  <section id="rsvp">
+    <div class="section-title">RSVP</div>
+    <p style="font-size:0.9rem; color:#9e8e78; margin-bottom:1.5rem;">Please let the family know you will be joining them. Your presence is a comfort and an honor.</p>
+
+    <div class="rsvp-form" id="rsvp-form">
+      <div class="form-row">
+        <div>
+          <label for="rsvp-name">Full name</label>
+          <input type="text" id="rsvp-name" placeholder="Your name" autocomplete="name">
+        </div>
+        <div>
+          <label for="rsvp-email">Email address</label>
+          <input type="email" id="rsvp-email" placeholder="you@example.com" autocomplete="email">
+        </div>
+      </div>
+      <div class="form-row">
+        <div>
+          <label for="rsvp-phone">Phone (optional)</label>
+          <input type="tel" id="rsvp-phone" placeholder="+1 (000) 000-0000" autocomplete="tel">
+        </div>
+        <div>
+          <label for="rsvp-guests">Number of guests</label>
+          <select id="rsvp-guests">
+            <option value="1">1 — just me</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5+">5 or more</option>
+          </select>
+        </div>
+      </div>
+
+      <div>
+        <label>Attending which events?</label>
+        <div class="checkbox-group">
+          <label><input type="checkbox" id="rsvp-funeral" checked> Funeral service — <span id="rsvp-funeral-date-label"></span></label>
+          <label><input type="checkbox" id="rsvp-thanksgiving"> Thanksgiving celebration — <span id="rsvp-thanks-date-label"></span></label>
+        </div>
+      </div>
+
+      <div>
+        <label for="rsvp-relation">Relationship to the deceased</label>
+        <select id="rsvp-relation">
+          <option value="">Please select</option>
+          <option>Immediate family</option>
+          <option>Extended family</option>
+          <option>Close friend</option>
+          <option>Community member</option>
+          <option>Colleague</option>
+          <option>Other</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="rsvp-message">Leave a memory or message (optional)</label>
+        <textarea id="rsvp-message" placeholder="Share a memory, a word of comfort, or a tribute…"></textarea>
+      </div>
+
+      <button class="submit-btn" onclick="submitRsvp()">Submit RSVP</button>
+    </div>
+
+    <div class="success-msg" id="rsvp-success">
+      Your RSVP has been received. The family is grateful for your presence and your love. <em>Nyame nhyira wo.</em>
+    </div>
+
+    <div style="margin-top:2rem; background:#0f0c09; border:1px solid #3d2e1a; border-radius:6px; padding:1rem 1.25rem;">
+      <div style="font-size:0.8rem; color:#7a6a52; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:0.75rem;">Responses received</div>
+      <div id="rsvp-list" style="font-size:0.85rem; color:#7a6a52; font-style:italic;">No responses yet.</div>
+    </div>
+  </section>
+
+</main>
+
+<div class="adinkra-footer">
+  <div class="symbol">✦</div>
+  <p id="footer-adinkra-text"></p>
+</div>
+
+<div class="kente-stripe"></div>
+
+<footer class="site-footer">
+  In loving memory &nbsp;·&nbsp; <span id="footer-name"></span> &nbsp;·&nbsp; <span id="footer-years"></span>
+</footer>
+
+<script>
+const CONFIG = {
+  name:               "Kofi Acheampong",
+  years:              "1934 – 2024",
+  title:              "Elder, Father, Okyeame",
+  tribute:            "A man of quiet wisdom, unshakeable dignity, and deep roots. Born of Akropong, he carried the spirit of the Akan people across generations and oceans. His counsel was sought by many; his laughter was remembered by all.",
+  photo1:             "",
+  photo2:             "",
+  funeralName:        "Eternal Rest Funeral Home",
+  funeralAddress:     "123 Memorial Drive, Lawrenceville, GA 30046",
+  funeralPhone:       "(770) 555-0100",
+  funeralDate:        "Saturday, July 20, 2024",
+  funeralTime:        "11:00 AM",
+  thanksgivingDate:   "Sunday, July 21, 2024",
+  thanksgivingTime:   "1:00 PM",
+  thanksgivingLocation: "Same location — Fellowship Hall",
+  streamUrl:          "",
+  streamLabel:        "Watch the service live",
+  florists: [
+    { name: "Petal & Grace Flowers",    phone: "(770) 555-0200", url: "" },
+    { name: "Blooms by Adwoa",          phone: "(770) 555-0311", url: "" },
+    { name: "Garden of Remembrance",    phone: "(770) 555-0445", url: "" }
+  ],
+  program: {
+    officiant: "Rev. Emmanuel Asare",
+    items: [
+      { title: "Processional & opening prayer",   sub: "" },
+      { title: "Scripture reading",               sub: "Psalm 23" },
+      { title: "Hymn",                            sub: "Yen Ara Asase Ni" },
+      { title: "Family tribute",                  sub: "" },
+      { title: "Community tribute",               sub: "" },
+      { title: "Homily",                          sub: "" },
+      { title: "Closing hymn",                    sub: "" },
+      { title: "Committal & benediction",         sub: "" }
+    ]
+  },
+  adinkra: {
+    symbol: "Gye Nyame",
+    meaning: "Except for God — symbol of the supremacy and omnipotence of God"
+  }
+};
+
+function el(id) { return document.getElementById(id); }
+
+function populate() {
+  el('h-name').textContent     = CONFIG.name;
+  el('h-years').textContent    = CONFIG.years;
+  el('h-title').textContent    = CONFIG.title;
+  el('tribute-text').textContent = CONFIG.tribute;
+
+  const grid = el('photos-grid');
+  [CONFIG.photo1, CONFIG.photo2].forEach((src, i) => {
+    if (i === 1 && !src) return;
+    const frame = document.createElement('div');
+    frame.className = 'photo-frame';
+    if (src) {
+      const img = document.createElement('img');
+      img.src = src; img.alt = CONFIG.name;
+      frame.appendChild(img);
+    } else {
+      frame.innerHTML = `<div class="photo-placeholder"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg><span>Photo ${i+1}<br>coming soon</span></div>`;
+    }
+    grid.appendChild(frame);
+  });
+
+  el('funeral-datetime').textContent = CONFIG.funeralDate + ' · ' + CONFIG.funeralTime;
+  el('funeral-address').textContent  = CONFIG.funeralAddress;
+  el('funeral-name-text').textContent = CONFIG.funeralName;
+  const ph = el('funeral-phone-link');
+  ph.textContent = CONFIG.funeralPhone;
+  ph.href = 'tel:' + CONFIG.funeralPhone.replace(/\D/g,'');
+
+  el('thanksgiving-datetime').textContent = CONFIG.thanksgivingDate + ' · ' + CONFIG.thanksgivingTime;
+  el('thanksgiving-location').textContent = CONFIG.thanksgivingLocation;
+
+  const banner = el('stream-banner');
+  const dot    = el('stream-dot');
+  const btn    = el('stream-btn');
+  if (CONFIG.streamUrl) {
+    el('stream-heading').textContent = CONFIG.streamLabel;
+    el('stream-sub').textContent     = 'Service is streaming — click to join';
+    dot.classList.remove('pending');
+    btn.textContent = 'Watch now';
+    btn.href = CONFIG.streamUrl;
+    btn.target = '_blank';
+  } else {
+    banner.classList.add('pending');
+    dot.classList.add('pending');
+    el('stream-heading').textContent = 'Livestream link coming soon';
+    el('stream-sub').textContent     = 'Check back closer to the service date';
+    btn.textContent = 'Not yet available';
+    btn.classList.add('pending');
+  }
+
+  const fg = el('florist-grid');
+  CONFIG.florists.forEach(f => {
+    const c = document.createElement('div');
+    c.className = 'florist-card';
+    c.innerHTML = `<h4>${f.name}</h4>
+      <div class="info-row"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.8a19.79 19.79 0 01-3.07-8.63A2 2 0 012 .18h3a2 2 0 012 1.72c.13.96.36 1.9.69 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.91.33 1.85.56 2.81.69A2 2 0 0122 14.92z"/></svg>
+      <a href="tel:${f.phone.replace(/\D/g,'')}" style="color:#c8962e; text-decoration:none; font-size:0.85rem;">${f.phone}</a></div>
+      ${f.url ? `<a href="${f.url}" target="_blank">Visit website ↗</a>` : ''}`;
+    fg.appendChild(c);
+  });
+
+  el('officiant-name').textContent = CONFIG.program.officiant;
+  const pl = el('program-list');
+  CONFIG.program.items.forEach((item, i) => {
+    const li = document.createElement('li');
+    li.innerHTML = `<span class="prog-num">${String(i+1).padStart(2,'0')}</span>
+      <div class="prog-item"><strong>${item.title}</strong>${item.sub ? `<span>${item.sub}</span>` : ''}</div>`;
+    pl.appendChild(li);
+  });
+
+  el('adinkra-name').textContent    = CONFIG.adinkra.symbol;
+  el('adinkra-meaning').textContent = CONFIG.adinkra.meaning;
+  el('footer-adinkra-text').textContent = CONFIG.adinkra.symbol + ' — ' + CONFIG.adinkra.meaning;
+
+  el('rsvp-funeral-date-label').textContent   = CONFIG.funeralDate;
+  el('rsvp-thanks-date-label').textContent    = CONFIG.thanksgivingDate;
+
+  el('footer-name').textContent  = CONFIG.name;
+  el('footer-years').textContent = CONFIG.years;
+
+  document.title = 'In memoriam · ' + CONFIG.name;
+
+  renderRsvpList();
+}
+
+let rsvps = JSON.parse(localStorage.getItem('rsvps') || '[]');
+
+function submitRsvp() {
+  const name     = el('rsvp-name').value.trim();
+  const email    = el('rsvp-email').value.trim();
+  const guests   = el('rsvp-guests').value;
+  const relation = el('rsvp-relation').value;
+  const message  = el('rsvp-message').value.trim();
+  const funeral  = el('rsvp-funeral').checked;
+  const thanks   = el('rsvp-thanksgiving').checked;
+
+  if (!name) { el('rsvp-name').focus(); return; }
+  if (!funeral && !thanks) { alert('Please select at least one event.'); return; }
+
+  const events = [funeral && 'Funeral service', thanks && 'Thanksgiving'].filter(Boolean).join(' & ');
+  rsvps.push({ name, email, guests, relation, message, events, date: new Date().toLocaleDateString() });
+  localStorage.setItem('rsvps', JSON.stringify(rsvps));
+
+  el('rsvp-form').style.display = 'none';
+  el('rsvp-success').style.display = 'block';
+  renderRsvpList();
+}
+
+function renderRsvpList() {
+  const list = el('rsvp-list');
+  if (!rsvps.length) { list.textContent = 'No responses yet.'; return; }
+  list.innerHTML = '';
+  rsvps.forEach(r => {
+    const div = document.createElement('div');
+    div.style.cssText = 'padding:0.5rem 0; border-bottom:1px solid #2a1e10; color:#9e8e78;';
+    div.innerHTML = `<strong style="color:#c4b49a;">${r.name}</strong> <span style="color:#5a4a32;">(${r.guests} guest${r.guests > 1 ? 's' : ''} · ${r.events})</span>${r.message ? `<div style="font-style:italic;font-size:0.82rem;color:#7a6a52;margin-top:2px;">"${r.message}"</div>` : ''}`;
+    list.appendChild(div);
+  });
+}
+
+populate();
+</script>
+</body>
+</html>
