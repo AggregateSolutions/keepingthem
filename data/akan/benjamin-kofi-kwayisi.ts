@@ -8,7 +8,13 @@ const config: MemorialConfig = {
   tribute:
     "A man of quiet wisdom, unshakeable dignity, and deep roots. Born of Akropong, he carried the spirit of the Akan people across generations and oceans. His counsel was sought by many; his laughter was remembered by all.",
   photos: [
-    { src: "/Papa_62.png", alt: "Memorial photo" },
+    { src: "/Papa_62.png", alt: "Memorial photo", primaryDuration: 8000 },
+    // Add additional photos below — they will cycle every 4 seconds
+    // { src: "/photo-2.jpg", alt: "Memorial photo" },
+    // { src: "/photo-3.jpg", alt: "Memorial photo" },
+    // { src: "/photo-4.jpg", alt: "Memorial photo" },
+    // { src: "/photo-5.jpg", alt: "Memorial photo" },
+    // { src: "/photo-6.jpg", alt: "Memorial photo" },
   ],
   funeralService: {
     name: "Hamilton Mill Memorial Chapel & Gardens",

@@ -4,7 +4,7 @@ export interface MemorialConfig {
   years: string;
   title: string;
   tribute: string;
-  photos: { src: string; alt: string }[];
+  photos: { src: string; alt: string; primaryDuration?: number }[];
   funeralService: {
     name: string;
     address: string;

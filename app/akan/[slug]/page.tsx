@@ -8,6 +8,7 @@ import FloristGrid from "@/components/FloristGrid";
 import ProgramSection from "@/components/ProgramSection";
 import CultureGuide from "@/components/CultureGuide";
 import RsvpForm from "@/components/RsvpForm";
+import PhotoSlideshow from "@/components/PhotoSlideshow";
 import akanMemorials from "@/data/akan";
 import type { MemorialConfig } from "@/types/memorial";
 
@@ -88,24 +89,13 @@ export default async function MemorialPage({ params }: { params: Promise<{ slug:
           </p>
 
           {m.photos.length > 0 ? (
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "1rem", marginBottom: "1.5rem" }}>
-              {m.photos.map((p, i) => (
-                <div key={i} style={{ aspectRatio: "3/4", background: "#2a1e10", border: "1px solid var(--border)", borderRadius: "4px", overflow: "hidden" }}>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={p.src} alt={p.alt} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                </div>
-              ))}
-            </div>
+            <PhotoSlideshow photos={m.photos} defaultDuration={4000} />
           ) : (
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "1rem", marginBottom: "1.5rem" }}>
-              <div style={{ aspectRatio: "3/4", background: "#2a1e10", border: "1px solid var(--border)", borderRadius: "4px", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.5rem", color: "var(--text-faint)", fontSize: "0.8rem", textAlign: "center", padding: "1rem" }}>
-                  <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" style={{ opacity: 0.4 }}>
-                    <circle cx="12" cy="8" r="4" /><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
-                  </svg>
-                  <span>Photo coming soon</span>
-                </div>
-              </div>
+            <div style={{ background: "#2a1e10", border: "1px solid var(--border)", borderRadius: "4px", padding: "3rem", display: "flex", flexDirection: "column", alignItems: "center", gap: "0.5rem", color: "var(--text-faint)", fontSize: "0.8rem", marginBottom: "1.5rem" }}>
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" style={{ opacity: 0.4 }}>
+                <circle cx="12" cy="8" r="4" /><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
+              </svg>
+              <span>Photos coming soon</span>
             </div>
           )}
         </section>

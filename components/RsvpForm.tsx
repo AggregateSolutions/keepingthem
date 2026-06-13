@@ -21,7 +21,7 @@ export default function RsvpForm({ funeral, thanksgiving }: {
   const [rsvps, setRsvps] = useState<RsvpEntry[]>([]);
   const [form, setForm] = useState({
     name: "", email: "", phone: "", guests: "1", relation: "",
-    message: "", funeral: true, thanksgiving: false,
+    message: "", funeral: true, thanksgiving: false, sendFlowers: false,
   });
 
   function handleSubmit(e: React.FormEvent) {
@@ -126,6 +126,22 @@ export default function RsvpForm({ funeral, thanksgiving }: {
             <option>Colleague</option>
             <option>Other</option>
           </select>
+        </div>
+
+        <div>
+          <label style={labelStyle}>Additional</label>
+          <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", marginTop: "0.3rem" }}>
+            <label style={{ display: "flex", alignItems: "center", gap: "0.6rem", fontSize: "0.9rem", color: "var(--text-mid)", cursor: "pointer", textTransform: "none" as const, letterSpacing: 0 }}>
+              <input type="checkbox" checked={form.sendFlowers} onChange={e => setForm(f => ({ ...f, sendFlowers: e.target.checked }))} />
+              I plan to send flowers to the funeral home
+            </label>
+          </div>
+          {form.sendFlowers && (
+            <div style={{ marginTop: "0.75rem", background: "var(--brown-dark)", border: "1px solid var(--border)", borderRadius: "4px", padding: "0.75rem 1rem", fontSize: "0.85rem", color: "var(--text-muted)", lineHeight: 1.7 }}>
+              <div style={{ fontSize: "0.75rem", color: "var(--gold)", textTransform: "uppercase" as const, letterSpacing: "0.06em", marginBottom: "0.3rem" }}>Delivery details</div>
+              Please contact one of the florists in the <a href="#flowers" style={{ color: "var(--gold)", textDecoration: "none" }}>Send Flowers</a> section above. Mention the name of the deceased and the service date — the florist will coordinate delivery directly with the funeral home.
+            </div>
+          )}
         </div>
 
         <div>
