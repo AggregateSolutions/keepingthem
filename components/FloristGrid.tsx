@@ -20,7 +20,7 @@ export default function FloristGrid({ florists }: { florists: MemorialConfig["fl
   return (
     <>
       <p style={{ fontSize: "0.9rem", color: "var(--text-muted)", marginBottom: "1.25rem" }}>
-        Honor the family with flowers from a local florist. Please contact them directly to place your order and mention it is for this service.
+        If you'd like to send flowers, the florists below are local to the service and can arrange delivery. There is no obligation — your presence alone is a gift to the family.
       </p>
       <div
         style={{
