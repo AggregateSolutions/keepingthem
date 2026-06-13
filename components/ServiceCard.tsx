@@ -1,5 +1,13 @@
 import type { MemorialConfig } from "@/types/memorial";
 
+function ForkIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ color: "var(--text-dim)", flexShrink: 0, marginTop: 3 }}>
+      <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 002-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 00-5 5v6c0 1.1.9 2 2 2h3zm0 0v7"/>
+    </svg>
+  );
+}
+
 function CalendarIcon() {
   return (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ color: "var(--text-dim)", flexShrink: 0, marginTop: 3 }}>
@@ -41,9 +49,10 @@ function InfoRow({ icon, children }: { icon: React.ReactNode; children: React.Re
 interface Props {
   funeral: MemorialConfig["funeralService"];
   thanksgiving: MemorialConfig["thanksgiving"];
+  reception?: MemorialConfig["reception"];
 }
 
-export default function ServiceCard({ funeral, thanksgiving }: Props) {
+export default function ServiceCard({ funeral, thanksgiving, reception }: Props) {
   return (
     <>
       <div className="info-card">
@@ -70,6 +79,19 @@ export default function ServiceCard({ funeral, thanksgiving }: Props) {
           A celebration of a life well-lived, held in the tradition of our people.
         </p>
       </div>
+
+      {reception && (
+        <div className="info-card">
+          <h3 style={{ fontFamily: "var(--font-serif)", fontSize: "1.1rem", color: "var(--gold)", marginBottom: "0.6rem" }}>
+            Reception
+          </h3>
+          <InfoRow icon={<CalendarIcon />}>{reception.date} · {reception.time}</InfoRow>
+          <InfoRow icon={<PinIcon />}>{reception.name} — {reception.address}</InfoRow>
+          {reception.notes && (
+            <InfoRow icon={<ForkIcon />}>{reception.notes}</InfoRow>
+          )}
+        </div>
+      )}
     </>
   );
 }

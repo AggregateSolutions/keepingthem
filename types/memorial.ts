@@ -17,6 +17,13 @@ export interface MemorialConfig {
     time: string;
     location: string;
   };
+  reception?: {
+    name: string;
+    address: string;
+    date: string;
+    time: string;
+    notes?: string;
+  };
   stream: {
     url: string;
     label: string;

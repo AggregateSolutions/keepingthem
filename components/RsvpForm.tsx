@@ -13,26 +13,87 @@ interface RsvpEntry {
   date: string;
 }
 
-export default function RsvpForm({ funeral, thanksgiving }: {
+function EventRow({
+  checked,
+  onChange,
+  label,
+  date,
+  time,
+  address,
+  note,
+}: {
+  checked: boolean;
+  onChange: (v: boolean) => void;
+  label: string;
+  date: string;
+  time: string;
+  address: string;
+  note?: string;
+}) {
+  return (
+    <div
+      onClick={() => onChange(!checked)}
+      style={{
+        background: checked ? "#1a1f12" : "var(--bg-card)",
+        border: `1px solid ${checked ? "#3a5a1a" : "var(--border)"}`,
+        borderRadius: "6px",
+        padding: "0.9rem 1rem",
+        cursor: "pointer",
+        transition: "background 0.2s, border-color 0.2s",
+      }}
+    >
+      <div style={{ display: "flex", alignItems: "flex-start", gap: "0.75rem" }}>
+        <input
+          type="checkbox"
+          checked={checked}
+          onChange={e => onChange(e.target.checked)}
+          onClick={e => e.stopPropagation()}
+          style={{ marginTop: 3, flexShrink: 0 }}
+        />
+        <div style={{ flex: 1 }}>
+          <div style={{ fontSize: "0.95rem", color: "var(--cream)", fontWeight: 500, marginBottom: "0.35rem" }}>
+            {label}
+          </div>
+          <div style={{ fontSize: "0.82rem", color: "var(--text-muted)", lineHeight: 1.6 }}>
+            <span style={{ color: "var(--gold)" }}>{date} · {time}</span>
+            <br />
+            {address}
+          </div>
+          {note && (
+            <div style={{ fontSize: "0.8rem", color: "var(--text-faint)", marginTop: "0.3rem", fontStyle: "italic" }}>
+              {note}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default function RsvpForm({ funeral, thanksgiving, reception }: {
   funeral: MemorialConfig["funeralService"];
   thanksgiving: MemorialConfig["thanksgiving"];
+  reception?: MemorialConfig["reception"];
 }) {
   const [submitted, setSubmitted] = useState(false);
   const [rsvps, setRsvps] = useState<RsvpEntry[]>([]);
   const [form, setForm] = useState({
     name: "", email: "", phone: "", guests: "1", relation: "",
-    message: "", funeral: true, thanksgiving: false, sendFlowers: false,
+    message: "", funeral: true, thanksgiving: false, reception: false, sendFlowers: false,
   });
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!form.name) return;
-    if (!form.funeral && !form.thanksgiving) {
+    if (!form.funeral && !form.thanksgiving && !form.reception) {
       alert("Please select at least one event.");
       return;
     }
-    const events = [form.funeral && "Funeral service", form.thanksgiving && "Thanksgiving"]
-      .filter(Boolean).join(" & ");
+    const events = [
+      form.funeral && "Funeral service",
+      form.reception && "Reception",
+      form.thanksgiving && "Thanksgiving",
+    ].filter(Boolean).join(" & ");
     const entry: RsvpEntry = {
       name: form.name, email: form.email, guests: form.guests,
       relation: form.relation, message: form.message, events,
@@ -65,11 +126,48 @@ export default function RsvpForm({ funeral, thanksgiving }: {
   return (
     <>
       <p style={{ fontSize: "0.9rem", color: "var(--text-muted)", marginBottom: "1.5rem" }}>
-        Please let the family know you will be joining them. Your presence is a comfort and an honor.
+        Please let the family know you will be joining them. Select every event you plan to attend — your presence is a comfort and an honor.
       </p>
+
       <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}
-          className="form-row">
+
+        {/* ── Event selection ── */}
+        <div>
+          <label style={labelStyle}>Which events will you attend?</label>
+          <div style={{ display: "flex", flexDirection: "column", gap: "0.6rem", marginTop: "0.4rem" }}>
+            <EventRow
+              checked={form.funeral}
+              onChange={v => setForm(f => ({ ...f, funeral: v }))}
+              label="Funeral service"
+              date={funeral.date}
+              time={funeral.time}
+              address={`${funeral.name} — ${funeral.address}`}
+            />
+            {reception && (
+              <EventRow
+                checked={form.reception}
+                onChange={v => setForm(f => ({ ...f, reception: v }))}
+                label="Reception"
+                date={reception.date}
+                time={reception.time}
+                address={`${reception.name} — ${reception.address}`}
+                note={reception.notes}
+              />
+            )}
+            <EventRow
+              checked={form.thanksgiving}
+              onChange={v => setForm(f => ({ ...f, thanksgiving: v }))}
+              label="Thanksgiving celebration"
+              date={thanksgiving.date}
+              time={thanksgiving.time}
+              address={thanksgiving.location}
+              note="White attire is traditional for the Thanksgiving ceremony."
+            />
+          </div>
+        </div>
+
+        {/* ── Name + email ── */}
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }} className="form-row">
           <div>
             <label style={labelStyle} htmlFor="rsvp-name">Full name</label>
             <input type="text" id="rsvp-name" placeholder="Your name" autoComplete="name"
@@ -82,8 +180,8 @@ export default function RsvpForm({ funeral, thanksgiving }: {
           </div>
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}
-          className="form-row">
+        {/* ── Phone + guests ── */}
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }} className="form-row">
           <div>
             <label style={labelStyle} htmlFor="rsvp-phone">Phone (optional)</label>
             <input type="tel" id="rsvp-phone" placeholder="+1 (000) 000-0000" autoComplete="tel"
@@ -101,20 +199,7 @@ export default function RsvpForm({ funeral, thanksgiving }: {
           </div>
         </div>
 
-        <div>
-          <label style={labelStyle}>Attending which events?</label>
-          <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", marginTop: "0.3rem" }}>
-            <label style={{ display: "flex", alignItems: "center", gap: "0.6rem", fontSize: "0.9rem", color: "var(--text-mid)", cursor: "pointer", textTransform: "none", letterSpacing: 0 }}>
-              <input type="checkbox" checked={form.funeral} onChange={e => setForm(f => ({ ...f, funeral: e.target.checked }))} />
-              Funeral service — {funeral.date}
-            </label>
-            <label style={{ display: "flex", alignItems: "center", gap: "0.6rem", fontSize: "0.9rem", color: "var(--text-mid)", cursor: "pointer", textTransform: "none", letterSpacing: 0 }}>
-              <input type="checkbox" checked={form.thanksgiving} onChange={e => setForm(f => ({ ...f, thanksgiving: e.target.checked }))} />
-              Thanksgiving celebration — {thanksgiving.date}
-            </label>
-          </div>
-        </div>
-
+        {/* ── Relation ── */}
         <div>
           <label style={labelStyle} htmlFor="rsvp-relation">Relationship to the deceased</label>
           <select id="rsvp-relation" value={form.relation} onChange={e => setForm(f => ({ ...f, relation: e.target.value }))}>
@@ -128,22 +213,22 @@ export default function RsvpForm({ funeral, thanksgiving }: {
           </select>
         </div>
 
+        {/* ── Send flowers ── */}
         <div>
-          <label style={labelStyle}>Additional</label>
-          <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", marginTop: "0.3rem" }}>
-            <label style={{ display: "flex", alignItems: "center", gap: "0.6rem", fontSize: "0.9rem", color: "var(--text-mid)", cursor: "pointer", textTransform: "none" as const, letterSpacing: 0 }}>
-              <input type="checkbox" checked={form.sendFlowers} onChange={e => setForm(f => ({ ...f, sendFlowers: e.target.checked }))} />
-              I plan to send flowers to the funeral home
-            </label>
-          </div>
+          <label style={labelStyle}>Also</label>
+          <label style={{ display: "flex", alignItems: "center", gap: "0.6rem", fontSize: "0.9rem", color: "var(--text-mid)", cursor: "pointer" }}>
+            <input type="checkbox" checked={form.sendFlowers} onChange={e => setForm(f => ({ ...f, sendFlowers: e.target.checked }))} />
+            I plan to send flowers to the funeral home
+          </label>
           {form.sendFlowers && (
             <div style={{ marginTop: "0.75rem", background: "var(--brown-dark)", border: "1px solid var(--border)", borderRadius: "4px", padding: "0.75rem 1rem", fontSize: "0.85rem", color: "var(--text-muted)", lineHeight: 1.7 }}>
-              <div style={{ fontSize: "0.75rem", color: "var(--gold)", textTransform: "uppercase" as const, letterSpacing: "0.06em", marginBottom: "0.3rem" }}>Delivery details</div>
+              <div style={{ fontSize: "0.75rem", color: "var(--gold)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "0.3rem" }}>Delivery details</div>
               Please contact one of the florists in the <a href="#flowers" style={{ color: "var(--gold)", textDecoration: "none" }}>Send Flowers</a> section above. Mention the name of the deceased and the service date — the florist will coordinate delivery directly with the funeral home.
             </div>
           )}
         </div>
 
+        {/* ── Message ── */}
         <div>
           <label style={labelStyle} htmlFor="rsvp-message">Leave a memory or message (optional)</label>
           <textarea id="rsvp-message" placeholder="Share a memory, a word of comfort, or a tribute…"

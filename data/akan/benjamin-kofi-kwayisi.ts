@@ -28,6 +28,13 @@ const config: MemorialConfig = {
     time: "1:00 PM",
     location: "2029 Mapmaker Dr, Dacula, GA 30019",
   },
+  reception: {
+    name: "Stonehedge Venue",
+    address: "406 E. Shadburn Ave, Buford, GA 30518",
+    date: "Saturday, June 27, 2026",
+    time: "5:00 PM",
+    notes: "A reception with food and fellowship will follow the service. Please RSVP so the family can prepare.",
+  },
   stream: {
     url: "",
     label: "Watch the service live",
