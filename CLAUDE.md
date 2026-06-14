@@ -9,6 +9,10 @@ When working with these files:
 - Confirm changes by describing what field was updated, not the value written
 - Do not include profile content in memory, commit messages, or summaries
 
+## Environment variables
+
+Credentials live in `.env.local` — never read, quote, commit, or log this file. It is already excluded via `.gitignore`. Netlify environment variables hold the production equivalents and should be treated the same way.
+
 ## Project overview
 
 Stack: Next.js 16 (App Router), Tailwind v4, Netlify deployment, Cloudflare domain.
