@@ -136,7 +136,7 @@ export default async function MemorialPage({ params }: { params: Promise<{ slug:
         {/* ── RSVP ── */}
         <section id="rsvp" style={{ marginBottom: "3rem" }}>
           <div className="section-title">RSVP</div>
-          <RsvpForm funeral={m.funeralService} thanksgiving={m.thanksgiving} reception={m.reception} />
+          <RsvpForm funeral={m.funeralService} thanksgiving={m.thanksgiving} reception={m.reception} memorialSlug={m.slug} culture={m.culture} />
         </section>
 
       </main>

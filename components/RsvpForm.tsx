@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { MemorialConfig } from "@/types/memorial";
+import { supabase } from "@/lib/supabase";
 
 interface RsvpEntry {
   name: string;
@@ -70,25 +71,56 @@ function EventRow({
   );
 }
 
-export default function RsvpForm({ funeral, thanksgiving, reception }: {
+export default function RsvpForm({ funeral, thanksgiving, reception, memorialSlug, culture }: {
   funeral: MemorialConfig["funeralService"];
   thanksgiving: MemorialConfig["thanksgiving"];
   reception?: MemorialConfig["reception"];
+  memorialSlug: string;
+  culture: string;
 }) {
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
   const [rsvps, setRsvps] = useState<RsvpEntry[]>([]);
   const [form, setForm] = useState({
     name: "", email: "", phone: "", guests: "1", relation: "",
     message: "", funeral: true, thanksgiving: false, reception: false, sendFlowers: false,
   });
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!form.name) return;
     if (!form.funeral && !form.thanksgiving && !form.reception) {
       alert("Please select at least one event.");
       return;
     }
+    setSubmitting(true);
+    setError("");
+
+    const { error: dbError } = await supabase
+      .from("keepingthem_rsvps")
+      .insert({
+        memorial_slug:       memorialSlug,
+        culture:             culture,
+        name:                form.name,
+        email:               form.email,
+        phone:               form.phone,
+        guests:              form.guests,
+        relation:            form.relation,
+        message:             form.message,
+        attend_funeral:      form.funeral,
+        attend_reception:    form.reception,
+        attend_thanksgiving: form.thanksgiving,
+        send_flowers:        form.sendFlowers,
+      });
+
+    setSubmitting(false);
+
+    if (dbError) {
+      setError("Something went wrong. Please try again or contact the family directly.");
+      return;
+    }
+
     const events = [
       form.funeral && "Funeral service",
       form.reception && "Reception",
@@ -235,12 +267,20 @@ export default function RsvpForm({ funeral, thanksgiving, reception }: {
             value={form.message} onChange={e => setForm(f => ({ ...f, message: e.target.value }))} />
         </div>
 
-        <button type="submit" style={{
-          background: "var(--gold)", color: "var(--bg-deep)", border: "none", borderRadius: "4px",
+        {error && (
+          <div style={{ background: "#1f0d0d", border: "1px solid #4a1a1a", borderRadius: "4px", padding: "0.75rem 1rem", fontSize: "0.85rem", color: "#d68f8f" }}>
+            {error}
+          </div>
+        )}
+
+        <button type="submit" disabled={submitting} style={{
+          background: submitting ? "var(--text-faint)" : "var(--gold)",
+          color: "var(--bg-deep)", border: "none", borderRadius: "4px",
           padding: "0.75rem 2rem", fontFamily: "var(--font-sans)", fontSize: "0.9rem",
-          fontWeight: 500, cursor: "pointer", letterSpacing: "0.04em", alignSelf: "flex-start",
+          fontWeight: 500, cursor: submitting ? "not-allowed" : "pointer",
+          letterSpacing: "0.04em", alignSelf: "flex-start",
         }}>
-          Submit RSVP
+          {submitting ? "Submitting…" : "Submit RSVP"}
         </button>
       </form>
       <RsvpList rsvps={rsvps} />
