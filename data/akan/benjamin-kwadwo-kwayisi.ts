@@ -1,12 +1,12 @@
 import type { MemorialConfig } from "@/types/memorial";
 
 const config: MemorialConfig = {
-  slug: "benjamin-kofi-kwayisi",
+  slug: "benjamin-kwadwo-kwayisi",
   name: "Benjamin Kwadwo Kwayisi",
   years: "1936 – 2026",
   title: "Elder, Father, Okyeame",
   tribute:
-    "A man of quiet wisdom, unshakeable dignity, and deep roots. Born of Akropong, he carried the spirit of the Akan people across generations and oceans. His counsel was sought by many; his laughter was remembered by all.",
+    "A man of quiet wisdom, unshakeable dignity, and deep roots. Born of Akropong, he carried the spirit of the Akan people across generations and oceans. His counsel was sought by many; his laughter is remembered by all.",
   photos: [
     { src: "/Papa_62.png", alt: "Memorial photo", primaryDuration: 8000 },
     // Add additional photos below — they will cycle every 4 seconds
