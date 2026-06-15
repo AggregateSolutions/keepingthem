@@ -13,6 +13,44 @@ interface Props {
   defaultDuration?: number; // ms for non-primary photos
 }
 
+function PhotoFrame({ src, alt, fading }: { src: string; alt: string; fading?: boolean }) {
+  return (
+    <div style={{ position: "relative", width: "100%", height: 780, overflow: "hidden" }}>
+      {/* Blurred background fills side bars */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={src}
+        alt=""
+        aria-hidden="true"
+        style={{
+          position: "absolute", inset: 0,
+          width: "100%", height: "100%",
+          objectFit: "cover",
+          filter: "blur(18px) brightness(0.4) saturate(0.7)",
+          transform: "scale(1.1)",
+        }}
+      />
+      {/* Sharp foreground image — full subject visible */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={src}
+        alt={alt}
+        style={{
+          position: "relative",
+          display: "block",
+          margin: "0 auto",
+          height: "100%",
+          width: "auto",
+          maxWidth: "100%",
+          objectFit: "contain",
+          opacity: fading ? 0 : 1,
+          transition: "opacity 0.3s ease",
+        }}
+      />
+    </div>
+  );
+}
+
 export default function PhotoSlideshow({ photos, defaultDuration = 4000 }: Props) {
   const [current, setCurrent] = useState(0);
   const [fading, setFading] = useState(false);
@@ -32,7 +70,7 @@ export default function PhotoSlideshow({ photos, defaultDuration = 4000 }: Props
   useEffect(() => {
     if (photos.length <= 1) return;
     const duration = current === 0
-      ? (photos[0].primaryDuration ?? defaultDuration * 2)
+      ? (photos[0].primaryDuration ?? defaultDuration)
       : defaultDuration;
     const timer = setTimeout(next, duration);
     return () => clearTimeout(timer);
@@ -43,9 +81,8 @@ export default function PhotoSlideshow({ photos, defaultDuration = 4000 }: Props
   // Single photo — no controls needed
   if (photos.length === 1) {
     return (
-      <div style={{ marginBottom: "1.5rem", borderRadius: "4px", overflow: "hidden", border: "1px solid var(--border)", background: "#2a1e10" }}>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={photos[0].src} alt={photos[0].alt} style={{ width: "100%", maxHeight: 520, objectFit: "cover", objectPosition: "center 20%", display: "block" }} />
+      <div style={{ marginBottom: "1.5rem", borderRadius: "4px", overflow: "hidden", border: "1px solid var(--border)" }}>
+        <PhotoFrame src={photos[0].src} alt={photos[0].alt} />
       </div>
     );
   }
@@ -53,21 +90,8 @@ export default function PhotoSlideshow({ photos, defaultDuration = 4000 }: Props
   return (
     <div style={{ marginBottom: "1.5rem" }}>
       {/* Main photo frame */}
-      <div style={{ position: "relative", borderRadius: "4px", overflow: "hidden", border: "1px solid var(--border)", background: "#2a1e10" }}>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={photos[current].src}
-          alt={photos[current].alt}
-          style={{
-            width: "100%",
-            maxHeight: 520,
-            objectFit: "cover",
-            objectPosition: "center 20%",
-            display: "block",
-            opacity: fading ? 0 : 1,
-            transition: "opacity 0.3s ease",
-          }}
-        />
+      <div style={{ position: "relative", borderRadius: "4px", overflow: "hidden", border: "1px solid var(--border)" }}>
+        <PhotoFrame src={photos[current].src} alt={photos[current].alt} fading={fading} />
 
         {/* Prev arrow */}
         <button

@@ -110,13 +110,8 @@ export default async function MemorialPage({ params }: { params: Promise<{ slug:
 
         {/* ── Remembrance ── */}
         <section id="remembrance" style={{ marginBottom: "3rem" }}>
-          <div className="section-title">In remembrance</div>
-          <p style={{ fontFamily: "var(--font-serif)", fontSize: "1.15rem", fontStyle: "italic", color: "#d4c4aa", lineHeight: 1.9, borderLeft: "2px solid var(--gold)", paddingLeft: "1.25rem", marginBottom: "1.5rem" }}>
-            {m.tribute}
-          </p>
-
           {m.photos.length > 0 ? (
-            <PhotoSlideshow photos={m.photos} defaultDuration={4000} />
+            <PhotoSlideshow photos={m.photos} defaultDuration={8000} />
           ) : (
             <div style={{ background: "#2a1e10", border: "1px solid var(--border)", borderRadius: "4px", padding: "3rem", display: "flex", flexDirection: "column", alignItems: "center", gap: "0.5rem", color: "var(--text-faint)", fontSize: "0.8rem", marginBottom: "1.5rem" }}>
               <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" style={{ opacity: 0.4 }}>
@@ -125,6 +120,10 @@ export default async function MemorialPage({ params }: { params: Promise<{ slug:
               <span>Photos coming soon</span>
             </div>
           )}
+          <div className="section-title">In remembrance</div>
+          <p style={{ fontFamily: "var(--font-serif)", fontSize: "1.15rem", fontStyle: "italic", color: "#d4c4aa", lineHeight: 1.9, borderLeft: "2px solid var(--gold)", paddingLeft: "1.25rem", marginBottom: "1.5rem" }}>
+            {m.tribute}
+          </p>
         </section>
 
         {/* ── Service Details ── */}
