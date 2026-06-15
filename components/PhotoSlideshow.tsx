@@ -45,7 +45,7 @@ export default function PhotoSlideshow({ photos, defaultDuration = 4000 }: Props
     return (
       <div style={{ marginBottom: "1.5rem", borderRadius: "4px", overflow: "hidden", border: "1px solid var(--border)", background: "#2a1e10" }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={photos[0].src} alt={photos[0].alt} style={{ width: "100%", maxHeight: 520, objectFit: "cover", display: "block" }} />
+        <img src={photos[0].src} alt={photos[0].alt} style={{ width: "100%", maxHeight: 520, objectFit: "cover", objectPosition: "center 20%", display: "block" }} />
       </div>
     );
   }
@@ -62,6 +62,7 @@ export default function PhotoSlideshow({ photos, defaultDuration = 4000 }: Props
             width: "100%",
             maxHeight: 520,
             objectFit: "cover",
+            objectPosition: "center 20%",
             display: "block",
             opacity: fading ? 0 : 1,
             transition: "opacity 0.3s ease",
