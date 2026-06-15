@@ -90,23 +90,50 @@ export default function FlyerClient({ m, slug }: { m: MemorialConfig; slug: stri
             </div>
           )}
 
-          {/* Floral divider */}
-          <div style={{ textAlign: "center", padding: "0.6rem 0 0", opacity: 0.5 }}>
-            <svg width="260" height="28" viewBox="0 0 260 28" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <line x1="0" y1="14" x2="95" y2="14" stroke={GOLD} strokeWidth="0.5" />
-              <circle cx="108" cy="14" r="3" fill={GOLD} opacity="0.6" />
-              <circle cx="120" cy="8" r="2" fill={GOLD} opacity="0.5" />
-              <circle cx="120" cy="20" r="2" fill={GOLD} opacity="0.5" />
-              <circle cx="130" cy="14" r="4" fill={GOLD} opacity="0.8" />
-              <circle cx="140" cy="8" r="2" fill={GOLD} opacity="0.5" />
-              <circle cx="140" cy="20" r="2" fill={GOLD} opacity="0.5" />
-              <circle cx="152" cy="14" r="3" fill={GOLD} opacity="0.6" />
-              <line x1="165" y1="14" x2="260" y2="14" stroke={GOLD} strokeWidth="0.5" />
-              {/* Small petal accents */}
-              <ellipse cx="130" cy="6" rx="2.5" ry="5" fill={GOLD} opacity="0.25" />
-              <ellipse cx="130" cy="22" rx="2.5" ry="5" fill={GOLD} opacity="0.25" />
-              <ellipse cx="118" cy="14" rx="5" ry="2.5" fill={GOLD} opacity="0.2" />
-              <ellipse cx="142" cy="14" rx="5" ry="2.5" fill={GOLD} opacity="0.2" />
+          {/* Floral divider — full flower with petals and vines */}
+          <div style={{ textAlign: "center", padding: "0.75rem 0 0" }}>
+            <svg width="320" height="48" viewBox="0 0 320 48" fill="none">
+              {/* Left vine */}
+              <path d="M0 24 Q30 18 60 24 Q80 28 100 22" stroke={GOLD} strokeWidth="0.8" opacity="0.4" fill="none"/>
+              <path d="M20 24 Q25 16 30 20" stroke={GOLD} strokeWidth="0.6" opacity="0.3" fill="none"/>
+              <path d="M45 23 Q50 32 55 27" stroke={GOLD} strokeWidth="0.6" opacity="0.3" fill="none"/>
+              <path d="M70 22 Q75 14 80 18" stroke={GOLD} strokeWidth="0.6" opacity="0.3" fill="none"/>
+              {/* Left leaf accents */}
+              <ellipse cx="30" cy="18" rx="5" ry="2.5" fill={GOLD} opacity="0.2" transform="rotate(-20 30 18)"/>
+              <ellipse cx="55" cy="30" rx="5" ry="2.5" fill={GOLD} opacity="0.2" transform="rotate(15 55 30)"/>
+              <ellipse cx="80" cy="16" rx="5" ry="2.5" fill={GOLD} opacity="0.2" transform="rotate(-25 80 16)"/>
+              {/* Small bud left */}
+              <circle cx="100" cy="22" r="3" fill={GOLD} opacity="0.5"/>
+              <ellipse cx="100" cy="16" rx="2" ry="4" fill={GOLD} opacity="0.3"/>
+              <ellipse cx="100" cy="28" rx="2" ry="4" fill={GOLD} opacity="0.3"/>
+              <ellipse cx="94" cy="22" rx="4" ry="2" fill={GOLD} opacity="0.3"/>
+              <ellipse cx="106" cy="22" rx="4" ry="2" fill={GOLD} opacity="0.3"/>
+              {/* Centre flower */}
+              <circle cx="160" cy="24" r="5" fill={GOLD} opacity="0.9"/>
+              <ellipse cx="160" cy="11" rx="3.5" ry="7" fill={GOLD} opacity="0.45"/>
+              <ellipse cx="160" cy="37" rx="3.5" ry="7" fill={GOLD} opacity="0.45"/>
+              <ellipse cx="147" cy="24" rx="7" ry="3.5" fill={GOLD} opacity="0.45"/>
+              <ellipse cx="173" cy="24" rx="7" ry="3.5" fill={GOLD} opacity="0.45"/>
+              <ellipse cx="150" cy="14" rx="3.5" ry="7" fill={GOLD} opacity="0.3" transform="rotate(-45 150 14)"/>
+              <ellipse cx="170" cy="14" rx="3.5" ry="7" fill={GOLD} opacity="0.3" transform="rotate(45 170 14)"/>
+              <ellipse cx="150" cy="34" rx="3.5" ry="7" fill={GOLD} opacity="0.3" transform="rotate(45 150 34)"/>
+              <ellipse cx="170" cy="34" rx="3.5" ry="7" fill={GOLD} opacity="0.3" transform="rotate(-45 170 34)"/>
+              <circle cx="160" cy="24" r="3" fill={DARK} opacity="0.6"/>
+              {/* Small bud right */}
+              <circle cx="220" cy="22" r="3" fill={GOLD} opacity="0.5"/>
+              <ellipse cx="220" cy="16" rx="2" ry="4" fill={GOLD} opacity="0.3"/>
+              <ellipse cx="220" cy="28" rx="2" ry="4" fill={GOLD} opacity="0.3"/>
+              <ellipse cx="214" cy="22" rx="4" ry="2" fill={GOLD} opacity="0.3"/>
+              <ellipse cx="226" cy="22" rx="4" ry="2" fill={GOLD} opacity="0.3"/>
+              {/* Right vine */}
+              <path d="M320 24 Q290 18 260 24 Q240 28 220 22" stroke={GOLD} strokeWidth="0.8" opacity="0.4" fill="none"/>
+              <path d="M300 24 Q295 16 290 20" stroke={GOLD} strokeWidth="0.6" opacity="0.3" fill="none"/>
+              <path d="M275 23 Q270 32 265 27" stroke={GOLD} strokeWidth="0.6" opacity="0.3" fill="none"/>
+              <path d="M250 22 Q245 14 240 18" stroke={GOLD} strokeWidth="0.6" opacity="0.3" fill="none"/>
+              {/* Right leaf accents */}
+              <ellipse cx="290" cy="18" rx="5" ry="2.5" fill={GOLD} opacity="0.2" transform="rotate(20 290 18)"/>
+              <ellipse cx="265" cy="30" rx="5" ry="2.5" fill={GOLD} opacity="0.2" transform="rotate(-15 265 30)"/>
+              <ellipse cx="240" cy="16" rx="5" ry="2.5" fill={GOLD} opacity="0.2" transform="rotate(25 240 16)"/>
             </svg>
           </div>
 
@@ -125,24 +152,38 @@ export default function FlyerClient({ m, slug }: { m: MemorialConfig; slug: stri
               {m.title}
             </div>
             {/* Corner flower accents */}
-            <div style={{ display: "flex", justifyContent: "space-between", marginTop: "0.5rem", opacity: 0.35 }}>
-              <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-                <circle cx="8" cy="8" r="3" fill={GOLD} />
-                <circle cx="16" cy="4" r="2" fill={GOLD} />
-                <circle cx="4" cy="16" r="2" fill={GOLD} />
-                <circle cx="14" cy="14" r="4" fill={GOLD} opacity="0.5" />
-                <line x1="8" y1="8" x2="28" y2="28" stroke={GOLD} strokeWidth="0.5" />
-                <line x1="16" y1="4" x2="28" y2="28" stroke={GOLD} strokeWidth="0.5" />
-                <line x1="4" y1="16" x2="28" y2="28" stroke={GOLD} strokeWidth="0.5" />
+            <div style={{ display: "flex", justifyContent: "space-between", marginTop: "0.5rem" }}>
+              <svg width="52" height="52" viewBox="0 0 52 52" fill="none">
+                <path d="M2 50 Q10 30 26 26 Q30 10 50 2" stroke={GOLD} strokeWidth="0.7" opacity="0.35" fill="none"/>
+                <path d="M2 35 Q8 28 14 32" stroke={GOLD} strokeWidth="0.6" opacity="0.25" fill="none"/>
+                <path d="M18 14 Q24 8 28 16" stroke={GOLD} strokeWidth="0.6" opacity="0.25" fill="none"/>
+                <ellipse cx="10" cy="40" rx="4" ry="2" fill={GOLD} opacity="0.2" transform="rotate(-40 10 40)"/>
+                <ellipse cx="22" cy="22" rx="4" ry="2" fill={GOLD} opacity="0.2" transform="rotate(-45 22 22)"/>
+                <ellipse cx="38" cy="10" rx="4" ry="2" fill={GOLD} opacity="0.2" transform="rotate(-30 38 10)"/>
+                <circle cx="26" cy="26" r="4" fill={GOLD} opacity="0.6"/>
+                <ellipse cx="26" cy="18" rx="2.5" ry="5.5" fill={GOLD} opacity="0.35"/>
+                <ellipse cx="26" cy="34" rx="2.5" ry="5.5" fill={GOLD} opacity="0.35"/>
+                <ellipse cx="18" cy="26" rx="5.5" ry="2.5" fill={GOLD} opacity="0.35"/>
+                <ellipse cx="34" cy="26" rx="5.5" ry="2.5" fill={GOLD} opacity="0.35"/>
+                <ellipse cx="20" cy="20" rx="2.5" ry="5.5" fill={GOLD} opacity="0.2" transform="rotate(-45 20 20)"/>
+                <ellipse cx="32" cy="20" rx="2.5" ry="5.5" fill={GOLD} opacity="0.2" transform="rotate(45 32 20)"/>
+                <circle cx="26" cy="26" r="2" fill={DARK} opacity="0.5"/>
               </svg>
-              <svg width="32" height="32" viewBox="0 0 32 32" fill="none" style={{ transform: "scaleX(-1)" }}>
-                <circle cx="8" cy="8" r="3" fill={GOLD} />
-                <circle cx="16" cy="4" r="2" fill={GOLD} />
-                <circle cx="4" cy="16" r="2" fill={GOLD} />
-                <circle cx="14" cy="14" r="4" fill={GOLD} opacity="0.5" />
-                <line x1="8" y1="8" x2="28" y2="28" stroke={GOLD} strokeWidth="0.5" />
-                <line x1="16" y1="4" x2="28" y2="28" stroke={GOLD} strokeWidth="0.5" />
-                <line x1="4" y1="16" x2="28" y2="28" stroke={GOLD} strokeWidth="0.5" />
+              <svg width="52" height="52" viewBox="0 0 52 52" fill="none" style={{ transform: "scaleX(-1)" }}>
+                <path d="M2 50 Q10 30 26 26 Q30 10 50 2" stroke={GOLD} strokeWidth="0.7" opacity="0.35" fill="none"/>
+                <path d="M2 35 Q8 28 14 32" stroke={GOLD} strokeWidth="0.6" opacity="0.25" fill="none"/>
+                <path d="M18 14 Q24 8 28 16" stroke={GOLD} strokeWidth="0.6" opacity="0.25" fill="none"/>
+                <ellipse cx="10" cy="40" rx="4" ry="2" fill={GOLD} opacity="0.2" transform="rotate(-40 10 40)"/>
+                <ellipse cx="22" cy="22" rx="4" ry="2" fill={GOLD} opacity="0.2" transform="rotate(-45 22 22)"/>
+                <ellipse cx="38" cy="10" rx="4" ry="2" fill={GOLD} opacity="0.2" transform="rotate(-30 38 10)"/>
+                <circle cx="26" cy="26" r="4" fill={GOLD} opacity="0.6"/>
+                <ellipse cx="26" cy="18" rx="2.5" ry="5.5" fill={GOLD} opacity="0.35"/>
+                <ellipse cx="26" cy="34" rx="2.5" ry="5.5" fill={GOLD} opacity="0.35"/>
+                <ellipse cx="18" cy="26" rx="5.5" ry="2.5" fill={GOLD} opacity="0.35"/>
+                <ellipse cx="34" cy="26" rx="5.5" ry="2.5" fill={GOLD} opacity="0.35"/>
+                <ellipse cx="20" cy="20" rx="2.5" ry="5.5" fill={GOLD} opacity="0.2" transform="rotate(-45 20 20)"/>
+                <ellipse cx="32" cy="20" rx="2.5" ry="5.5" fill={GOLD} opacity="0.2" transform="rotate(45 32 20)"/>
+                <circle cx="26" cy="26" r="2" fill={DARK} opacity="0.5"/>
               </svg>
             </div>
           </div>
@@ -182,18 +223,28 @@ export default function FlyerClient({ m, slug }: { m: MemorialConfig; slug: stri
             />
           </div>
 
-          {/* Soft floral row */}
-          <div style={{ textAlign: "center", padding: "0.4rem 0", opacity: 0.3 }}>
-            <svg width="200" height="16" viewBox="0 0 200 16" fill="none">
-              <line x1="0" y1="8" x2="70" y2="8" stroke={GOLD} strokeWidth="0.5" />
-              <circle cx="82" cy="8" r="2.5" fill={GOLD} />
-              <circle cx="92" cy="4" r="1.5" fill={GOLD} />
-              <circle cx="92" cy="12" r="1.5" fill={GOLD} />
-              <circle cx="100" cy="8" r="3.5" fill={GOLD} />
-              <circle cx="108" cy="4" r="1.5" fill={GOLD} />
-              <circle cx="108" cy="12" r="1.5" fill={GOLD} />
-              <circle cx="118" cy="8" r="2.5" fill={GOLD} />
-              <line x1="130" y1="8" x2="200" y2="8" stroke={GOLD} strokeWidth="0.5" />
+          {/* Floral row above QR */}
+          <div style={{ textAlign: "center", padding: "0.5rem 0" }}>
+            <svg width="280" height="36" viewBox="0 0 280 36" fill="none">
+              <path d="M0 18 Q40 12 80 18 Q100 22 118 16" stroke={GOLD} strokeWidth="0.7" opacity="0.35" fill="none"/>
+              <path d="M162 16 Q180 22 200 18 Q240 12 280 18" stroke={GOLD} strokeWidth="0.7" opacity="0.35" fill="none"/>
+              <ellipse cx="30" cy="13" rx="5" ry="2.5" fill={GOLD} opacity="0.18" transform="rotate(-15 30 13)"/>
+              <ellipse cx="65" cy="21" rx="5" ry="2.5" fill={GOLD} opacity="0.18" transform="rotate(10 65 21)"/>
+              <ellipse cx="100" cy="13" rx="5" ry="2.5" fill={GOLD} opacity="0.18" transform="rotate(-20 100 13)"/>
+              <ellipse cx="180" cy="21" rx="5" ry="2.5" fill={GOLD} opacity="0.18" transform="rotate(20 180 21)"/>
+              <ellipse cx="215" cy="13" rx="5" ry="2.5" fill={GOLD} opacity="0.18" transform="rotate(-10 215 13)"/>
+              <ellipse cx="250" cy="21" rx="5" ry="2.5" fill={GOLD} opacity="0.18" transform="rotate(15 250 21)"/>
+              {/* Centre flower */}
+              <circle cx="140" cy="18" r="4.5" fill={GOLD} opacity="0.7"/>
+              <ellipse cx="140" cy="8" rx="3" ry="6" fill={GOLD} opacity="0.35"/>
+              <ellipse cx="140" cy="28" rx="3" ry="6" fill={GOLD} opacity="0.35"/>
+              <ellipse cx="130" cy="18" rx="6" ry="3" fill={GOLD} opacity="0.35"/>
+              <ellipse cx="150" cy="18" rx="6" ry="3" fill={GOLD} opacity="0.35"/>
+              <ellipse cx="133" cy="11" rx="3" ry="6" fill={GOLD} opacity="0.22" transform="rotate(-45 133 11)"/>
+              <ellipse cx="147" cy="11" rx="3" ry="6" fill={GOLD} opacity="0.22" transform="rotate(45 147 11)"/>
+              <ellipse cx="133" cy="25" rx="3" ry="6" fill={GOLD} opacity="0.22" transform="rotate(45 133 25)"/>
+              <ellipse cx="147" cy="25" rx="3" ry="6" fill={GOLD} opacity="0.22" transform="rotate(-45 147 25)"/>
+              <circle cx="140" cy="18" r="2" fill={DARK} opacity="0.5"/>
             </svg>
           </div>
 
