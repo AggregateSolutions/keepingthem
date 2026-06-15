@@ -26,13 +26,13 @@ const config: MemorialConfig = {
     address: "3481 Hamilton Mill Rd, Buford, GA 30519",
     phone: "(770) 945-6924",
     date: "Saturday, June 27, 2026",
-    time: "1:00 PM - 3:00 PM",
+    time: "1:00 PM - 4:00 PM",
   },
   reception: {
     name: "Stonehedge Venue",
     address: "406 E. Shadburn Ave, Buford, GA 30518",
     date: "Saturday, June 27, 2026",
-    time: "4:00 PM",
+    time: "5:00 PM",
     notes: "A reception with food and fellowship will follow the service. Please RSVP so the family can prepare.",
   },
   thanksgiving: {
