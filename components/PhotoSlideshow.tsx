@@ -20,8 +20,11 @@ function PhotoFrame({ src, alt, fading }: { src: string; alt: string; fading?: b
       src={src}
       alt={alt}
       style={{
-        width: "100%",
+        width: "auto",
+        maxWidth: "100%",
+        maxHeight: 500,
         display: "block",
+        margin: "0 auto",
         opacity: fading ? 0 : 1,
         transition: "opacity 0.3s ease",
       }}
