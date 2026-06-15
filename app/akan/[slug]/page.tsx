@@ -24,9 +24,32 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const { slug } = await params;
   const m = memorials[slug];
   if (!m) return {};
+
+  const photo = m.photos[0];
+  const ogImage = photo
+    ? `https://keepingthem.net${photo.src}`
+    : "https://keepingthem.net/og-default.png";
+
+  const serviceDetail = `Funeral · ${m.funeralService.date} · ${m.funeralService.time} · ${m.funeralService.name}`;
+  const description = `${m.tribute} ${serviceDetail}`;
+
   return {
     title: `In memoriam · ${m.name} · keepingthem.net`,
-    description: m.tribute,
+    description,
+    openGraph: {
+      title: `In memoriam · ${m.name}`,
+      description,
+      url: `https://keepingthem.net/akan/${slug}`,
+      siteName: "keepingthem.net",
+      images: [{ url: ogImage, width: 1200, height: 630, alt: `In memoriam · ${m.name}` }],
+      type: "website",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `In memoriam · ${m.name}`,
+      description,
+      images: [ogImage],
+    },
   };
 }
 
