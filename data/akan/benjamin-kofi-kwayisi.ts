@@ -21,7 +21,7 @@ const config: MemorialConfig = {
     address: "3481 Hamilton Mill Rd, Buford, GA 30501",
     phone: "(770) 945-6924",
     date: "Saturday, June 27, 2026",
-    time: "11:00 AM",
+    time: "12:00 PM",
   },
   thanksgiving: {
     date: "Sunday, June 28, 2026",
