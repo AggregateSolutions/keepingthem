@@ -11,7 +11,7 @@ const config: MemorialConfig = {
     { src: "/Papa_62.png", alt: "Memorial photo", primaryDuration: 8000 },
     // Add additional photos below — they will cycle every 4 seconds
       { src: "/Dad_Goldas_Final_Grad.jpeg", alt: "Memorial photo" },
-    // { src: "/photo-3.jpg", alt: "Memorial photo" },
+      { src: "/Dad_78th_birthday.png", alt: "Memorial photo" },
     // { src: "/photo-4.jpg", alt: "Memorial photo" },
     // { src: "/photo-5.jpg", alt: "Memorial photo" },
     // { src: "/photo-6.jpg", alt: "Memorial photo" },
@@ -23,7 +23,7 @@ const config: MemorialConfig = {
   },
   funeralService: {
     name: "Hamilton Mill Memorial Chapel & Gardens",
-    address: "3481 Hamilton Mill Rd, Buford, GA 30501",
+    address: "3481 Hamilton Mill Rd, Buford, GA 30519",
     phone: "(770) 945-6924",
     date: "Saturday, June 27, 2026",
     time: "1:00 PM - 3:00 PM",
