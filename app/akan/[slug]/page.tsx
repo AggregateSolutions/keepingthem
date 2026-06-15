@@ -9,6 +9,7 @@ import ProgramSection from "@/components/ProgramSection";
 import CultureGuide from "@/components/CultureGuide";
 import RsvpForm from "@/components/RsvpForm";
 import PhotoSlideshow from "@/components/PhotoSlideshow";
+import StickyRsvpButton from "@/components/StickyRsvpButton";
 import akanMemorials from "@/data/akan";
 import type { MemorialConfig } from "@/types/memorial";
 
@@ -126,7 +127,7 @@ export default async function MemorialPage({ params }: { params: Promise<{ slug:
         {/* ── Service Details ── */}
         <section id="service" style={{ marginBottom: "3rem" }}>
           <div className="section-title">Service details</div>
-          <ServiceCard funeral={m.funeralService} thanksgiving={m.thanksgiving} reception={m.reception} />
+          <ServiceCard viewing={m.viewing} funeral={m.funeralService} reception={m.reception} thanksgiving={m.thanksgiving} />
         </section>
 
         {/* ── Watch Live ── */}
@@ -171,6 +172,8 @@ export default async function MemorialPage({ params }: { params: Promise<{ slug:
           {m.adinkra.symbol} — {m.adinkra.meaning}
         </p>
       </div>
+
+      <StickyRsvpButton />
 
       <KenteStripe />
 

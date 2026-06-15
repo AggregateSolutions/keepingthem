@@ -175,6 +175,15 @@ export default function RsvpForm({ funeral, thanksgiving, reception, memorialSlu
               time={funeral.time}
               address={`${funeral.name} — ${funeral.address}`}
             />
+            <EventRow
+              checked={form.thanksgiving}
+              onChange={v => setForm(f => ({ ...f, thanksgiving: v }))}
+              label="Thanksgiving celebration"
+              date={thanksgiving.date}
+              time={thanksgiving.time}
+              address={thanksgiving.location}
+              note="White attire is traditional for the Thanksgiving ceremony."
+            />
             {reception && (
               <EventRow
                 checked={form.reception}
@@ -186,15 +195,6 @@ export default function RsvpForm({ funeral, thanksgiving, reception, memorialSlu
                 note={reception.notes}
               />
             )}
-            <EventRow
-              checked={form.thanksgiving}
-              onChange={v => setForm(f => ({ ...f, thanksgiving: v }))}
-              label="Thanksgiving celebration"
-              date={thanksgiving.date}
-              time={thanksgiving.time}
-              address={thanksgiving.location}
-              note="White attire is traditional for the Thanksgiving ceremony."
-            />
           </div>
         </div>
 

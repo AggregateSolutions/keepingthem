@@ -47,14 +47,24 @@ function InfoRow({ icon, children }: { icon: React.ReactNode; children: React.Re
 }
 
 interface Props {
+  viewing?: MemorialConfig["viewing"];
   funeral: MemorialConfig["funeralService"];
-  thanksgiving: MemorialConfig["thanksgiving"];
   reception?: MemorialConfig["reception"];
+  thanksgiving: MemorialConfig["thanksgiving"];
 }
 
-export default function ServiceCard({ funeral, thanksgiving, reception }: Props) {
+export default function ServiceCard({ viewing, funeral, reception, thanksgiving }: Props) {
   return (
     <>
+      {viewing && (
+        <div className="info-card">
+          <h3 style={{ fontFamily: "var(--font-serif)", fontSize: "1.1rem", color: "var(--gold)", marginBottom: "0.6rem" }}>
+            Viewing
+          </h3>
+          <InfoRow icon={<CalendarIcon />}>{viewing.date} · {viewing.startTime} – {viewing.endTime}</InfoRow>
+        </div>
+      )}
+
       <div className="info-card">
         <h3 style={{ fontFamily: "var(--font-serif)", fontSize: "1.1rem", color: "var(--gold)", marginBottom: "0.6rem" }}>
           Funeral service
@@ -69,17 +79,6 @@ export default function ServiceCard({ funeral, thanksgiving, reception }: Props)
         <InfoRow icon={<ClockIcon />}>{funeral.name}</InfoRow>
       </div>
 
-      <div className="info-card">
-        <h3 style={{ fontFamily: "var(--font-serif)", fontSize: "1.1rem", color: "var(--gold)", marginBottom: "0.6rem" }}>
-          Thanksgiving celebration
-        </h3>
-        <InfoRow icon={<CalendarIcon />}>{thanksgiving.date} · {thanksgiving.time}</InfoRow>
-        <InfoRow icon={<PinIcon />}>{thanksgiving.location}</InfoRow>
-        <p style={{ fontSize: "0.82rem", color: "#7a6a52", marginTop: "0.6rem", fontFamily: "var(--font-serif)", fontStyle: "italic" }}>
-          A celebration of a life well-lived, held in the tradition of our people.
-        </p>
-      </div>
-
       {reception && (
         <div className="info-card">
           <h3 style={{ fontFamily: "var(--font-serif)", fontSize: "1.1rem", color: "var(--gold)", marginBottom: "0.6rem" }}>
@@ -92,6 +91,17 @@ export default function ServiceCard({ funeral, thanksgiving, reception }: Props)
           )}
         </div>
       )}
+
+      <div className="info-card">
+        <h3 style={{ fontFamily: "var(--font-serif)", fontSize: "1.1rem", color: "var(--gold)", marginBottom: "0.6rem" }}>
+          Thanksgiving celebration
+        </h3>
+        <InfoRow icon={<CalendarIcon />}>{thanksgiving.date} · {thanksgiving.time}</InfoRow>
+        <InfoRow icon={<PinIcon />}>{thanksgiving.location}</InfoRow>
+        <p style={{ fontSize: "0.82rem", color: "#7a6a52", marginTop: "0.6rem", fontFamily: "var(--font-serif)", fontStyle: "italic" }}>
+          A celebration of a life well-lived, held in the tradition of our people.
+        </p>
+      </div>
     </>
   );
 }

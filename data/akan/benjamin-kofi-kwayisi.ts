@@ -10,30 +10,35 @@ const config: MemorialConfig = {
   photos: [
     { src: "/Papa_62.png", alt: "Memorial photo", primaryDuration: 8000 },
     // Add additional photos below — they will cycle every 4 seconds
-    // { src: "/photo-2.jpg", alt: "Memorial photo" },
+      { src: "/Dad_Goldas_Final_Grad.jpeg", alt: "Memorial photo" },
     // { src: "/photo-3.jpg", alt: "Memorial photo" },
     // { src: "/photo-4.jpg", alt: "Memorial photo" },
     // { src: "/photo-5.jpg", alt: "Memorial photo" },
     // { src: "/photo-6.jpg", alt: "Memorial photo" },
   ],
+  viewing: {
+    date: "Saturday, June 21, 2025",
+    startTime: "11:00 AM",
+    endTime: "1:00 PM",
+  },
   funeralService: {
     name: "Hamilton Mill Memorial Chapel & Gardens",
     address: "3481 Hamilton Mill Rd, Buford, GA 30501",
     phone: "(770) 945-6924",
     date: "Saturday, June 27, 2026",
-    time: "12:00 PM",
-  },
-  thanksgiving: {
-    date: "Sunday, June 28, 2026",
-    time: "1:00 PM",
-    location: "2029 Mapmaker Dr, Dacula, GA 30019",
+    time: "1:00 PM - 3:00 PM",
   },
   reception: {
     name: "Stonehedge Venue",
     address: "406 E. Shadburn Ave, Buford, GA 30518",
     date: "Saturday, June 27, 2026",
-    time: "5:00 PM",
+    time: "4:00 PM",
     notes: "A reception with food and fellowship will follow the service. Please RSVP so the family can prepare.",
+  },
+  thanksgiving: {
+    date: "Sunday, June 28, 2026",
+    time: "1:00 PM",
+    location: "2029 Mapmaker Dr, Dacula, GA 30019",
   },
   stream: {
     url: "",
@@ -46,14 +51,13 @@ const config: MemorialConfig = {
     { name: "Design House of Flowers", phone: "(770) 904-4488", url: "https://www.designhouseofflowers.com",   address: "1605 Buford Hwy Suite D, Buford, GA" },
   ],
   program: {
-    officiant: "Rev. Emmanuel Asare",
+    officiant: "TBA",
     items: [
       { title: "Processional & opening prayer",  sub: "" },
       { title: "Scripture reading",              sub: "Psalm 23" },
       { title: "Hymn",                           sub: "Yen Ara Asase Ni" },
       { title: "Family tribute",                 sub: "" },
       { title: "Community tribute",              sub: "" },
-      { title: "Homily",                         sub: "" },
       { title: "Closing hymn",                   sub: "" },
       { title: "Committal & benediction",        sub: "" },
     ],

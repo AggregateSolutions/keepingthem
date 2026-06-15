@@ -5,6 +5,11 @@ export interface MemorialConfig {
   title: string;
   tribute: string;
   photos: { src: string; alt: string; primaryDuration?: number }[];
+  viewing?: {
+    date: string;
+    startTime: string;
+    endTime: string;
+  };
   funeralService: {
     name: string;
     address: string;
