@@ -76,12 +76,12 @@ export default function FlyerClient({ m, slug }: { m: MemorialConfig; slug: stri
 
           {/* Photo */}
           {photo && (
-            <div style={{ position: "relative", width: "100%", height: "320px", background: "#1a1208" }}>
+            <div style={{ position: "relative", width: "100%", height: "400px", background: "#1a1208" }}>
               <Image
                 src={photo.src}
                 alt={photo.alt}
                 fill
-                style={{ objectFit: "cover", objectPosition: "center 15%" }}
+                style={{ objectFit: "cover", objectPosition: "center 25%" }}
               />
               <div style={{
                 position: "absolute", inset: 0,
