@@ -248,20 +248,28 @@ export default function FlyerClient({ m, slug }: { m: MemorialConfig; slug: stri
             </svg>
           </div>
 
-          {/* QR code + tribute snippet */}
-          <div style={{ padding: "0.9rem 1.5rem", display: "flex", alignItems: "center", gap: "1rem" }}>
-            <div style={{ flexShrink: 0, background: "#fff", padding: "6px", borderRadius: "4px" }}>
-              <QRCodeSVG value={url} size={72} fgColor={DARK} bgColor="#ffffff" />
+          {/* QR codes — memorial + Zelle side by side */}
+          <div style={{ padding: "0.9rem 1.5rem", display: "flex", gap: "1rem", justifyContent: "center" }}>
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.35rem" }}>
+              <div style={{ background: "#fff", padding: "6px", borderRadius: "4px" }}>
+                <QRCodeSVG value={url} size={68} fgColor={DARK} bgColor="#ffffff" />
+              </div>
+              <div style={{ fontSize: "0.58rem", color: GOLD, textTransform: "uppercase", letterSpacing: "0.08em", textAlign: "center" }}>
+                Memorial & RSVP
+              </div>
+              <div style={{ fontSize: "0.55rem", color: "#7a6a52", textAlign: "center", fontStyle: "italic" }}>
+                Scan to visit page
+              </div>
             </div>
-            <div style={{ flex: 1 }}>
-              <div style={{ fontSize: "0.6rem", color: GOLD, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "0.3rem" }}>
-                Full memorial & RSVP
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.35rem" }}>
+              <div style={{ background: "#fff", padding: "6px", borderRadius: "4px" }}>
+                <QRCodeSVG value="zelle://send?phone=6787726856" size={68} fgColor={DARK} bgColor="#ffffff" />
               </div>
-              <div style={{ fontSize: "0.62rem", color: "#7a6a52", wordBreak: "break-all", marginBottom: "0.4rem" }}>
-                {url}
+              <div style={{ fontSize: "0.58rem", color: GOLD, textTransform: "uppercase", letterSpacing: "0.08em", textAlign: "center" }}>
+                Send via Zelle
               </div>
-              <div style={{ fontSize: "0.62rem", color: "#a09070", fontStyle: "italic", lineHeight: 1.5 }}>
-                Scan to view the memorial page, RSVP, and watch the live stream.
+              <div style={{ fontSize: "0.55rem", color: "#7a6a52", textAlign: "center", fontStyle: "italic" }}>
+                Contributions welcome
               </div>
             </div>
           </div>
