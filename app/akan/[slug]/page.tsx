@@ -65,9 +65,12 @@ export default async function MemorialPage({ params }: { params: Promise<{ slug:
 
       {/* ── Site header ── */}
       <header style={{ background: "var(--bg-deep)", borderBottom: "1px solid var(--border)", padding: "2.5rem 1.5rem 2rem", textAlign: "center" }}>
-        <nav style={{ marginBottom: "1.5rem" }}>
+        <nav style={{ marginBottom: "1.5rem", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <Link href="/akan" style={{ color: "var(--gold)", textDecoration: "none", fontSize: "0.8rem", letterSpacing: "0.08em", textTransform: "uppercase" }}>
             ← Akan Memorials
+          </Link>
+          <Link href={`/akan/${slug}/flyer`} style={{ color: "var(--gold)", textDecoration: "none", fontSize: "0.8rem", letterSpacing: "0.08em", textTransform: "uppercase", border: "1px solid var(--gold)", padding: "0.3rem 0.75rem", borderRadius: "4px" }}>
+            Flyer
           </Link>
         </nav>
         <div style={{ fontSize: "48px", color: "var(--gold)", marginBottom: "0.5rem", fontFamily: "serif" }} aria-hidden="true">☥</div>
