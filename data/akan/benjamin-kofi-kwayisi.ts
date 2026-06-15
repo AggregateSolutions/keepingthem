@@ -17,7 +17,7 @@ const config: MemorialConfig = {
     // { src: "/photo-6.jpg", alt: "Memorial photo" },
   ],
   viewing: {
-    date: "Saturday, June 21, 2025",
+    date: "Saturday, June 27th, 2026",
     startTime: "11:00 AM",
     endTime: "1:00 PM",
   },
