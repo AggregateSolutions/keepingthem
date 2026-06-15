@@ -15,39 +15,17 @@ interface Props {
 
 function PhotoFrame({ src, alt, fading }: { src: string; alt: string; fading?: boolean }) {
   return (
-    <div style={{ position: "relative", width: "100%", height: 780, overflow: "hidden" }}>
-      {/* Blurred background fills side bars */}
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src={src}
-        alt=""
-        aria-hidden="true"
-        style={{
-          position: "absolute", inset: 0,
-          width: "100%", height: "100%",
-          objectFit: "cover",
-          filter: "blur(18px) brightness(0.4) saturate(0.7)",
-          transform: "scale(1.1)",
-        }}
-      />
-      {/* Sharp foreground image — full subject visible */}
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src={src}
-        alt={alt}
-        style={{
-          position: "relative",
-          display: "block",
-          margin: "0 auto",
-          height: "100%",
-          width: "auto",
-          maxWidth: "100%",
-          objectFit: "contain",
-          opacity: fading ? 0 : 1,
-          transition: "opacity 0.3s ease",
-        }}
-      />
-    </div>
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={src}
+      alt={alt}
+      style={{
+        width: "100%",
+        display: "block",
+        opacity: fading ? 0 : 1,
+        transition: "opacity 0.3s ease",
+      }}
+    />
   );
 }
 
