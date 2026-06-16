@@ -223,6 +223,18 @@ export default function FlyerClient({ m, slug }: { m: MemorialConfig; slug: stri
             />
           </div>
 
+          {/* Dress code note */}
+          <div style={{ padding: "0.6rem 1.5rem 0.5rem", borderTop: `1px solid #3a2e1a` }}>
+            <div style={{ fontSize: "0.6rem", color: GOLD, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "0.3rem", textAlign: "center" }}>
+              Attire
+            </div>
+            <p style={{ fontSize: "0.62rem", color: "#a09070", fontStyle: "italic", lineHeight: 1.7, textAlign: "center", margin: 0 }}>
+              {m.dressCode === "black-and-white"
+                ? "The family will be dressed in black and white. Guests are warmly welcomed to honor this tradition, though all are received with gratitude regardless of attire."
+                : "The family will be dressed in red and black. Guests are warmly welcomed to honor this tradition, though all are received with gratitude regardless of attire."}
+            </p>
+          </div>
+
           {/* Floral row above QR */}
           <div style={{ textAlign: "center", padding: "0.5rem 0" }}>
             <svg width="280" height="36" viewBox="0 0 280 36" fill="none">
