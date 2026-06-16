@@ -248,28 +248,38 @@ export default function FlyerClient({ m, slug }: { m: MemorialConfig; slug: stri
             </svg>
           </div>
 
-          {/* QR codes — memorial + Zelle side by side */}
-          <div style={{ padding: "0.9rem 1.5rem", display: "flex", gap: "1rem", justifyContent: "center" }}>
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.35rem" }}>
-              <div style={{ background: "#fff", padding: "6px", borderRadius: "4px" }}>
-                <QRCodeSVG value={url} size={68} fgColor={DARK} bgColor="#ffffff" />
-              </div>
-              <div style={{ fontSize: "0.58rem", color: GOLD, textTransform: "uppercase", letterSpacing: "0.08em", textAlign: "center" }}>
-                Memorial & RSVP
-              </div>
-              <div style={{ fontSize: "0.55rem", color: "#7a6a52", textAlign: "center", fontStyle: "italic" }}>
-                Scan to visit page
-              </div>
+          {/* Contributions */}
+          <div style={{ padding: "0.6rem 1.5rem 0.3rem", borderTop: `1px solid #3a2e1a` }}>
+            <div style={{ fontSize: "0.58rem", color: "#7a6a52", textAlign: "center", fontStyle: "italic", lineHeight: 1.7, marginBottom: "0.75rem" }}>
+              In lieu of flowers, the family welcomes your generosity.<br />
+              Zelle · (678) 772-6856 &nbsp;·&nbsp; Cash App · $reggieblak
             </div>
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.35rem" }}>
-              <div style={{ background: "#fff", padding: "6px", borderRadius: "4px" }}>
-                <QRCodeSVG value="zelle://send?phone=6787726856" size={68} fgColor={DARK} bgColor="#ffffff" />
+            <div style={{ display: "flex", gap: "1.25rem", justifyContent: "center" }}>
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.35rem" }}>
+                <div style={{ background: "#fff", padding: "6px", borderRadius: "4px" }}>
+                  <QRCodeSVG value={url} size={60} fgColor={DARK} bgColor="#ffffff" />
+                </div>
+                <div style={{ fontSize: "0.55rem", color: GOLD, textTransform: "uppercase", letterSpacing: "0.08em", textAlign: "center" }}>
+                  Memorial & RSVP
+                </div>
               </div>
-              <div style={{ fontSize: "0.58rem", color: GOLD, textTransform: "uppercase", letterSpacing: "0.08em", textAlign: "center" }}>
-                Send via Zelle
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.35rem" }}>
+                <div style={{ background: "#fff", padding: "6px", borderRadius: "4px" }}>
+                  <QRCodeSVG value="https://cash.app/$reggieblak" size={60} fgColor={DARK} bgColor="#ffffff" />
+                </div>
+                <div style={{ fontSize: "0.55rem", color: GOLD, textTransform: "uppercase", letterSpacing: "0.08em", textAlign: "center" }}>
+                  Cash App
+                </div>
               </div>
-              <div style={{ fontSize: "0.55rem", color: "#7a6a52", textAlign: "center", fontStyle: "italic" }}>
-                Contributions welcome
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.35rem" }}>
+                <div style={{ background: "#fff", padding: "6px", borderRadius: "4px", display: "flex", alignItems: "center", justifyContent: "center", width: 72, height: 72 }}>
+                  <div style={{ fontSize: "0.65rem", color: DARK, textAlign: "center", fontFamily: "sans-serif", fontWeight: 600, lineHeight: 1.4 }}>
+                    Zelle<br />(678)<br />772-6856
+                  </div>
+                </div>
+                <div style={{ fontSize: "0.55rem", color: GOLD, textTransform: "uppercase", letterSpacing: "0.08em", textAlign: "center" }}>
+                  Zelle
+                </div>
               </div>
             </div>
           </div>
