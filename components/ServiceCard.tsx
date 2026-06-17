@@ -1,4 +1,5 @@
 import type { MemorialConfig } from "@/types/memorial";
+import ThanksgivingUnlock from "@/components/ThanksgivingUnlock";
 
 function ForkIcon() {
   return (
@@ -51,9 +52,10 @@ interface Props {
   funeral: MemorialConfig["funeralService"];
   reception?: MemorialConfig["reception"];
   thanksgiving: MemorialConfig["thanksgiving"];
+  slug: string;
 }
 
-export default function ServiceCard({ viewing, funeral, reception, thanksgiving }: Props) {
+export default function ServiceCard({ viewing, funeral, reception, thanksgiving, slug }: Props) {
   return (
     <>
       {viewing && (
@@ -97,7 +99,11 @@ export default function ServiceCard({ viewing, funeral, reception, thanksgiving 
           Thanksgiving celebration
         </h3>
         <InfoRow icon={<CalendarIcon />}>{thanksgiving.date} · {thanksgiving.time}</InfoRow>
-        <InfoRow icon={<PinIcon />}>{thanksgiving.location}</InfoRow>
+        <InfoRow icon={<PinIcon />}>
+          {thanksgiving.privateLocation
+            ? <ThanksgivingUnlock slug={slug} />
+            : thanksgiving.location}
+        </InfoRow>
         <p style={{ fontSize: "0.82rem", color: "#7a6a52", marginTop: "0.6rem", fontFamily: "var(--font-serif)", fontStyle: "italic" }}>
           A celebration of a life well-lived, held in the tradition of our people.
         </p>

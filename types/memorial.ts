@@ -20,7 +20,8 @@ export interface MemorialConfig {
   thanksgiving: {
     date: string;
     time: string;
-    location: string;
+    location: string;       // public-facing text e.g. "Private residence · Dacula, GA"
+    privateLocation?: true; // flag — actual address lives in env var, never in bundle
   };
   reception?: {
     name: string;

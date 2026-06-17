@@ -129,7 +129,7 @@ export default async function MemorialPage({ params }: { params: Promise<{ slug:
         {/* ── Service Details ── */}
         <section id="service" style={{ marginBottom: "3rem" }}>
           <div className="section-title">Service details</div>
-          <ServiceCard viewing={m.viewing} funeral={m.funeralService} reception={m.reception} thanksgiving={m.thanksgiving} />
+          <ServiceCard viewing={m.viewing} funeral={m.funeralService} reception={m.reception} thanksgiving={m.thanksgiving} slug={slug} />
         </section>
 
         {/* ── Watch Live ── */}
