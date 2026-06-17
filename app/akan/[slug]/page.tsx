@@ -169,7 +169,26 @@ export default async function MemorialPage({ params }: { params: Promise<{ slug:
 
       {/* ── Footer adinkra ── */}
       <div style={{ textAlign: "center", padding: "2rem 1rem 1rem", color: "var(--text-faint)", fontSize: "0.8rem" }}>
-        <div style={{ fontFamily: "serif", fontSize: "2rem", color: "#3d2e1a", marginBottom: "0.5rem" }}>✦</div>
+        <div style={{ display: "flex", justifyContent: "center", marginBottom: "0.75rem" }}>
+          <svg width="48" height="56" viewBox="0 0 48 56" fill="none" xmlns="http://www.w3.org/2000/svg" opacity="0.45">
+            {/* Gye Nyame — vertical trunk with cross bars and curved terminals */}
+            <line x1="24" y1="4" x2="24" y2="52" stroke="#c8962e" strokeWidth="2"/>
+            {/* Top horizontal bar */}
+            <line x1="10" y1="12" x2="38" y2="12" stroke="#c8962e" strokeWidth="2"/>
+            <path d="M10 12 Q6 12 6 8 Q6 4 10 4" stroke="#c8962e" strokeWidth="1.5" fill="none"/>
+            <path d="M38 12 Q42 12 42 8 Q42 4 38 4" stroke="#c8962e" strokeWidth="1.5" fill="none"/>
+            {/* Middle horizontal bar */}
+            <line x1="8" y1="28" x2="40" y2="28" stroke="#c8962e" strokeWidth="2"/>
+            <path d="M8 28 Q3 28 3 24 Q3 20 8 20" stroke="#c8962e" strokeWidth="1.5" fill="none"/>
+            <path d="M40 28 Q45 28 45 24 Q45 20 40 20" stroke="#c8962e" strokeWidth="1.5" fill="none"/>
+            {/* Bottom horizontal bar */}
+            <line x1="10" y1="44" x2="38" y2="44" stroke="#c8962e" strokeWidth="2"/>
+            <path d="M10 44 Q6 44 6 48 Q6 52 10 52" stroke="#c8962e" strokeWidth="1.5" fill="none"/>
+            <path d="M38 44 Q42 44 42 48 Q42 52 38 52" stroke="#c8962e" strokeWidth="1.5" fill="none"/>
+            {/* Centre diamond */}
+            <rect x="20" y="24" width="8" height="8" transform="rotate(45 24 28)" fill="#c8962e" opacity="0.6"/>
+          </svg>
+        </div>
         <p style={{ fontFamily: "var(--font-serif)", fontStyle: "italic", fontSize: "0.95rem", color: "var(--text-faint)" }}>
           {m.adinkra.symbol} — {m.adinkra.meaning}
         </p>
