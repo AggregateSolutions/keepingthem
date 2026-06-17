@@ -299,19 +299,8 @@ export default function FlyerClient({ m, slug }: { m: MemorialConfig; slug: stri
           {/* Adinkra footer */}
           <div style={{ textAlign: "center", padding: "0.5rem 1rem 0.75rem", borderTop: `1px solid #3a2e1a` }}>
             <div style={{ display: "flex", justifyContent: "center", marginBottom: "0.3rem" }}>
-              <svg width="28" height="34" viewBox="0 0 48 56" fill="none" opacity="0.5">
-                <line x1="24" y1="4" x2="24" y2="52" stroke={GOLD} strokeWidth="2"/>
-                <line x1="10" y1="12" x2="38" y2="12" stroke={GOLD} strokeWidth="2"/>
-                <path d="M10 12 Q6 12 6 8 Q6 4 10 4" stroke={GOLD} strokeWidth="1.5" fill="none"/>
-                <path d="M38 12 Q42 12 42 8 Q42 4 38 4" stroke={GOLD} strokeWidth="1.5" fill="none"/>
-                <line x1="8" y1="28" x2="40" y2="28" stroke={GOLD} strokeWidth="2"/>
-                <path d="M8 28 Q3 28 3 24 Q3 20 8 20" stroke={GOLD} strokeWidth="1.5" fill="none"/>
-                <path d="M40 28 Q45 28 45 24 Q45 20 40 20" stroke={GOLD} strokeWidth="1.5" fill="none"/>
-                <line x1="10" y1="44" x2="38" y2="44" stroke={GOLD} strokeWidth="2"/>
-                <path d="M10 44 Q6 44 6 48 Q6 52 10 52" stroke={GOLD} strokeWidth="1.5" fill="none"/>
-                <path d="M38 44 Q42 44 42 48 Q42 52 38 52" stroke={GOLD} strokeWidth="1.5" fill="none"/>
-                <rect x="20" y="24" width="8" height="8" transform="rotate(45 24 28)" fill={GOLD} opacity="0.6"/>
-              </svg>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/GyeNyame.png" alt="Gye Nyame" style={{ width: 36, height: 36, objectFit: "contain", opacity: 0.55, filter: "sepia(1) saturate(3) hue-rotate(5deg) brightness(0.85)" }} />
             </div>
             <div style={{ fontSize: "0.62rem", color: "#7a6a52", fontStyle: "italic" }}>
               {m.adinkra.symbol} — {m.adinkra.meaning}
