@@ -3,27 +3,8 @@ import { akanCulture } from "@/data/culture/akan";
 /* ── Faithful SVG renderings of each Adinkra symbol ─────────── */
 
 function GyeNyame() {
-  // Gye Nyame — stylized fern-like form with bilateral symmetry
-  return (
-    <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width: 64, height: 64 }}>
-      {/* Central vertical stem */}
-      <line x1="40" y1="10" x2="40" y2="70" stroke="#c8962e" strokeWidth="2.5" strokeLinecap="round"/>
-      {/* Top arc */}
-      <path d="M28,18 Q40,6 52,18" stroke="#c8962e" strokeWidth="2" fill="none" strokeLinecap="round"/>
-      {/* Bottom arc */}
-      <path d="M28,62 Q40,74 52,62" stroke="#c8962e" strokeWidth="2" fill="none" strokeLinecap="round"/>
-      {/* Left fronds */}
-      <path d="M40,28 Q28,24 22,28 Q28,32 40,28Z" fill="#c8962e" opacity="0.85"/>
-      <path d="M40,38 Q26,33 18,37 Q26,43 40,38Z" fill="#c8962e" opacity="0.85"/>
-      <path d="M40,48 Q28,44 22,48 Q28,52 40,48Z" fill="#c8962e" opacity="0.85"/>
-      {/* Right fronds */}
-      <path d="M40,28 Q52,24 58,28 Q52,32 40,28Z" fill="#c8962e" opacity="0.85"/>
-      <path d="M40,38 Q54,33 62,37 Q54,43 40,38Z" fill="#c8962e" opacity="0.85"/>
-      <path d="M40,48 Q52,44 58,48 Q52,52 40,48Z" fill="#c8962e" opacity="0.85"/>
-      {/* Center dot */}
-      <circle cx="40" cy="40" r="3" fill="#f5ead8"/>
-    </svg>
-  );
+  // eslint-disable-next-line @next/next/no-img-element
+  return <img src="/GyeNyame.png" alt="Gye Nyame" style={{ width: 64, height: 64, objectFit: "contain", filter: "sepia(1) saturate(3) hue-rotate(5deg) brightness(0.85)" }} />;
 }
 
 function Sankofa() {
