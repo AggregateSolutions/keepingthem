@@ -38,7 +38,8 @@ const config: MemorialConfig = {
   thanksgiving: {
     date: "Sunday, June 28, 2026",
     time: "1:00 PM",
-    location: "2029 Mapmaker Dr, Dacula, GA 30019",
+    location: "Private ResidenceDacula, GA",
+    privateLocation: true,
   },
   stream: {
     url: "",
@@ -53,13 +54,17 @@ const config: MemorialConfig = {
   program: {
     officiant: "TBA",
     items: [
-      { title: "Processional & opening prayer",  sub: "" },
-      { title: "Scripture reading",              sub: "Psalm 23" },
-      { title: "Hymn",                           sub: "Yen Ara Asase Ni" },
-      { title: "Family tribute",                 sub: "" },
-      { title: "Community tribute",              sub: "" },
-      { title: "Closing hymn",                   sub: "" },
-      { title: "Committal & benediction",        sub: "" },
+      { title: "Gathering Music",                 sub: "12:00 PM"},
+      { title: "Call To Order",                   sub: "12:15 PM"},
+      { title: "Procession ",                     sub: "12:15 PM" },
+      { title: "Invocation",                      sub: "12:20 PM" },
+      { title: "Music Dedication",                sub: "Amazing Grace" },
+      { title: "Scripture Reading",               sub: "Psalm 23 - Grandchild" },
+      { title: "Obituary Reading",                sub: "Son" },
+      { title: "Family tribute",                  sub: "12:25 PM" },
+      { title: "Community tribute",               sub: "12:30 PM" },
+      { title: "Closing hymn",                    sub: "12:35 PM" },
+      { title: "Committal & benediction",         sub: "12:40 PM" },
     ],
   },
   adinkra: {
