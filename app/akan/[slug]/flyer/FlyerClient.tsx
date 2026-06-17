@@ -219,7 +219,7 @@ export default function FlyerClient({ m, slug }: { m: MemorialConfig; slug: stri
               label="Thanksgiving celebration"
               date={m.thanksgiving.date}
               time={m.thanksgiving.time}
-              location={m.thanksgiving.location}
+              location={m.thanksgiving.privateLocation ? "Private residence · Dacula, GA — scan memorial QR for details" : m.thanksgiving.location}
             />
           </div>
 
