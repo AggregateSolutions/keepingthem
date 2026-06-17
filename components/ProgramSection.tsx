@@ -1,6 +1,6 @@
 import type { MemorialConfig } from "@/types/memorial";
 
-export default function ProgramSection({ program, adinkra }: { program: MemorialConfig["program"]; adinkra: MemorialConfig["adinkra"] }) {
+export default function ProgramSection({ program }: { program: MemorialConfig["program"] }) {
   return (
     <>
       <div className="info-card" style={{ marginBottom: "1rem" }}>
@@ -47,17 +47,6 @@ export default function ProgramSection({ program, adinkra }: { program: Memorial
         ))}
       </ul>
 
-      <div className="info-card" style={{ marginTop: "1.5rem", borderColor: "#5a3a1a" }}>
-        <div style={{ fontSize: "0.8rem", color: "var(--gold)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "0.4rem" }}>
-          Adinkra symbol
-        </div>
-        <div style={{ fontFamily: "var(--font-serif)", fontSize: "1.4rem", color: "var(--cream)", marginBottom: "0.3rem" }}>
-          {adinkra.symbol}
-        </div>
-        <div style={{ fontSize: "0.85rem", color: "var(--text-muted)", fontStyle: "italic", fontFamily: "var(--font-serif)" }}>
-          {adinkra.meaning}
-        </div>
-      </div>
     </>
   );
 }

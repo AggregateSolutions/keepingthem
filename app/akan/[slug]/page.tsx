@@ -147,7 +147,7 @@ export default async function MemorialPage({ params }: { params: Promise<{ slug:
         {/* ── Order of Service ── */}
         <section id="program" style={{ marginBottom: "3rem" }}>
           <div className="section-title">Order of service</div>
-          <ProgramSection program={m.program} adinkra={m.adinkra} />
+          <ProgramSection program={m.program} />
         </section>
 
         {/* ── Akan Culture Guide ── */}
