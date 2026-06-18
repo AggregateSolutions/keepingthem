@@ -11,6 +11,7 @@
   "dependencies": {
     "@netlify/functions": "^5.3.0",
     "@supabase/supabase-js": "^2.108.1",
+    "docx": "^9.7.1",
     "next": "16.2.9",
     "qrcode.react": "^4.2.0",
     "react": "19.2.4",

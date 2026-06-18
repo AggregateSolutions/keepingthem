@@ -10,6 +10,7 @@ import CultureGuide from "@/components/CultureGuide";
 import RsvpForm from "@/components/RsvpForm";
 import PhotoSlideshow from "@/components/PhotoSlideshow";
 import StickyRsvpButton from "@/components/StickyRsvpButton";
+import TributeWall from "@/components/TributeWall";
 import akanMemorials from "@/data/akan";
 import type { MemorialConfig } from "@/types/memorial";
 
@@ -94,6 +95,7 @@ export default async function MemorialPage({ params }: { params: Promise<{ slug:
           ["#flowers", "Send Flowers"],
           ["#program", "Program"],
           ["#culture", "Culture Guide"],
+          ["#tributes", "Tributes"],
           ["#rsvp", "RSVP"],
         ].map(([href, label]) => (
           <a
@@ -157,6 +159,12 @@ export default async function MemorialPage({ params }: { params: Promise<{ slug:
             For guests who may be less familiar with Akan funeral traditions, the following is offered as a guide to honor the family and participate with cultural awareness.
           </p>
           <CultureGuide dressCode={m.dressCode} />
+        </section>
+
+        {/* ── Tributes ── */}
+        <section id="tributes" style={{ marginBottom: "3rem" }}>
+          <div className="section-title">Tributes &amp; messages</div>
+          <TributeWall slug={slug} limit={4} />
         </section>
 
         {/* ── RSVP ── */}
