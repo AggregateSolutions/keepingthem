@@ -9,6 +9,7 @@ const HERO_IMAGE_URL = "";
 const cultures = [
   { name: "Akan",            region: "Ghana",          language: "Twi",        accentColor: "#c8962e", slug: "/akan", live: true  },
   { name: "Jamaican",        region: "Caribbean",      language: "Patois",     accentColor: "#2a6b2a", slug: "",      live: false },
+  { name: "African American",region: "United States",  language: "Homegoing",  accentColor: "#7a3a1a", slug: "",      live: false },
   { name: "Yoruba",          region: "Nigeria",        language: "Yorùbá",     accentColor: "#6b4c9a", slug: "",      live: false },
   { name: "Irish",           region: "Ireland",        language: "Gaeilge",    accentColor: "#3a7a4a", slug: "",      live: false },
   { name: "Japanese",        region: "Japan",          language: "日本語",      accentColor: "#9a2a2a", slug: "",      live: false },
@@ -23,6 +24,7 @@ const phrases = [
   { text: "إِنَّا لِلَّهِ وَإِنَّا إِلَيْهِ رَاجِعُونَ",         lang: "Arabic"  },
   { text: "安らかに眠れ。あなたは忘れられない。",                  lang: "Japanese" },
   { text: "Wi nuh sey goodbye, wi sey likkle more.",  lang: "Jamaican Patois" },
+  { text: "We don't say goodbye — we say going home.", lang: "African American · Homegoing" },
   { text: "Ar dheis Dé go raibh a anam.",             lang: "Irish Gaelic" },
   { text: "Niech spoczywa w pokoju.",                 lang: "Polish" },
 ];
