@@ -265,6 +265,9 @@ export default function RsvpForm({ funeral, thanksgiving, reception, memorialSlu
           <label style={labelStyle} htmlFor="rsvp-message">Leave a memory or message (optional)</label>
           <textarea id="rsvp-message" placeholder="Share a memory, a word of comfort, or a tribute…"
             value={form.message} onChange={e => setForm(f => ({ ...f, message: e.target.value }))} />
+          <div style={{ fontSize: "0.75rem", color: "var(--text-faint)", marginTop: "0.4rem", lineHeight: 1.6 }}>
+            Messages may be displayed publicly on this memorial page as a tribute to the family, using your first initial and last initial only.
+          </div>
         </div>
 
         {error && (

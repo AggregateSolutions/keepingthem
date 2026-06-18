@@ -35,6 +35,10 @@ data/
 types/memorial.ts           MemorialConfig type
 ```
 
+## Git workflow
+
+Never run `git push`. Stage and commit only — the user pushes manually to control Netlify deploy frequency and preserve free-tier build minutes.
+
 ## Design rules
 
 - Background is always dark — never white as a page background

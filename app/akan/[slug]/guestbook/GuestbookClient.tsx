@@ -11,6 +11,12 @@ interface Tribute {
   created_at: string;
 }
 
+function toInitials(name: string): string {
+  const parts = name.trim().split(/\s+/);
+  if (parts.length === 1) return parts[0][0].toUpperCase() + ".";
+  return parts[0][0].toUpperCase() + ". " + parts[parts.length - 1][0].toUpperCase() + ".";
+}
+
 function TributeCard({ tribute }: { tribute: Tribute }) {
   const date = new Date(tribute.created_at).toLocaleDateString("en-US", {
     month: "long", day: "numeric", year: "numeric",
@@ -44,7 +50,7 @@ function TributeCard({ tribute }: { tribute: Tribute }) {
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", borderTop: "1px solid var(--border)", paddingTop: "0.6rem" }}>
         <div>
           <span style={{ fontSize: "0.9rem", color: "var(--cream)", fontWeight: 500 }}>
-            {tribute.name}
+            {toInitials(tribute.name)}
           </span>
           {tribute.relation && (
             <span style={{ fontSize: "0.8rem", color: "var(--text-muted)", marginLeft: "0.5rem" }}>
