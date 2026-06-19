@@ -206,11 +206,19 @@ function BiographyPage({ m }: { m: MemorialConfig }) {
           <GoldRule />
           <div style={{ marginTop: "0.2in" }}>
             {m.biography ? (
-              m.biography.split("\n\n").map((para, i) => (
-                <p key={i} style={{ fontFamily: "Garamond, Georgia, serif", fontSize: "0.82rem", color: DARK_TEXT, lineHeight: 1.85, marginBottom: "0.6rem", textAlign: "justify" }}>
-                  {para}
-                </p>
-              ))
+              m.biography.split("\n\n").map((para, i) => {
+                const isHeading = para.startsWith("**") && para.endsWith("**");
+                const text = isHeading ? para.slice(2, -2) : para;
+                return isHeading ? (
+                  <div key={i} style={{ fontFamily: "Garamond, Georgia, serif", fontSize: "0.88rem", fontWeight: 700, color: GOLD, marginBottom: "0.25rem", marginTop: "0.4rem", letterSpacing: "0.03em" }}>
+                    {text}
+                  </div>
+                ) : (
+                  <p key={i} style={{ fontFamily: "Garamond, Georgia, serif", fontSize: "0.82rem", color: DARK_TEXT, lineHeight: 1.85, marginBottom: "0.5rem", textAlign: "justify" }}>
+                    {para}
+                  </p>
+                );
+              })
             ) : (
               <p style={{ fontFamily: "Garamond, Georgia, serif", fontSize: "0.82rem", color: FAINT_TEXT, fontStyle: "italic", lineHeight: 1.85 }}>
                 [ Biography to be added ]
