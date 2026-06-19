@@ -11,8 +11,8 @@ const config: MemorialConfig = {
     { src: "/Papa_62.png", alt: "Memorial photo", primaryDuration: 8000 },
     // Add additional photos below — they will cycle every 4 seconds
       { src: "/Dad_Goldas_Final_Grad.jpeg", alt: "Memorial photo" },
-      { src: "/Dad_78th_birthday.png", alt: "Memorial photo" },
-      { src: "/Dad_Mom_1.png", alt: "Benjamin And His Boo" },
+     // { src: "/Dad_78th_birthday.png", alt: "Memorial photo" },
+     // { src: "/Dad_Mom_1.png", alt: "Benjamin And His Boo" },
     // { src: "/photo-5.jpg", alt: "Memorial photo" },
     // { src: "/photo-6.jpg", alt: "Memorial photo" },
   ],
@@ -87,19 +87,13 @@ const config: MemorialConfig = {
     {
       section: "A Life Well Lived",
       photos: [
-        { src: "/Dad_Headshot_1.png",         alt: "Portrait",              caption: "" },
-        { src: "/Dad_Headshot_2.png",         alt: "Portrait",              caption: "" },
-        { src: "/Dad_Old_School_1.png",       alt: "Earlier years",         caption: "" },
-        { src: "/Dad_78th_birthday.png",      alt: "78th Birthday",         caption: "Celebrating 78 years" },
-      ],
-    },
-    {
-      section: "Career & Service",
-      photos: [
+        { src: "/Dad_Headshot_1.png",            alt: "Portrait",              caption: "" },
+        { src: "/Dad_Headshot_2.png",            alt: "Portrait",              caption: "" },
         { src: "/Dad_Ghana_Aviation_1.png",      alt: "Ghana Aviation",       caption: "A life of service" },
         { src: "/Dad_Ghana_Aviation_2.png",      alt: "Ghana Aviation",       caption: "" },
         { src: "/Dad_Graduation_Aviation_1.png", alt: "Aviation Graduation",  caption: "" },
         { src: "/Dad_Ghana_Comittee_1.png",      alt: "Ghana Committee",      caption: "" },
+        { src: "/Dad_78th_birthday.png",         alt: "78th Birthday",         caption: "Celebrating 78 years" },
       ],
     },
     {
@@ -109,6 +103,7 @@ const config: MemorialConfig = {
         { src: "/Dad_Mom_MrT_1.png",          alt: "Family moment",          caption: "" },
         { src: "/Dad_Christmas_WintersChapel.png", alt: "Christmas",         caption: "" },
         { src: "/DAD_Muhammed_Others.png",    alt: "With friends",           caption: "" },
+        { src: "/DAD_AND_UNCLE_PETER.jpeg",        alt: "With Uncle Peter",  caption: "" },
       ],
     },
     {
@@ -117,7 +112,6 @@ const config: MemorialConfig = {
         { src: "/Kwayisi_Family_Pics_2018_17.jpg", alt: "Kwayisi Wall",       fit: "contain"},
         { src: "/DAD_Family_Nelsons_1.png",        alt: "The Nelson Gang",    fit: "contain",         caption: "" },
         { src: "/SISTER_BERNICE_RIP.jpg",          alt: "Bernice Gloria Aboagye RIP",   caption: "" },
-        { src: "/DAD_AND_UNCLE_PETER.jpeg",        alt: "With Uncle Peter",   caption: "" },
         { src: "/KWAYISI_SISTERS_GHANA.JPG",       alt: "Kwayisi Sisters",    caption: "" },
       ],
     },
