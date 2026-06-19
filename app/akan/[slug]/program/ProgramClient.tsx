@@ -310,7 +310,7 @@ function HymnPage({ hymn, num }: { hymn: { title: string; lyrics: string }; num:
   );
 }
 
-type PhotoEntry = { src: string; alt: string; caption?: string };
+type PhotoEntry = { src: string; alt: string; caption?: string; fit?: "cover" | "contain" };
 
 function PhotoPage({ section, photos, showSection }: { section: string; photos: PhotoEntry[]; showSection: boolean }) {
   return (
@@ -339,8 +339,8 @@ function PhotoPage({ section, photos, showSection }: { section: string; photos: 
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.15in" }}>
           {photos.map((p, i) => (
             <div key={i}>
-              <div style={{ position: "relative", height: "2.35in", border: `1px solid ${BORDER}` }}>
-                <Image src={p.src} alt={p.alt} fill style={{ objectFit: "cover", objectPosition: "center 15%" }} />
+              <div style={{ position: "relative", height: "2.35in", border: `1px solid ${BORDER}`, background: "#f0e6d0" }}>
+                <Image src={p.src} alt={p.alt} fill style={{ objectFit: p.fit ?? "cover", objectPosition: p.fit === "contain" ? "center center" : "center 15%" }} />
               </div>
               {p.caption && (
                 <div style={{ fontFamily: "Garamond, Georgia, serif", fontSize: "0.58rem", color: FAINT_TEXT, fontStyle: "italic", textAlign: "center", marginTop: "0.04in" }}>

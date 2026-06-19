@@ -51,6 +51,7 @@ export interface MemorialConfig {
       src: string;
       alt: string;
       caption?: string;
+      fit?: "cover" | "contain";
     }[];
   }[];
   program: {
