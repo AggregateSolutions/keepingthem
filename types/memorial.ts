@@ -46,9 +46,12 @@ export interface MemorialConfig {
     lyrics: string;
   }[];
   programPhotos?: {
-    src: string;
-    alt: string;
-    caption?: string;
+    section: string;
+    photos: {
+      src: string;
+      alt: string;
+      caption?: string;
+    }[];
   }[];
   program: {
     officiant: string;

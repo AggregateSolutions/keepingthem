@@ -310,23 +310,40 @@ function HymnPage({ hymn, num }: { hymn: { title: string; lyrics: string }; num:
   );
 }
 
-function PhotoPage({ photos }: { photos: NonNullable<MemorialConfig["programPhotos"]> }) {
+type PhotoEntry = { src: string; alt: string; caption?: string };
+
+function PhotoPage({ section, photos, showSection }: { section: string; photos: PhotoEntry[]; showSection: boolean }) {
   return (
     <PagePage>
       <KenteBorder height={8} />
-      <div style={{ padding: "0.25in 0.4in 0.2in", position: "relative" }}>
-        <div style={{
-          display: "grid",
-          gridTemplateColumns: "1fr 1fr",
-          gap: "0.18in",
-        }}>
+      <div style={{ padding: "0.2in 0.4in 0.15in", position: "relative" }}>
+        {showSection && (
+          <>
+            <div style={{ textAlign: "center", margin: "0.05in 0 0" }}>
+              <div style={{ fontFamily: "Garamond, Georgia, serif", fontSize: "0.65rem", color: FAINT_TEXT, letterSpacing: "0.14em", textTransform: "uppercase", marginBottom: "0.05in" }}>
+                {section}
+              </div>
+            </div>
+            <GoldRule />
+            <FloralDivider />
+          </>
+        )}
+        {!showSection && (
+          <div style={{ textAlign: "center", marginBottom: "0.1in" }}>
+            <div style={{ fontFamily: "Garamond, Georgia, serif", fontSize: "0.6rem", color: FAINT_TEXT, letterSpacing: "0.1em", fontStyle: "italic" }}>
+              {section} (continued)
+            </div>
+            <GoldRule />
+          </div>
+        )}
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.15in" }}>
           {photos.map((p, i) => (
             <div key={i}>
-              <div style={{ position: "relative", height: "2.4in", border: `1px solid ${BORDER}` }}>
+              <div style={{ position: "relative", height: "2.35in", border: `1px solid ${BORDER}` }}>
                 <Image src={p.src} alt={p.alt} fill style={{ objectFit: "cover", objectPosition: "center 15%" }} />
               </div>
               {p.caption && (
-                <div style={{ fontFamily: "Garamond, Georgia, serif", fontSize: "0.6rem", color: FAINT_TEXT, fontStyle: "italic", textAlign: "center", marginTop: "0.05in" }}>
+                <div style={{ fontFamily: "Garamond, Georgia, serif", fontSize: "0.58rem", color: FAINT_TEXT, fontStyle: "italic", textAlign: "center", marginTop: "0.04in" }}>
                   {p.caption}
                 </div>
               )}
@@ -456,7 +473,14 @@ function chunkArray<T>(arr: T[], size: number): T[][] {
 
 /* ── Main component ─────────────────────────────────────────── */
 export default function ProgramClient({ m }: { m: MemorialConfig }) {
-  const photoChunks = chunkArray(m.programPhotos ?? [], 4);
+  // Flatten sections into pages of 4, tracking section label and whether it's the first page of that section
+  const photoPages: { section: string; photos: PhotoEntry[]; showSection: boolean }[] = [];
+  for (const group of m.programPhotos ?? []) {
+    const chunks = chunkArray(group.photos, 4);
+    chunks.forEach((chunk, i) => {
+      photoPages.push({ section: group.section, photos: chunk, showSection: i === 0 });
+    });
+  }
 
   return (
     <>
@@ -503,8 +527,8 @@ export default function ProgramClient({ m }: { m: MemorialConfig }) {
           {m.hymns?.map((hymn, i) => (
             <HymnPage key={i} hymn={hymn} num={i + 1} />
           ))}
-          {photoChunks.map((chunk, i) => (
-            <PhotoPage key={i} photos={chunk} />
+          {photoPages.map((page, i) => (
+            <PhotoPage key={i} section={page.section} photos={page.photos} showSection={page.showSection} />
           ))}
           <AcknowledgementsPage m={m} />
           <BackCoverPage m={m} />

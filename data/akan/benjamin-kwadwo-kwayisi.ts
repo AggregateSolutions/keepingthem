@@ -84,14 +84,24 @@ const config: MemorialConfig = {
   dressCode: "black-and-white",
 
   programPhotos: [
-    { src: "/Dad_Mom_1.png",              alt: "Benjamin and His Boo",         caption: "Together always" },
-    { src: "/Dad_78th_birthday.png",      alt: "78th Birthday",                caption: "Celebrating 78 years" },
-    { src: "/Papa_62.png",                alt: "Papa at 62",                   caption: "" },
-    { src: "/Dad_Headshot_1.png",         alt: "Portrait",                     caption: "" },
-    { src: "/Dad_Ghana_Aviation_1.png",   alt: "Ghana Aviation",               caption: "A life of service" },
-    { src: "/Dad_Graduation_Aviation_1.png", alt: "Aviation Graduation",       caption: "" },
-    { src: "/DAD_Family_Nelsons_1.png",   alt: "Family",                       caption: "Family" },
-    { src: "/Dad_Old_School_1.png",       alt: "Earlier years",                caption: "" },  
+    {
+      section: "A Life Well Lived",
+      photos: [
+        { src: "/Dad_Mom_1.png",              alt: "Benjamin and His Boo",         caption: "Together always" },
+        { src: "/Dad_78th_birthday.png",      alt: "78th Birthday",                caption: "Celebrating 78 years" },
+        { src: "/Papa_62.png",                alt: "Papa at 62",                   caption: "" },
+        { src: "/Dad_Headshot_1.png",         alt: "Portrait",                     caption: "" },
+      ],
+    },
+    {
+      section: "Career & Service",
+      photos: [
+        { src: "/Dad_Ghana_Aviation_1.png",      alt: "Ghana Aviation",        caption: "A life of service" },
+        { src: "/Dad_Graduation_Aviation_1.png", alt: "Aviation Graduation",   caption: "" },
+        { src: "/DAD_Family_Nelsons_1.png",      alt: "Family",                caption: "Family" },
+        { src: "/Dad_Old_School_1.png",          alt: "Earlier years",         caption: "" },
+      ],
+    },
   ],
 
   biography: `**Early Life, Education, and Early Aviation Career:**
