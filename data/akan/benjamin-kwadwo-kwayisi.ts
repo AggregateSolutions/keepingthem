@@ -87,19 +87,37 @@ const config: MemorialConfig = {
     {
       section: "A Life Well Lived",
       photos: [
-        { src: "/Dad_Mom_1.png",              alt: "Benjamin and His Boo",         caption: "Together always" },
-        { src: "/Dad_78th_birthday.png",      alt: "78th Birthday",                caption: "Celebrating 78 years" },
-        { src: "/Papa_62.png",                alt: "Papa at 62",                   caption: "" },
-        { src: "/Dad_Headshot_1.png",         alt: "Portrait",                     caption: "" },
+        { src: "/Dad_Headshot_1.png",         alt: "Portrait",              caption: "" },
+        { src: "/Dad_Headshot_2.png",         alt: "Portrait",              caption: "" },
+        { src: "/Dad_Old_School_1.png",       alt: "Earlier years",         caption: "" },
+        { src: "/Dad_78th_birthday.png",      alt: "78th Birthday",         caption: "Celebrating 78 years" },
       ],
     },
     {
       section: "Career & Service",
       photos: [
-        { src: "/Dad_Ghana_Aviation_1.png",      alt: "Ghana Aviation",        caption: "A life of service" },
-        { src: "/Dad_Graduation_Aviation_1.png", alt: "Aviation Graduation",   caption: "" },
-        { src: "/DAD_Family_Nelsons_1.png",      alt: "Family",                caption: "Family" },
-        { src: "/Dad_Old_School_1.png",          alt: "Earlier years",         caption: "" },
+        { src: "/Dad_Ghana_Aviation_1.png",      alt: "Ghana Aviation",       caption: "A life of service" },
+        { src: "/Dad_Ghana_Aviation_2.png",      alt: "Ghana Aviation",       caption: "" },
+        { src: "/Dad_Graduation_Aviation_1.png", alt: "Aviation Graduation",  caption: "" },
+        { src: "/Dad_Ghana_Comittee_1.png",      alt: "Ghana Committee",      caption: "" },
+      ],
+    },
+    {
+      section: "Cherished Memories",
+      photos: [
+        { src: "/Dad_Mom_1.png",              alt: "Benjamin and His Boo",   caption: "Together always" },
+        { src: "/Dad_Mom_MrT_1.png",          alt: "Family moment",          caption: "" },
+        { src: "/Dad_Christmas_WintersChapel.png", alt: "Christmas",         caption: "" },
+        { src: "/DAD_Muhammed_Others.png",    alt: "With friends",           caption: "" },
+      ],
+    },
+    {
+      section: "Family",
+      photos: [
+        { src: "/DAD_Family_Nelsons_1.png",       alt: "Family",             caption: "" },
+        { src: "/Dad_Uncle_Peter_FrontStep.png",  alt: "With Uncle Peter",   caption: "" },
+        { src: "/DAD_AND_UNCLE_PETER.jpeg",       alt: "With Uncle Peter",   caption: "" },
+        { src: "/KWAYISI_SISTERS_GHANA.JPG",      alt: "Kwayisi Sisters",    caption: "" },
       ],
     },
   ],
