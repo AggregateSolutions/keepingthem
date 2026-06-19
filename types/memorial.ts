@@ -40,6 +40,16 @@ export interface MemorialConfig {
     url: string;
     address?: string;
   }[];
+  biography?: string;
+  hymns?: {
+    title: string;
+    lyrics: string;
+  }[];
+  programPhotos?: {
+    src: string;
+    alt: string;
+    caption?: string;
+  }[];
   program: {
     officiant: string;
     items: { title: string; sub: string }[];
