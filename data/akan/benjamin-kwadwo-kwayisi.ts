@@ -114,10 +114,11 @@ const config: MemorialConfig = {
     {
       section: "Family",
       photos: [
-        { src: "/DAD_Family_Nelsons_1.png",       alt: "Family",             caption: "" },
-        { src: "/Dad_Uncle_Peter_FrontStep.png",  alt: "With Uncle Peter",   caption: "" },
-        { src: "/DAD_AND_UNCLE_PETER.jpeg",       alt: "With Uncle Peter",   caption: "" },
-        { src: "/KWAYISI_SISTERS_GHANA.JPG",      alt: "Kwayisi Sisters",    caption: "" },
+        { src: "/Kwayisi_Family_Pics_2018_17.jpg", alt: "Kwayisi Wall",       fit: "contain"},
+        { src: "/DAD_Family_Nelsons_1.png",        alt: "The Nelson Gang",    fit: "contain",         caption: "" },
+        { src: "/SISTER_BERNICE_RIP.jpg",          alt: "Bernice Gloria Aboagye RIP",   caption: "" },
+        { src: "/DAD_AND_UNCLE_PETER.jpeg",        alt: "With Uncle Peter",   caption: "" },
+        { src: "/KWAYISI_SISTERS_GHANA.JPG",       alt: "Kwayisi Sisters",    caption: "" },
       ],
     },
   ],
