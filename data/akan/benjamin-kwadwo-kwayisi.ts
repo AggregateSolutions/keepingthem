@@ -11,7 +11,7 @@ const config: MemorialConfig = {
     { src: "/Papa_62.png", alt: "Memorial photo", primaryDuration: 8000 },
     // Add additional photos below — they will cycle every 4 seconds
       { src: "/Dad_Goldas_Final_Grad.jpeg", alt: "Memorial photo" },
-      { src: "/Dad_78th_birthday.png", alt: "Memorial photo" },
+      //{ src: "/Dad_78th_birthday.png", alt: "Memorial photo" },
      // { src: "/Dad_Mom_1.png", alt: "Benjamin And His Boo" },
     // { src: "/photo-5.jpg", alt: "Memorial photo" },
     // { src: "/photo-6.jpg", alt: "Memorial photo" },
@@ -103,12 +103,12 @@ const config: MemorialConfig = {
       photos: [
         { src: "/Dad_Mom_1.png",                   alt: "Benjamin and His Boo",   caption: "Together always" },
         { src: "/DAD_BABY_GOLDA_1.jpeg",           alt: "Dadys Girl",             caption: "Dad and Yaa" },
-        { src: "/Kwayisi_Family_Pics_2018_40.jpg", alt: "",                       caption: "A Daddy's Girl!" },
+        { src: "/Kwayisi_Family_Pics_2018_40.jpg", alt: "She Loveves Her DAD!",                       caption: "A Daddy's Girl!" },
         { src: "/Dad_Mom_MrT_1.png",               alt: "Family moment",          caption: "Celebrating Extended Family" },
         { src: "/Dad_Christmas_WintersChapel.png", alt: "Christmas",              caption: "Tree Skills" },
         { src: "/DAD_AND_UNCLE_PETER.jpeg",        alt: "With Uncle Peter",       caption: "Good Friends" },
         { src: "/Dad_78th_birthday.png",           alt: "78th Birthday",          caption: "Celebrating 78 years" },
-        { src: "/DAD_BLOWING_CANDLES.jpeg",        alt: "",                       caption: "Indeed A Blessing"},
+        { src: "/DAD_BLOWING_CANDLES.jpeg",        alt: "A Blessing",                       caption: "Indeed A Blessing"},
       ],
     },
     {
