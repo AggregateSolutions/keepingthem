@@ -72,6 +72,71 @@ function FloralDivider() {
   );
 }
 
+/* Repeating Akan geometric side border — diamond/chevron motif */
+function SideBorder({ side }: { side: "left" | "right" }) {
+  const flip = side === "right";
+  return (
+    <div style={{
+      position: "absolute",
+      top: 14,
+      bottom: 14,
+      [side]: 6,
+      width: 18,
+      overflow: "hidden",
+      zIndex: 1,
+      pointerEvents: "none",
+      opacity: 0.55,
+    }}>
+      <svg width="18" height="800" viewBox="0 0 18 800" fill="none" style={{ transform: flip ? "scaleX(-1)" : undefined }}>
+        {/* Repeating diamond + chevron unit, 24px tall */}
+        {Array.from({ length: 34 }).map((_, i) => {
+          const y = i * 24;
+          return (
+            <g key={i}>
+              {/* Diamond */}
+              <polygon points={`9,${y+2} 16,${y+10} 9,${y+18} 2,${y+10}`} fill={GOLD} opacity="0.35" />
+              <polygon points={`9,${y+5} 13,${y+10} 9,${y+15} 5,${y+10}`} fill={GOLD} opacity="0.6" />
+              {/* Chevron below */}
+              <polyline points={`2,${y+20} 9,${y+24} 16,${y+20}`} stroke={GOLD} strokeWidth="1" fill="none" opacity="0.4" />
+            </g>
+          );
+        })}
+        {/* Vertical spine */}
+        <line x1="9" y1="0" x2="9" y2="800" stroke={GOLD} strokeWidth="0.5" opacity="0.25" />
+      </svg>
+    </div>
+  );
+}
+
+/* Row of small Adinkra glyphs as page footer decoration */
+function AdinkraFooterStrip() {
+  return (
+    <div style={{ position: "absolute", bottom: 18, left: 0, right: 0, display: "flex", justifyContent: "center", gap: "0.35in", pointerEvents: "none", zIndex: 1, opacity: 0.18 }}>
+      {/* Gye Nyame simplified */}
+      {[0,1,2,3,4].map((i) => (
+        <svg key={i} width="14" height="14" viewBox="0 0 80 80" fill={GOLD}>
+          <path fillRule="evenodd" d="M40 4C46.6 4 52 9.4 52 16C52 22.6 46.6 28 40 28C33.4 28 28 22.6 28 16C28 9.4 33.4 4 40 4ZM40 10C36.7 10 34 12.7 34 16C34 19.3 36.7 22 40 22C43.3 22 46 19.3 46 16C46 12.7 43.3 10 40 10Z"/>
+          <path fillRule="evenodd" d="M40 52C46.6 52 52 57.4 52 64C52 70.6 46.6 76 40 76C33.4 76 28 70.6 28 64C28 57.4 33.4 52 40 52ZM40 58C36.7 58 34 60.7 34 64C34 67.3 36.7 70 40 70C43.3 70 46 67.3 46 64C46 60.7 43.3 58 40 58Z"/>
+          <path d="M40 25C40 25 33 24 26 28C18 33 12 41 14 50C16 58 24 63 32 60C38 58 41 52 39 47C37 42 32 40 28 42C25 44 25 48 27 50C29 52 33 52 35 50C36 49 36 47 35 46C34 45 33 46 33 47C33 48 34 48 34 47C34 46 33 45 32 46C31 47 31 49 33 50C35 51 38 50 39 47C40 44 39 40 36 37C33 34 29 33 26 36C22 39 21 45 24 50C27 56 34 59 40 57C40 55 40 25 40 25Z"/>
+          <path d="M40 25C40 25 47 24 54 28C62 33 68 41 66 50C64 58 56 63 48 60C42 58 39 52 41 47C43 42 48 40 52 42C55 44 55 48 53 50C51 52 47 52 45 50C44 49 44 47 45 46C46 45 47 46 47 47C47 48 46 48 46 47C46 46 47 45 48 46C49 47 49 49 47 50C45 51 42 50 41 47C40 44 41 40 44 37C47 34 51 33 54 36C58 39 59 45 56 50C53 56 46 59 40 57C40 55 40 25 40 25Z"/>
+        </svg>
+      ))}
+    </div>
+  );
+}
+
+/* Top corner ornaments — all four corners */
+function PageCorners() {
+  return (
+    <>
+      <div style={{ position: "absolute", top: 14, left: 14, zIndex: 1, pointerEvents: "none" }}><CornerFlower size={38} /></div>
+      <div style={{ position: "absolute", top: 14, right: 14, zIndex: 1, pointerEvents: "none" }}><CornerFlower size={38} flip /></div>
+      <div style={{ position: "absolute", bottom: 14, left: 14, zIndex: 1, pointerEvents: "none", transform: "scaleY(-1)" }}><CornerFlower size={38} /></div>
+      <div style={{ position: "absolute", bottom: 14, right: 14, zIndex: 1, pointerEvents: "none", transform: "scale(-1, -1)" }}><CornerFlower size={38} /></div>
+    </>
+  );
+}
+
 function AdinkraWatermark() {
   return (
     <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", pointerEvents: "none", zIndex: 0 }}>
@@ -113,8 +178,7 @@ function CoverPage({ m }: { m: MemorialConfig }) {
   const photo = m.photos[0];
   return (
     <PagePage>
-      <KenteBorder height={12} />
-      <div style={{ padding: "0.5in 0.5in 0.35in", display: "flex", flexDirection: "column", alignItems: "center", gap: "0.2rem", position: "relative" }}>
+      <div style={{ padding: "0.35in 0.5in 0.35in", display: "flex", flexDirection: "column", alignItems: "center", gap: "0.2rem", position: "relative" }}>
         {/* Corner flowers */}
         <div style={{ position: "absolute", top: "0.5in", left: "0.4in" }}><CornerFlower size={52} /></div>
         <div style={{ position: "absolute", top: "0.5in", right: "0.4in" }}><CornerFlower size={52} flip /></div>
@@ -164,7 +228,6 @@ function CoverPage({ m }: { m: MemorialConfig }) {
           <CornerFlower size={40} flip />
         </div>
       </div>
-      <KenteBorder height={12} />
     </PagePage>
   );
 }
@@ -173,8 +236,7 @@ function TributePage({ m }: { m: MemorialConfig }) {
   const photo = m.photos[1] ?? m.photos[0];
   return (
     <PagePage>
-      <KenteBorder height={8} />
-      <div style={{ padding: "0.4in 0.5in 0.2in", position: "relative" }}>
+      <div style={{ padding: "0.35in 0.5in 0.2in", position: "relative" }}>
         <AdinkraWatermark />
         <div style={{ position: "relative", zIndex: 1 }}>
           <SectionHeading>In Remembrance</SectionHeading>
@@ -190,7 +252,6 @@ function TributePage({ m }: { m: MemorialConfig }) {
           </p>
         </div>
       </div>
-      <KenteBorder height={8} />
     </PagePage>
   );
 }
@@ -198,8 +259,7 @@ function TributePage({ m }: { m: MemorialConfig }) {
 function BiographyPage({ m }: { m: MemorialConfig }) {
   return (
     <PagePage>
-      <KenteBorder height={8} />
-      <div style={{ padding: "0.4in 0.5in", position: "relative" }}>
+      <div style={{ padding: "0.35in 0.5in", position: "relative" }}>
         <AdinkraWatermark />
         <div style={{ position: "relative", zIndex: 1 }}>
           <SectionHeading>Biography</SectionHeading>
@@ -227,66 +287,94 @@ function BiographyPage({ m }: { m: MemorialConfig }) {
           </div>
         </div>
       </div>
-      <KenteBorder height={8} />
     </PagePage>
   );
 }
 
-function OrderOfServicePage({ m }: { m: MemorialConfig }) {
+const ORDER_ITEMS_PER_PAGE = 12;
+
+function OrderOfServiceItemList({ items, startIndex, totalItems }: { items: { title: string; sub: string }[]; startIndex: number; totalItems: number }) {
   return (
-    <PagePage>
-      <KenteBorder height={8} />
-      <div style={{ padding: "0.4in 0.45in", position: "relative" }}>
-        <AdinkraWatermark />
-        <div style={{ position: "relative", zIndex: 1 }}>
-          <SectionHeading>Order of Service</SectionHeading>
-          <div style={{ textAlign: "center", marginBottom: "0.15in" }}>
-            <div style={{ fontSize: "0.65rem", color: FAINT_TEXT, fontFamily: "Garamond, Georgia, serif", fontStyle: "italic" }}>
-              {m.funeralService.date} · {m.funeralService.time}
-            </div>
-            <div style={{ fontSize: "0.62rem", color: FAINT_TEXT, marginTop: "0.05rem" }}>
-              Officiant: {m.program.officiant}
-            </div>
-          </div>
-          <GoldRule />
-          <div style={{ marginTop: "0.15in" }}>
-            {m.program.items.map((item, i) => (
-              <div key={i} style={{
-                display: "flex",
-                alignItems: "flex-start",
-                gap: "0.5rem",
-                padding: "0.18rem 0",
-                borderBottom: i < m.program.items.length - 1 ? `1px solid #e8d8b8` : "none",
-              }}>
-                <span style={{ fontFamily: "Garamond, Georgia, serif", fontSize: "0.7rem", color: GOLD, minWidth: "1.2rem", paddingTop: 1, fontWeight: 600 }}>
-                  {String(i + 1).padStart(2, "0")}
+    <div style={{ marginTop: "0.15in" }}>
+      {items.map((item, i) => {
+        const globalIndex = startIndex + i;
+        return (
+          <div key={i} style={{
+            display: "flex",
+            alignItems: "flex-start",
+            gap: "0.5rem",
+            padding: "0.2rem 0",
+            borderBottom: globalIndex < totalItems - 1 ? `1px solid #e8d8b8` : "none",
+          }}>
+            <span style={{ fontFamily: "Garamond, Georgia, serif", fontSize: "0.7rem", color: GOLD, minWidth: "1.2rem", paddingTop: 1, fontWeight: 600 }}>
+              {String(globalIndex + 1).padStart(2, "0")}
+            </span>
+            <div style={{ flex: 1 }}>
+              <span style={{ fontFamily: "Garamond, Georgia, serif", fontSize: "0.82rem", color: DARK_TEXT, fontWeight: 600 }}>
+                {item.title}
+              </span>
+              {item.sub && (
+                <span style={{ fontFamily: "Garamond, Georgia, serif", fontSize: "0.74rem", color: MID_TEXT, marginLeft: "0.4rem", fontStyle: "italic" }}>
+                  {item.sub}
                 </span>
-                <div style={{ flex: 1 }}>
-                  <span style={{ fontFamily: "Garamond, Georgia, serif", fontSize: "0.8rem", color: DARK_TEXT, fontWeight: 600 }}>
-                    {item.title}
-                  </span>
-                  {item.sub && (
-                    <span style={{ fontFamily: "Garamond, Georgia, serif", fontSize: "0.72rem", color: MID_TEXT, marginLeft: "0.4rem", fontStyle: "italic" }}>
-                      {item.sub}
-                    </span>
-                  )}
-                </div>
-              </div>
-            ))}
+              )}
+            </div>
           </div>
-          <FloralDivider />
-        </div>
-      </div>
-      <KenteBorder height={8} />
-    </PagePage>
+        );
+      })}
+    </div>
+  );
+}
+
+function OrderOfServicePage({ m }: { m: MemorialConfig }) {
+  const pages = chunkArray(m.program.items, ORDER_ITEMS_PER_PAGE);
+  const total = m.program.items.length;
+
+  return (
+    <>
+      {pages.map((pageItems, pageIndex) => (
+        <PagePage key={pageIndex}>
+          <div style={{ padding: "0.35in 0.45in", position: "relative" }}>
+            <AdinkraWatermark />
+            <div style={{ position: "relative", zIndex: 1 }}>
+              {pageIndex === 0 ? (
+                <>
+                  <SectionHeading>Order of Service</SectionHeading>
+                  <div style={{ textAlign: "center", marginBottom: "0.15in" }}>
+                    <div style={{ fontSize: "0.65rem", color: FAINT_TEXT, fontFamily: "Garamond, Georgia, serif", fontStyle: "italic" }}>
+                      {m.funeralService.date} · {m.funeralService.time}
+                    </div>
+                    <div style={{ fontSize: "0.62rem", color: FAINT_TEXT, marginTop: "0.05rem" }}>
+                      Officiant: {m.program.officiant}
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <div style={{ textAlign: "center", marginBottom: "0.1in" }}>
+                  <div style={{ fontFamily: "Garamond, Georgia, serif", fontSize: "0.6rem", color: FAINT_TEXT, letterSpacing: "0.1em", fontStyle: "italic" }}>
+                    Order of Service (continued)
+                  </div>
+                </div>
+              )}
+              <GoldRule />
+              <OrderOfServiceItemList
+                items={pageItems}
+                startIndex={pageIndex * ORDER_ITEMS_PER_PAGE}
+                totalItems={total}
+              />
+              <FloralDivider />
+            </div>
+          </div>
+        </PagePage>
+      ))}
+    </>
   );
 }
 
 function HymnPage({ hymn, num }: { hymn: { title: string; lyrics: string }; num: number }) {
   return (
     <PagePage>
-      <KenteBorder height={8} />
-      <div style={{ padding: "0.4in 0.5in", position: "relative" }}>
+      <div style={{ padding: "0.35in 0.5in", position: "relative" }}>
         <AdinkraWatermark />
         <div style={{ position: "relative", zIndex: 1 }}>
           <div style={{ textAlign: "center", marginBottom: "0.05in" }}>
@@ -305,7 +393,6 @@ function HymnPage({ hymn, num }: { hymn: { title: string; lyrics: string }; num:
           </div>
         </div>
       </div>
-      <KenteBorder height={8} />
     </PagePage>
   );
 }
@@ -315,7 +402,6 @@ type PhotoEntry = { src: string; alt: string; caption?: string; fit?: "cover" | 
 function PhotoPage({ section, photos, showSection }: { section: string; photos: PhotoEntry[]; showSection: boolean }) {
   return (
     <PagePage>
-      <KenteBorder height={8} />
       <div style={{ padding: "0.2in 0.4in 0.15in", position: "relative" }}>
         {showSection && (
           <>
@@ -352,7 +438,6 @@ function PhotoPage({ section, photos, showSection }: { section: string; photos: 
         </div>
         <FloralDivider />
       </div>
-      <KenteBorder height={8} />
     </PagePage>
   );
 }
@@ -360,8 +445,7 @@ function PhotoPage({ section, photos, showSection }: { section: string; photos: 
 function AcknowledgementsPage({ m }: { m: MemorialConfig }) {
   return (
     <PagePage>
-      <KenteBorder height={8} />
-      <div style={{ padding: "0.4in 0.5in", position: "relative" }}>
+      <div style={{ padding: "0.35in 0.5in", position: "relative" }}>
         <AdinkraWatermark />
         <div style={{ position: "relative", zIndex: 1 }}>
           <SectionHeading>Acknowledgements</SectionHeading>
@@ -375,7 +459,6 @@ function AcknowledgementsPage({ m }: { m: MemorialConfig }) {
           <FloralDivider />
         </div>
       </div>
-      <KenteBorder height={8} />
     </PagePage>
   );
 }
@@ -384,8 +467,7 @@ function BackCoverPage({ m }: { m: MemorialConfig }) {
   const lastPhoto = m.photos[m.photos.length - 1];
   return (
     <PagePage>
-      <KenteBorder height={12} />
-      <div style={{ padding: "0.4in 0.5in", display: "flex", flexDirection: "column", alignItems: "center", gap: "0.15rem", position: "relative" }}>
+      <div style={{ padding: "0.35in 0.5in", display: "flex", flexDirection: "column", alignItems: "center", gap: "0.15rem", position: "relative" }}>
         <div style={{ position: "absolute", top: "0.4in", left: "0.4in" }}><CornerFlower size={52} /></div>
         <div style={{ position: "absolute", top: "0.4in", right: "0.4in" }}><CornerFlower size={52} flip /></div>
         <div style={{ position: "relative", zIndex: 1, width: "100%", textAlign: "center" }}>
@@ -419,7 +501,6 @@ function BackCoverPage({ m }: { m: MemorialConfig }) {
           </div>
         </div>
       </div>
-      <KenteBorder height={12} />
     </PagePage>
   );
 }
@@ -431,7 +512,7 @@ function PagePage({ children }: { children: React.ReactNode }) {
     <div className="program-page" style={{
       background: PAGE_BG,
       width: "5.5in",
-      minHeight: "8.5in",
+      height: "8.5in",
       margin: "0 auto",
       boxSizing: "border-box",
       position: "relative",
@@ -439,8 +520,22 @@ function PagePage({ children }: { children: React.ReactNode }) {
       pageBreakAfter: "always",
       overflow: "hidden",
     }}>
+      {/* Kente stripes pinned to top and bottom */}
+      <div style={{ position: "absolute", top: 0, left: 0, right: 0, zIndex: 3, pointerEvents: "none" }}>
+        <KenteBorder height={8} />
+      </div>
+      <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, zIndex: 3, pointerEvents: "none" }}>
+        <KenteBorder height={8} />
+      </div>
       {/* Inner gold line */}
       <div style={{ position: "absolute", inset: 7, border: `0.5px solid ${GOLD}`, opacity: 0.3, pointerEvents: "none", zIndex: 2 }} />
+      {/* Side borders */}
+      <SideBorder side="left" />
+      <SideBorder side="right" />
+      {/* Four corner flowers */}
+      <PageCorners />
+      {/* Adinkra footer strip */}
+      <AdinkraFooterStrip />
       {children}
     </div>
   );
@@ -448,18 +543,24 @@ function PagePage({ children }: { children: React.ReactNode }) {
 
 function SectionHeading({ children }: { children: React.ReactNode }) {
   return (
-    <h2 style={{
-      fontFamily: "Garamond, Georgia, serif",
-      fontSize: "1.1rem",
-      fontWeight: 400,
-      color: GOLD,
-      textAlign: "center",
-      letterSpacing: "0.08em",
-      margin: "0 0 0.1in",
-      textTransform: "uppercase",
+    <div style={{ textAlign: "center", margin: "0 0 0.1in", position: "relative" }}>
+      <div style={{ position: "absolute", top: "50%", left: 0, right: 0, height: 1, background: `linear-gradient(to right, transparent, ${GOLD}, transparent)`, opacity: 0.4 }} />
+      <h2 style={{
+        display: "inline-block",
+        position: "relative",
+        background: PAGE_BG,
+        padding: "0 0.15in",
+        fontFamily: "Garamond, Georgia, serif",
+        fontSize: "1.05rem",
+        fontWeight: 400,
+        color: GOLD,
+        letterSpacing: "0.1em",
+        margin: 0,
+        textTransform: "uppercase",
     }}>
-      {children}
-    </h2>
+        {children}
+      </h2>
+    </div>
   );
 }
 
