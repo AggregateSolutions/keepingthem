@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import type { MemorialConfig } from "@/types/memorial";
 import Image from "next/image";
 
@@ -572,8 +573,35 @@ function chunkArray<T>(arr: T[], size: number): T[][] {
   return chunks;
 }
 
+const PAGE_WIDTH_IN = 5.5;
+const PAGE_HEIGHT_IN = 8.5;
+
 /* ── Main component ─────────────────────────────────────────── */
 export default function ProgramClient({ m }: { m: MemorialConfig }) {
+  useEffect(() => {
+    function scalePages() {
+      const pxPerIn = 96;
+      const pageWidthPx = PAGE_WIDTH_IN * pxPerIn;
+      const pageHeightPx = PAGE_HEIGHT_IN * pxPerIn;
+      const available = window.innerWidth - 32; // 1rem padding each side
+      if (available < pageWidthPx) {
+        const scale = available / pageWidthPx;
+        const scaledHeight = pageHeightPx * scale;
+        document.querySelectorAll<HTMLElement>(".program-page").forEach((el) => {
+          el.style.transform = `scale(${scale})`;
+          el.style.marginBottom = `${scaledHeight - pageHeightPx}px`;
+        });
+      } else {
+        document.querySelectorAll<HTMLElement>(".program-page").forEach((el) => {
+          el.style.transform = "";
+          el.style.marginBottom = "";
+        });
+      }
+    }
+    scalePages();
+    window.addEventListener("resize", scalePages);
+    return () => window.removeEventListener("resize", scalePages);
+  }, []);
   // Flatten sections into pages of 4, tracking section label and whether it's the first page of that section
   const photoPages: { section: string; photos: PhotoEntry[]; showSection: boolean }[] = [];
   for (const group of m.programPhotos ?? []) {
@@ -641,6 +669,9 @@ export default function ProgramClient({ m }: { m: MemorialConfig }) {
       </div>
 
       <style>{`
+        .program-page {
+          transform-origin: top center;
+        }
         @media print {
           body { margin: 0; background: white; }
           .program-screen-wrapper {
@@ -656,6 +687,7 @@ export default function ProgramClient({ m }: { m: MemorialConfig }) {
             border: none !important;
             width: 5.5in !important;
             min-height: 8.5in !important;
+            transform: none !important;
           }
           * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
         }
