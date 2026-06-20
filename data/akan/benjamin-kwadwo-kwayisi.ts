@@ -11,10 +11,11 @@ const config: MemorialConfig = {
     { src: "/Papa_62.png", alt: "Memorial photo", primaryDuration: 8000 },
     // Add additional photos below — they will cycle every 4 seconds
       { src: "/Dad_Goldas_Final_Grad.jpeg", alt: "Memorial photo" },
-     // { src: "/Dad_78th_birthday.png", alt: "Memorial photo" },
+      { src: "/Dad_78th_birthday.png", alt: "Memorial photo" },
      // { src: "/Dad_Mom_1.png", alt: "Benjamin And His Boo" },
     // { src: "/photo-5.jpg", alt: "Memorial photo" },
     // { src: "/photo-6.jpg", alt: "Memorial photo" },
+    { src: "/DAD_ENJOYING_A_LAUGH.jpeg", alt: "Memorial photo" },
   ],
   viewing: {
     date: "Saturday, June 27th, 2026",
@@ -87,23 +88,27 @@ const config: MemorialConfig = {
     {
       section: "A Life Well Lived",
       photos: [
-        { src: "/Dad_Headshot_1.png",            alt: "Portrait",              caption: "" },
-        { src: "/Dad_Headshot_2.png",            alt: "Portrait",              caption: "" },
-        { src: "/Dad_Ghana_Aviation_1.png",      alt: "Ghana Aviation",       caption: "A life of service" },
-        { src: "/Dad_Ghana_Aviation_2.png",      alt: "Ghana Aviation",       caption: "" },
-        { src: "/Dad_Graduation_Aviation_1.png", alt: "Aviation Graduation",  caption: "" },
-        { src: "/Dad_Ghana_Comittee_1.png",      alt: "Ghana Committee",      caption: "" },
-        { src: "/Dad_78th_birthday.png",         alt: "78th Birthday",         caption: "Celebrating 78 years" },
+        { src: "/Dad_Headshot_1.png",              alt: "Portrait",              caption: "" },
+        { src: "/Kwayisi_Family_Pics_2018_44.jpg", alt: "Kwayisi #1"},
+        { src: "/Dad_Headshot_2.png",              alt: "Portrait",              caption: "" },
+        { src: "/Dad_Ghana_Aviation_1.png",        alt: "Ghana Aviation",       caption: "A life of service" },
+        { src: "/Dad_Ghana_Aviation_2.png",        alt: "Ghana Aviation",       caption: "Scottland" },
+        { src: "/Dad_Graduation_Aviation_1.png",   alt: "Aviation Graduation",  caption: "Master of Aviation  " },
+        { src: "/Dad_Ghana_Comittee_1.png",        alt: "Ghana Committee",      caption: "" },
+        { src: "/DAD_Muhammed_Others.png",         alt: "With friends",         caption: "World Vision Crew",   fit: "contain" },
       ],
     },
     {
       section: "Cherished Memories",
       photos: [
-        { src: "/Dad_Mom_1.png",              alt: "Benjamin and His Boo",   caption: "Together always" },
-        { src: "/Dad_Mom_MrT_1.png",          alt: "Family moment",          caption: "" },
-        { src: "/Dad_Christmas_WintersChapel.png", alt: "Christmas",         caption: "" },
-        { src: "/DAD_Muhammed_Others.png",    alt: "With friends",           caption: "" },
-        { src: "/DAD_AND_UNCLE_PETER.jpeg",        alt: "With Uncle Peter",  caption: "" },
+        { src: "/Dad_Mom_1.png",                   alt: "Benjamin and His Boo",   caption: "Together always" },
+        { src: "/DAD_BABY_GOLDA_1.jpeg",           alt: "Dadys Girl",             caption: "Dad and Yaa" },
+        { src: "/Kwayisi_Family_Pics_2018_40.jpg", alt: "",                       caption: "A Daddy's Girl!" },
+        { src: "/Dad_Mom_MrT_1.png",               alt: "Family moment",          caption: "Celebrating Extended Family" },
+        { src: "/Dad_Christmas_WintersChapel.png", alt: "Christmas",              caption: "Tree Skills" },
+        { src: "/DAD_AND_UNCLE_PETER.jpeg",        alt: "With Uncle Peter",       caption: "Good Friends" },
+        { src: "/Dad_78th_birthday.png",           alt: "78th Birthday",          caption: "Celebrating 78 years" },
+        { src: "/DAD_BLOWING_CANDLES.jpeg",        alt: "",                       caption: "Indeed A Blessing"},
       ],
     },
     {
@@ -133,7 +138,7 @@ Benjamin later found love and partnership again, marrying his beloved wife Marga
 
 Following his Graduation, he moved to Atlanta, Ga where he would find himself taking a position with World Vision. Answering a profound humanitarian call, he spent a little over 6 courageous months flying famine relief aid missions in Ethiopia, delivering life-saving food and supplies during a historic crisis. This selflessness would ultimately serve as the final proud chapter of his active piloting career.  
 
-Upon returning from Africa, his focus shifted back to his family and his higher education. In 1985, while in Atlanta, he and his wife celebrated the birth of their daughter, Golda Meyer Kwayisi, who would grow up to honor her father's dedication to service by becoming a surgeon. Following this chapter, his dedication to his craft brought him back to Florida, where he successfully obtained his Master’s degree in Aviation from Embry-Riddle. 
+Upon returning from Africa, his focus shifted back to his family and his higher education. In 1985, while in Atlanta, he and his wife celebrated the birth of their daughter, Golda Meir Kwayisi, who would grow up to honor her father's dedication to service by becoming a surgeon. Following this chapter, his dedication to his craft brought him back to Florida, where he successfully obtained his Master’s degree in Aviation from Embry-Riddle. 
 
 **Political Unrest & Systemic Barriers:**
 

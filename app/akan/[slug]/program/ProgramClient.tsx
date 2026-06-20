@@ -731,8 +731,38 @@ export default function ProgramClient({ m }: { m: MemorialConfig }) {
           </a>
         </div>
 
+        {/* Booklet print instructions */}
+        <div className="booklet-instructions" style={{
+          maxWidth: "480px",
+          background: "#241a0a",
+          border: `1px solid ${GOLD}`,
+          borderRadius: "6px",
+          padding: "1rem 1.25rem",
+          fontFamily: "sans-serif",
+          fontSize: "0.78rem",
+          color: "#c4a86a",
+          lineHeight: 1.7,
+        }}>
+          <div style={{ fontWeight: 700, color: GOLD, marginBottom: "0.4rem", letterSpacing: "0.05em", textTransform: "uppercase", fontSize: "0.7rem" }}>
+            Printing as a booklet
+          </div>
+          <div style={{ color: "#9a7a4a", marginBottom: "0.6rem" }}>
+            Each page is 5.5″ × 8.5″. To print as a center-fold booklet on standard 8.5″ × 11″ paper:
+          </div>
+          <ol style={{ margin: 0, paddingLeft: "1.2rem", color: "#b09060", display: "flex", flexDirection: "column", gap: "0.25rem" }}>
+            <li>Click <strong style={{ color: GOLD }}>Print / Save PDF</strong> above and save as PDF first</li>
+            <li>Open the PDF in <strong style={{ color: GOLD }}>Adobe Acrobat</strong> (free Reader works)</li>
+            <li>File → Print → under <strong style={{ color: GOLD }}>Page Sizing</strong>, choose <strong style={{ color: GOLD }}>Booklet</strong></li>
+            <li>Set paper to <strong style={{ color: GOLD }}>Letter (8.5″ × 11″) landscape</strong></li>
+            <li>Print double-sided, flip on short edge, then fold and staple in the center</li>
+          </ol>
+          <div style={{ marginTop: "0.6rem", color: "#6a5030", fontSize: "0.72rem" }}>
+            On Mac: Print dialog → Layout → Two-Sided → Short-Edge binding also works for simple folded booklets.
+          </div>
+        </div>
+
         <div style={{ fontSize: "0.72rem", color: "#7a6a52", fontFamily: "sans-serif" }}>
-          5.5″ × 8.5″ · Center-bound booklet · Enable "Background graphics" in print settings
+          Enable "Background graphics" in print settings to preserve colors
         </div>
 
         {/* Pages */}
@@ -768,7 +798,7 @@ export default function ProgramClient({ m }: { m: MemorialConfig }) {
             gap: 0 !important;
             min-height: unset !important;
           }
-          button, a[href] { display: none !important; }
+          button, a[href], .booklet-instructions { display: none !important; }
           .program-page {
             page-break-after: always;
             margin: 0 !important;
