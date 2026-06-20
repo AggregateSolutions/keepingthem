@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { MemorialConfig } from "@/types/memorial";
 import Image from "next/image";
 
@@ -257,46 +257,134 @@ function TributePage({ m }: { m: MemorialConfig }) {
   );
 }
 
-function BiographyPage({ m }: { m: MemorialConfig }) {
-  return (
-    <PagePage>
-      <div style={{ padding: "0.35in 0.5in", position: "relative" }}>
-        <AdinkraWatermark />
-        <div style={{ position: "relative", zIndex: 1 }}>
-          <SectionHeading>Biography</SectionHeading>
-          <GoldRule />
-          <div style={{ marginTop: "0.2in" }}>
-            {m.biography ? (
-              m.biography.split("\n\n").map((para, i) => {
-                const isHeading = para.startsWith("**") && para.endsWith("**");
-                const text = isHeading ? para.slice(2, -2) : para;
-                return isHeading ? (
-                  <div key={i} style={{ fontFamily: "Garamond, Georgia, serif", fontSize: "0.88rem", fontWeight: 700, color: GOLD, marginBottom: "0.25rem", marginTop: "0.4rem", letterSpacing: "0.03em" }}>
-                    {text}
-                  </div>
-                ) : (
-                  <p key={i} style={{ fontFamily: "Garamond, Georgia, serif", fontSize: "0.82rem", color: DARK_TEXT, lineHeight: 1.85, marginBottom: "0.5rem", textAlign: "justify" }}>
-                    {para}
-                  </p>
-                );
-              })
-            ) : (
-              <p style={{ fontFamily: "Garamond, Georgia, serif", fontSize: "0.82rem", color: FAINT_TEXT, fontStyle: "italic", lineHeight: 1.85 }}>
-                [ Biography to be added ]
-              </p>
-            )}
-          </div>
-        </div>
-      </div>
-    </PagePage>
+// px available for bio content inside a page (8.5in - kente top/bottom - padding top/bottom)
+// 8.5in @ 96dpi = 816px, minus 8px kente × 2, minus ~48px padding top/bottom = ~752px
+const BIO_CONTENT_HEIGHT_PX = 752;
+const BIO_PADDING = "0.25in 0.3in 0.25in";
+
+function renderBioPara(para: string, i: number) {
+  const isHeading = para.startsWith("**") && para.endsWith("**");
+  const text = isHeading ? para.slice(2, -2) : para;
+  return isHeading ? (
+    <div key={i} style={{ fontFamily: "Garamond, Georgia, serif", fontSize: "0.82rem", fontWeight: 700, color: GOLD, marginBottom: "0.2rem", marginTop: "0.35rem", letterSpacing: "0.03em" }}>
+      {text}
+    </div>
+  ) : (
+    <p key={i} style={{ fontFamily: "Garamond, Georgia, serif", fontSize: "0.82rem", color: DARK_TEXT, lineHeight: 1.8, marginBottom: "0.4rem", textAlign: "justify", margin: "0 0 0.4rem" }}>
+      {para}
+    </p>
   );
 }
 
-const ORDER_ITEMS_PER_PAGE = 12;
+function BiographyPage({ m }: { m: MemorialConfig }) {
+  const probeRef = useRef<HTMLDivElement>(null);
+  const [pages, setPages] = useState<string[][] | null>(null);
+
+  const allParas = m.biography ? m.biography.split("\n\n").filter(p => p.trim()) : [];
+
+  useEffect(() => {
+    if (!m.biography || !probeRef.current) return;
+
+    // Measure each paragraph's rendered height using the off-screen probe div
+    const probe = probeRef.current;
+    const paraHeights: number[] = [];
+    for (let i = 0; i < allParas.length; i++) {
+      // Clear and render one para at a time
+      const el = probe.children[i] as HTMLElement;
+      if (el) paraHeights.push(el.offsetHeight + (i > 0 ? 6.4 : 0)); // 0.4rem margin
+    }
+
+    // Greedily fill pages
+    const result: string[][] = [];
+    let current: string[] = [];
+    let used = 0;
+    // Reserve space for heading (SectionHeading + GoldRule + marginTop ~= 72px first page, 40px continued)
+    let reserved = 72;
+
+    for (let i = 0; i < allParas.length; i++) {
+      const h = paraHeights[i] ?? 40;
+      const isHeading = allParas[i].startsWith("**") && allParas[i].endsWith("**");
+      // Keep heading with next para — peek at next height too
+      const nextH = isHeading && i + 1 < allParas.length ? (paraHeights[i + 1] ?? 40) : 0;
+
+      if (current.length > 0 && used + h + nextH + reserved > BIO_CONTENT_HEIGHT_PX) {
+        result.push(current);
+        current = [];
+        used = 0;
+        reserved = 40; // continued pages have smaller header
+      }
+
+      current.push(allParas[i]);
+      used += h;
+    }
+    if (current.length) result.push(current);
+    setPages(result);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [m.biography]);
+
+  if (!m.biography) {
+    return (
+      <PagePage>
+        <div style={{ padding: BIO_PADDING, position: "relative" }}>
+          <AdinkraWatermark />
+          <div style={{ position: "relative", zIndex: 1 }}>
+            <SectionHeading>Biography</SectionHeading>
+            <GoldRule />
+            <p style={{ fontFamily: "Garamond, Georgia, serif", fontSize: "0.82rem", color: FAINT_TEXT, fontStyle: "italic", lineHeight: 1.85, marginTop: "0.2in" }}>
+              [ Biography to be added ]
+            </p>
+          </div>
+        </div>
+      </PagePage>
+    );
+  }
+
+  return (
+    <>
+      {/* Off-screen probe: render all paras at actual width to measure heights */}
+      <div ref={probeRef} style={{
+        position: "fixed", top: 0, left: "-9999px", width: "calc(5.5in - 0.6in)",
+        fontFamily: "Garamond, Georgia, serif", fontSize: "0.82rem", lineHeight: 1.8,
+        visibility: "hidden", pointerEvents: "none", zIndex: -1,
+      }}>
+        {allParas.map((para, i) => renderBioPara(para, i))}
+      </div>
+
+      {/* Render pages once measured; before that, show all on one page so it's not blank */}
+      {(pages ?? [allParas]).map((paras, pageIndex) => (
+        <PagePage key={pageIndex}>
+          <div style={{ padding: BIO_PADDING, position: "relative" }}>
+            <AdinkraWatermark />
+            <div style={{ position: "relative", zIndex: 1 }}>
+              {pageIndex === 0 ? (
+                <>
+                  <SectionHeading>Biography</SectionHeading>
+                  <GoldRule />
+                </>
+              ) : (
+                <div style={{ textAlign: "center", marginBottom: "0.08in" }}>
+                  <div style={{ fontFamily: "Garamond, Georgia, serif", fontSize: "0.6rem", color: FAINT_TEXT, letterSpacing: "0.1em", fontStyle: "italic" }}>
+                    Biography (continued)
+                  </div>
+                  <GoldRule />
+                </div>
+              )}
+              <div style={{ marginTop: "0.12in" }}>
+                {paras.map((para, i) => renderBioPara(para, i))}
+              </div>
+            </div>
+          </div>
+        </PagePage>
+      ))}
+    </>
+  );
+}
+
+const ORDER_ITEMS_PER_PAGE = 20;
 
 function OrderOfServiceItemList({ items, startIndex, totalItems }: { items: { title: string; sub: string }[]; startIndex: number; totalItems: number }) {
   return (
-    <div style={{ marginTop: "0.15in" }}>
+    <div style={{ marginTop: "0.1in" }}>
       {items.map((item, i) => {
         const globalIndex = startIndex + i;
         return (
@@ -304,7 +392,7 @@ function OrderOfServiceItemList({ items, startIndex, totalItems }: { items: { ti
             display: "flex",
             alignItems: "flex-start",
             gap: "0.5rem",
-            padding: "0.2rem 0",
+            padding: "0.12rem 0",
             borderBottom: globalIndex < totalItems - 1 ? `1px solid #e8d8b8` : "none",
           }}>
             <span style={{ fontFamily: "Garamond, Georgia, serif", fontSize: "0.7rem", color: GOLD, minWidth: "1.2rem", paddingTop: 1, fontWeight: 600 }}>
@@ -335,23 +423,23 @@ function OrderOfServicePage({ m }: { m: MemorialConfig }) {
     <>
       {pages.map((pageItems, pageIndex) => (
         <PagePage key={pageIndex}>
-          <div style={{ padding: "0.35in 0.45in", position: "relative" }}>
+          <div style={{ padding: "0.3in 0.45in 0.15in", position: "relative" }}>
             <AdinkraWatermark />
             <div style={{ position: "relative", zIndex: 1 }}>
               {pageIndex === 0 ? (
                 <>
                   <SectionHeading>Order of Service</SectionHeading>
-                  <div style={{ textAlign: "center", marginBottom: "0.15in" }}>
-                    <div style={{ fontSize: "0.65rem", color: FAINT_TEXT, fontFamily: "Garamond, Georgia, serif", fontStyle: "italic" }}>
+                  <div style={{ textAlign: "center", marginBottom: "0.08in" }}>
+                    <div style={{ fontSize: "0.62rem", color: FAINT_TEXT, fontFamily: "Garamond, Georgia, serif", fontStyle: "italic" }}>
                       {m.funeralService.date} · {m.funeralService.time}
                     </div>
-                    <div style={{ fontSize: "0.62rem", color: FAINT_TEXT, marginTop: "0.05rem" }}>
+                    <div style={{ fontSize: "0.6rem", color: FAINT_TEXT, marginTop: "0.03rem" }}>
                       Officiant: {m.program.officiant}
                     </div>
                   </div>
                 </>
               ) : (
-                <div style={{ textAlign: "center", marginBottom: "0.1in" }}>
+                <div style={{ textAlign: "center", marginBottom: "0.08in" }}>
                   <div style={{ fontFamily: "Garamond, Georgia, serif", fontSize: "0.6rem", color: FAINT_TEXT, letterSpacing: "0.1em", fontStyle: "italic" }}>
                     Order of Service (continued)
                   </div>
