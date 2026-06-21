@@ -221,7 +221,7 @@ function CoverPage({ m }: { m: MemorialConfig }) {
         </div>
         {m.viewing && (
           <div style={{ fontFamily: "Garamond, Georgia, serif", fontSize: "0.75rem", color: MID_TEXT, marginTop: "0.15rem" }}>
-            Viewing: {m.viewing.date} · {m.viewing.startTime} – {m.viewing.endTime}
+            Viewing (optional): {m.viewing.date} · {m.viewing.startTime} – {m.viewing.endTime}
           </div>
         )}
         <div style={{ marginTop: "0.2rem", display: "flex", justifyContent: "space-between" }}>

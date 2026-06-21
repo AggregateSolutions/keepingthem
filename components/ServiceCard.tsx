@@ -61,7 +61,7 @@ export default function ServiceCard({ viewing, funeral, reception, thanksgiving,
       {viewing && (
         <div className="info-card">
           <h3 style={{ fontFamily: "var(--font-serif)", fontSize: "1.1rem", color: "var(--gold)", marginBottom: "0.6rem" }}>
-            Viewing
+            Viewing <span style={{ fontSize: "0.75rem", fontFamily: "var(--font-sans)", fontWeight: 400, opacity: 0.65 }}>(optional)</span>
           </h3>
           <InfoRow icon={<CalendarIcon />}>{viewing.date} · {viewing.startTime} – {viewing.endTime}</InfoRow>
         </div>
