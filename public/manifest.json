@@ -1,0 +1,16 @@
+{
+  "name": "keepingthem.net",
+  "short_name": "keepingthem",
+  "description": "Multicultural digital memorials — honoring lives in the tradition of their people.",
+  "start_url": "/",
+  "display": "browser",
+  "background_color": "#1a1208",
+  "theme_color": "#c8962e",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

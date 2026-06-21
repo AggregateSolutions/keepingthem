@@ -8,6 +8,16 @@ export const metadata: Metadata = {
     icon: "/favicon.svg",
     shortcut: "/favicon.svg",
   },
+  manifest: "/manifest.json",
+  openGraph: {
+    title: "keepingthem.net — Multicultural Digital Memorials",
+    description: "A place to keep them, in the tradition of their people.",
+    type: "website",
+  },
+  other: {
+    "mobile-web-app-capable": "yes",
+    "apple-mobile-web-app-capable": "yes",
+  },
 };
 
 export default function RootLayout({
