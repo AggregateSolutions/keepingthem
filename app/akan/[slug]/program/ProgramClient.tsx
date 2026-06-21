@@ -202,7 +202,7 @@ function CoverPage({ m }: { m: MemorialConfig }) {
 
       {/* Photo */}
       {photo && (
-        <div style={{ position: "relative", width: "100%", height: "3.2in", overflow: "hidden" }}>
+        <div style={{ position: "relative", width: "100%", height: "2.8in", overflow: "hidden" }}>
           <Image src={photo.src} alt={photo.alt} fill style={{ objectFit: "cover", objectPosition: "center 20%" }} />
           <div style={{ position: "absolute", inset: 0, background: `linear-gradient(to bottom, rgba(253,246,236,0.15) 0%, transparent 20%, transparent 75%, rgba(253,246,236,0.8) 100%)` }} />
         </div>
