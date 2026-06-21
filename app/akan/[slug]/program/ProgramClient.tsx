@@ -224,6 +224,23 @@ function CoverPage({ m }: { m: MemorialConfig }) {
             Viewing (optional): {m.viewing.date} · {m.viewing.startTime} – {m.viewing.endTime}
           </div>
         )}
+        {m.reception && (
+          <div style={{ marginTop: "0.18rem" }}>
+            <div style={{ fontSize: "0.6rem", color: FAINT_TEXT, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "0.1rem", marginTop: "0.15rem" }}>
+              Reception
+            </div>
+            <div style={{ fontFamily: "Garamond, Georgia, serif", fontSize: "0.78rem", color: DARK_TEXT, lineHeight: 1.6 }}>
+              {m.reception.date} · {m.reception.time}<br />
+              {m.reception.name}<br />
+              <span style={{ fontSize: "0.7rem", color: MID_TEXT }}>{m.reception.address}</span>
+            </div>
+            {m.reception.notes && (
+              <div style={{ fontFamily: "Garamond, Georgia, serif", fontSize: "0.68rem", color: FAINT_TEXT, fontStyle: "italic", marginTop: "0.08rem" }}>
+                {m.reception.notes}
+              </div>
+            )}
+          </div>
+        )}
         <div style={{ marginTop: "0.2rem", display: "flex", justifyContent: "space-between" }}>
           <CornerFlower size={40} />
           <CornerFlower size={40} flip />
