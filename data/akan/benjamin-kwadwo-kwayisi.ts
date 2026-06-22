@@ -3,7 +3,7 @@ import type { MemorialConfig } from "@/types/memorial";
 const config: MemorialConfig = {
   slug: "benjamin-kwadwo-kwayisi",
   name: "Benjamin Kwadwo Kwayisi",
-  years: "1936 – 2026",
+  years: "January 16th, 1936 – June 9th, 2026",
   title: "Elder, Father, Okyeame",
   tribute:
     "A man of quiet wisdom, unshakeable dignity, and deep roots. Born of Akropong, he carried the spirit of the Akan people across generations and oceans. His counsel was sought by many; his laughter is remembered by all.",
@@ -15,7 +15,7 @@ const config: MemorialConfig = {
      // { src: "/Dad_Mom_1.png", alt: "Benjamin And His Boo" },
     // { src: "/photo-5.jpg", alt: "Memorial photo" },
     // { src: "/photo-6.jpg", alt: "Memorial photo" },
-    { src: "/DAD_ENJOYING_A_LAUGH.jpeg", alt: "Memorial photo" },
+    //{ src: "/DAD_ENJOYING_A_LAUGH.jpeg", alt: "Memorial photo" },
   ],
   viewing: {
     date: "Saturday, June 27th, 2026",
@@ -27,13 +27,13 @@ const config: MemorialConfig = {
     address: "3481 Hamilton Mill Rd, Buford, GA 30519",
     phone: "(770) 945-6924",
     date: "Saturday, June 27, 2026",
-    time: "1:00 PM - 4:00 PM",
+    time: "1:00 PM - 2:30 PM",
   },
   reception: {
     name: "Stonehedge Venue",
     address: "406 E. Shadburn Ave, Buford, GA 30518",
     date: "Saturday, June 27, 2026",
-    time: "5:00 PM",
+    time: "3:00 PM",
     notes: "A reception with food and fellowship will follow the service. Please RSVP so the family can prepare.",
   },
   thanksgiving: {
@@ -53,12 +53,12 @@ const config: MemorialConfig = {
     { name: "Design House of Flowers", phone: "(770) 904-4488", url: "https://www.designhouseofflowers.com",   address: "1605 Buford Hwy Suite D, Buford, GA" },
   ],
   program: {
-    officiant: "TBA",
+    officiant: "",
     items: [
       { title: "Gathering Music",                 sub: "12:00 PM"},
       { title: "Call To Order",                   sub: ""},
       { title: "Procession ",                     sub: "" },
-      { title: "Invocation",                      sub: "Pastor's Welcoming Message/Prayer" },
+      { title: "Invocation",                      sub: "Pastor's Welcoming Message/Prayer - Danny Newburn" },
       { title: "Music Dedication",                sub: "Amazing Grace" },
       { title: "Scripture Reading",               sub: "Psalm 23 - Grandchild" },
       { title: "Obituary Reading",                sub: "Son" },
@@ -89,7 +89,7 @@ const config: MemorialConfig = {
       section: "A Life Well Lived",
       photos: [
         { src: "/Dad_Headshot_1.png",              alt: "Portrait",              caption: "" },
-        { src: "/Kwayisi_Family_Pics_2018_44.jpg", alt: "Kwayisi #1"},
+        { src: "/Kwayisi_Family_Pics_2018_44.jpg", alt: "Kwayisi #1",             caption: ""  },
         { src: "/Dad_Headshot_2.png",              alt: "Portrait",              caption: "" },
         { src: "/Dad_Ghana_Aviation_1.png",        alt: "Ghana Aviation",       caption: "A life of service" },
         { src: "/Dad_Ghana_Aviation_2.png",        alt: "Ghana Aviation",       caption: "Scottland" },
@@ -151,6 +151,17 @@ Following his academic success, he set out to build a corporate and operational 
 Refusing to let these professional setbacks define his worth, Benjamin chose the path of humility and fierce devotion to his family. While working on his Ph.D., he relocated his family back to Atlanta and stepped into a completely new chapter, taking a role as a shipping clerk with the A.L. Williams Insurance Company (now known as Primerica). He dedicated himself to this work with the same excellence he brought to the skies, remaining with the company until his well-earned retirement in 2018. 
 
 Beyond his professional achievements and his incredible resilience, Benjamin was known above all for his profound mind, his admiration for education, and the love he had for his family. Throughout his life, family and friends regularly came to him to seek counseling, drawn to his deep wisdom and grounded perspective. He never failed them, always offering a listening ear and guidance born from a life of rich experience, sacrifice, and integrity. `,
+
+survivors: [
+  { relation: "Wife", name: "Margaret Kwayisi" },
+  { relation: "Son", name: "Benjamin Kwayisi Jr." },
+  { relation: "Daughters", name: "Golda Meyer Kwayisi, Christina Appiah, Patience Kwayisi, Susie Ohene Asante, and Esther Kwayisi" },
+],
+preceded: [
+  { relation: "Wife", name: "Beatrice Emelia Offei" },
+  { relation: "Parents", name: "Comfort Afua Afi and Kwaku Atiemo" },
+  { relation: "Sister", name: "Bernice Gloria Aboagye" },
+],
 
 hymns: [
   {

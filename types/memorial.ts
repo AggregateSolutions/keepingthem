@@ -41,6 +41,8 @@ export interface MemorialConfig {
     address?: string;
   }[];
   biography?: string;
+  survivors?: { relation: string; name: string }[];
+  preceded?: { relation: string; name: string }[];
   hymns?: {
     title: string;
     lyrics: string;

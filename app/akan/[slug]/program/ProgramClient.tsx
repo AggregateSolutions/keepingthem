@@ -362,31 +362,54 @@ function BiographyPage({ m }: { m: MemorialConfig }) {
       </div>
 
       {/* Render pages once measured; before that, show all on one page so it's not blank */}
-      {(pages ?? [allParas]).map((paras, pageIndex) => (
-        <PagePage key={pageIndex}>
-          <div style={{ padding: BIO_PADDING, position: "relative" }}>
-            <AdinkraWatermark />
-            <div style={{ position: "relative", zIndex: 1 }}>
-              {pageIndex === 0 ? (
-                <>
-                  <SectionHeading>Biography</SectionHeading>
-                  <GoldRule />
-                </>
-              ) : (
-                <div style={{ textAlign: "center", marginBottom: "0.08in" }}>
-                  <div style={{ fontFamily: "Garamond, Georgia, serif", fontSize: "0.6rem", color: FAINT_TEXT, letterSpacing: "0.1em", fontStyle: "italic" }}>
-                    Biography (continued)
+      {(pages ?? [allParas]).map((paras, pageIndex, arr) => {
+        const isLastPage = pageIndex === arr.length - 1;
+        return (
+          <PagePage key={pageIndex}>
+            <div style={{ padding: BIO_PADDING, position: "relative" }}>
+              <AdinkraWatermark />
+              <div style={{ position: "relative", zIndex: 1 }}>
+                {pageIndex === 0 ? (
+                  <>
+                    <SectionHeading>Biography</SectionHeading>
+                    <GoldRule />
+                  </>
+                ) : (
+                  <div style={{ textAlign: "center", marginBottom: "0.08in" }}>
+                    <div style={{ fontFamily: "Garamond, Georgia, serif", fontSize: "0.6rem", color: FAINT_TEXT, letterSpacing: "0.1em", fontStyle: "italic" }}>
+                      Biography (continued)
+                    </div>
+                    <GoldRule />
                   </div>
-                  <GoldRule />
+                )}
+                <div style={{ marginTop: "0.12in" }}>
+                  {paras.map((para, i) => renderBioPara(para, i))}
                 </div>
-              )}
-              <div style={{ marginTop: "0.12in" }}>
-                {paras.map((para, i) => renderBioPara(para, i))}
+                {isLastPage && (m.preceded?.length || m.survivors?.length) && (
+                  <div style={{ marginTop: "0.2in", borderTop: `1px solid #e8d8b8`, paddingTop: "0.15in" }}>
+                    {m.preceded && m.preceded.length > 0 && (
+                      <p style={{ fontFamily: "Garamond, Georgia, serif", fontSize: "0.8rem", color: DARK_TEXT, lineHeight: 1.8, marginBottom: "0.3rem" }}>
+                        <strong>Preceded in death by:</strong>{" "}
+                        {m.preceded.map((p, i) => (
+                          <span key={i}>{i > 0 ? "; " : ""}{p.relation === p.name ? p.name : `his ${p.relation.toLowerCase()}, ${p.name}`}</span>
+                        ))}.
+                      </p>
+                    )}
+                    {m.survivors && m.survivors.length > 0 && (
+                      <p style={{ fontFamily: "Garamond, Georgia, serif", fontSize: "0.8rem", color: DARK_TEXT, lineHeight: 1.8 }}>
+                        <strong>He is survived by:</strong>{" "}
+                        {m.survivors.map((s, i) => (
+                          <span key={i}>{i > 0 ? "; " : ""}{`his ${s.relation.toLowerCase()}, ${s.name}`}</span>
+                        ))}.
+                      </p>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
-          </div>
-        </PagePage>
-      ))}
+          </PagePage>
+        );
+      })}
     </>
   );
 }
