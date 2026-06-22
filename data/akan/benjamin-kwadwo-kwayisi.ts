@@ -56,23 +56,23 @@ const config: MemorialConfig = {
     officiant: "",
     items: [
       { title: "Gathering Music",                 sub: "12:00 PM"},
-      { title: "Call To Order",                   sub: ""},
+      { title: "Call To Order",                   sub: "Rueben"},
       { title: "Procession ",                     sub: "" },
       { title: "Invocation",                      sub: "Pastor's Welcoming Message/Prayer - Danny Newburn" },
-      { title: "Music Dedication",                sub: "Amazing Grace" },
-      { title: "Scripture Reading",               sub: "Psalm 23 - Grandchild" },
-      { title: "Obituary Reading",                sub: "Son" },
+      { title: "Music Dedication",                sub: "Aliah Aiken - Amazing Grace" },
+      { title: "Scripture Reading",               sub: "Psalm 23 - Noah Kwayisi" },
+      { title: "Obituary Reading",                sub: "Benjamin Kwayisi Jr" },
       { title: "Hymn",                            sub: "Blessed Assurance" },
-      { title: "Music Dedication",                sub: "You Raised Me Up" },
+      { title: "Music Dedication",                sub: "Aliah Aiken - You Raised Me Up" },
       { title: "Scripture Reading",               sub: " - Grandchild" },
-      { title: "Sermon",                          sub: "Pastor's Message" },
-      { title: "Ghanaian Music Dedication",       sub: "TBA" },
+      { title: "Sermon",                          sub: "Danny Newburn" },
+      { title: "Ghanaian Music Dedication",       sub: "Juliet " },
       { title: "Euology",                         sub: "Peter Onen" },
       { title: "Poem Reading",                    sub: "TBA"},
       { title: "Tributes",                        sub: "Family, Friends, Colleagues"},
-      { title: "Thank You Message",               sub: "Daughter"},
+      { title: "Thank You Message",               sub: "Golda Kwayisi"},
       { title: "Closing hymn",                    sub: "" },
-      { title: "Closing Musical Dedication",     sub: "Its So Hard To Say Goodbye"},
+      //{ title: "Closing Musical Dedication",      sub: "Aliah Aiken - Its So Hard To Say Goodbye"},
       { title: "Closing Slideshow and Pallbearer Gathering", sub: ""},
       { title: "Committal & benediction",         sub: "" },
     ],
@@ -108,7 +108,7 @@ const config: MemorialConfig = {
         { src: "/Dad_Christmas_WintersChapel.png", alt: "Christmas",              caption: "Tree Skills" },
         { src: "/DAD_AND_UNCLE_PETER.jpeg",        alt: "With Uncle Peter",       caption: "Good Friends" },
         { src: "/Dad_78th_birthday.png",           alt: "78th Birthday",          caption: "Celebrating 78 years" },
-        { src: "/DAD_BLOWING_CANDLES.jpeg",        alt: "A Blessing",                       caption: "Indeed A Blessing"},
+        //{ src: "/DAD_BLOWING_CANDLES.jpeg",        alt: "A Blessing",             caption: "Indeed A Blessing"},
       ],
     },
     {
@@ -155,12 +155,12 @@ Beyond his professional achievements and his incredible resilience, Benjamin was
 survivors: [
   { relation: "Wife", name: "Margaret Kwayisi" },
   { relation: "Son", name: "Benjamin Kwayisi Jr." },
-  { relation: "Daughters", name: "Golda Meyer Kwayisi, Christina Appiah, Patience Kwayisi, Susie Ohene Asante, and Esther Kwayisi" },
+  { relation: "Daughters", name: "Golda Meir Kwayisi, Christina Appiah, Patience Kwayisi, Susie Ohene Asante, and Esther Kwayisi" },
 ],
 preceded: [
-  { relation: "Wife", name: "Beatrice Emelia Offei" },
+  { relation: "First Wife", name: "Beatrice Emelia Offei" },
   { relation: "Parents", name: "Comfort Afua Afi and Kwaku Atiemo" },
-  { relation: "Sister", name: "Bernice Gloria Aboagye" },
+  { relation: "Daughter", name: "Bernice Gloria Aboagye" },
 ],
 
 acknowledgements: {
@@ -178,63 +178,6 @@ acknowledgements: {
 },
 
 hymns: [
-  {
-    title: "Rock of Ages",
-    lyrics: `Rock of Ages, cleft for me,
-let me hide myself in thee;
-let the water and the blood,
-from thy wounded side which flowed,
-be of sin the double cure;
-save from wrath and make me pure.
-
-Not the labors of my hands
-can fulfill thy law's demands;
-could my zeal no respite know,
-could my tears forever flow,
-all for sin could not atone;
-thou must save, and thou alone.
-
-Nothing in my hand I bring,
-simply to the cross I cling;
-naked, come to thee for dress;
-helpless, look to thee for grace;
-foul, I to the fountain fly;
-wash me, Savior, or I die.
-
-While I draw this fleeting breath,
-when mine eyes shall close in death,
-when I soar to worlds unknown,
-see thee on thy judgment throne,
-Rock of Ages, cleft for me,
-let me hide myself in thee.`,
-  },
-  {
-    title: "Abide with Me",
-    lyrics: `Abide with me; falls the eventide;
-The darkness deepens; Lord with me abide.
-When other helpers, fail and comforts flee,
-Help of the helpless, abide with me.
-
-Thou on my head, in early youth didst smile;
-And, though rebellious, and perverse meanwhile,
-Thou hast not left me, though I oft left Thee,
-On to the close Lord, abide with me.
-
-I need Thy presence, every passing hour.
-What but Thy grace, can foil the tempter's power?
-Who, like Thyself, my guide and stay can be?
-Through cloud and sunshine, abide with me.
-
-I fear no foe, with Thee at hand to bless
-Ills have no weight, tears lose their bitterness
-Where is thy sting death? Where grave thy victory?
-I triumph still, abide with me.
-
-Hold Thou Thy cross, before my closing eyes;
-Shine through the gloom, and point me to the skies.
-Heaven's morning breaks, and earth's vain shadows flee;
-In life, in death, Lord, abide with me.`,
-  },
   {
     title: "Blessed Assurance",
     lyrics: `Blessed assurance, Jesus is mine!
@@ -266,6 +209,37 @@ This is my story, this is my song,
 praising my Savior all the day long;
 this is my story, this is my song,
 praising my Savior all the day long.`,
+  },
+
+  {
+    title: "Rock of Ages",
+    lyrics: `Rock of Ages, cleft for me,
+let me hide myself in thee;
+let the water and the blood,
+from thy wounded side which flowed,
+be of sin the double cure;
+save from wrath and make me pure.
+
+Not the labors of my hands
+can fulfill thy law's demands;
+could my zeal no respite know,
+could my tears forever flow,
+all for sin could not atone;
+thou must save, and thou alone.
+
+Nothing in my hand I bring,
+simply to the cross I cling;
+naked, come to thee for dress;
+helpless, look to thee for grace;
+foul, I to the fountain fly;
+wash me, Savior, or I die.
+
+While I draw this fleeting breath,
+when mine eyes shall close in death,
+when I soar to worlds unknown,
+see thee on thy judgment throne,
+Rock of Ages, cleft for me,
+let me hide myself in thee.`,
   },
 ],
   };
