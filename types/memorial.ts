@@ -58,10 +58,13 @@ export interface MemorialConfig {
       alt: string;
       caption?: string;
       fit?: "cover" | "contain";
+      position?: string;
+      scale?: number;
     }[];
   }[];
   program: {
     officiant: string;
+    mc?: string;
     items: { title: string; sub: string }[];
   };
   adinkra: {

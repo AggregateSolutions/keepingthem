@@ -467,6 +467,11 @@ function OrderOfServicePage({ m }: { m: MemorialConfig }) {
                     <div style={{ fontSize: "0.62rem", color: FAINT_TEXT, fontFamily: "Garamond, Georgia, serif", fontStyle: "italic" }}>
                       {m.funeralService.date} · {m.funeralService.time}
                     </div>
+                    {m.program.mc && (
+                      <div style={{ fontSize: "0.6rem", color: FAINT_TEXT, marginTop: "0.03rem" }}>
+                        Master of Ceremonies: {m.program.mc}
+                      </div>
+                    )}
                     <div style={{ fontSize: "0.6rem", color: FAINT_TEXT, marginTop: "0.03rem" }}>
                       Officiant: {m.program.officiant}
                     </div>
@@ -520,7 +525,7 @@ function HymnPage({ hymn, num }: { hymn: { title: string; lyrics: string }; num:
   );
 }
 
-type PhotoEntry = { src: string; alt: string; caption?: string; fit?: "cover" | "contain" };
+type PhotoEntry = { src: string; alt: string; caption?: string; fit?: "cover" | "contain"; position?: string; scale?: number };
 
 function PhotoPage({ section, photos, showSection }: { section: string; photos: PhotoEntry[]; showSection: boolean }) {
   return (
@@ -548,8 +553,8 @@ function PhotoPage({ section, photos, showSection }: { section: string; photos: 
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.15in" }}>
           {photos.map((p, i) => (
             <div key={i}>
-              <div style={{ position: "relative", height: "2.35in", border: `1px solid ${BORDER}`, background: "#f0e6d0" }}>
-                <Image src={p.src} alt={p.alt} fill style={{ objectFit: p.fit ?? "cover", objectPosition: p.fit === "contain" ? "center center" : "center 15%" }} />
+              <div style={{ position: "relative", height: "2.35in", border: `1px solid ${BORDER}`, background: "#f0e6d0", overflow: "hidden" }}>
+                <Image src={p.src} alt={p.alt} fill style={{ objectFit: p.fit ?? "cover", objectPosition: p.position ?? (p.fit === "contain" ? "center center" : "center 15%"), transform: p.scale ? `scale(${p.scale})` : undefined, transformOrigin: p.position ?? "center center" }} />
               </div>
               {p.caption && (
                 <div style={{ fontFamily: "Garamond, Georgia, serif", fontSize: "0.58rem", color: FAINT_TEXT, fontStyle: "italic", textAlign: "center", marginTop: "0.04in" }}>
