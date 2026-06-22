@@ -163,6 +163,20 @@ preceded: [
   { relation: "Sister", name: "Bernice Gloria Aboagye" },
 ],
 
+acknowledgements: {
+  sections: [
+    {
+      title: "Chief Mourners",
+      names: "Nana Agyiri Kumi (Aboasahene), Nana Obirago I (Aboasahemea), Abusuapanyin Kwame Ampomah, Obeapanyin Janet Korkor Debrah, Obeapanyin Victoria Obenewa Darko (Sister), Odikro Asa Kwadwo, Obeapanyin Yaa Ofobea, Obeapanyin Adwoa Ofobea, and Obeapanyin Amma Nyarkoa.",
+    },
+    {
+      title: "Nephews and Nieces",
+      names: "Mrs. Florence Bafour Asamoah & Siblings, Mrs. Irene Enyonam Gyimah & Siblings, Ellen Owusua & Siblings, and Mrs. Mercy Atramea Bekoe & Siblings.",
+    },
+  ],
+  closing: "The family of Benjamin Kwadwo Kwayisi wishes to express their heartfelt gratitude to all who offered prayers, kind words, flowers, and unwavering support during this time of bereavement. Your love and presence bring comfort beyond measure.",
+},
+
 hymns: [
   {
     title: "Rock of Ages",

@@ -566,19 +566,37 @@ function PhotoPage({ section, photos, showSection }: { section: string; photos: 
 }
 
 function AcknowledgementsPage({ m }: { m: MemorialConfig }) {
+  const ack = m.acknowledgements;
   return (
     <PagePage>
-      <div style={{ padding: "0.35in 0.5in", position: "relative" }}>
+      <div style={{ padding: "0.3in 0.45in 0.2in", position: "relative" }}>
         <AdinkraWatermark />
         <div style={{ position: "relative", zIndex: 1 }}>
           <SectionHeading>Acknowledgements</SectionHeading>
           <GoldRule />
-          <p style={{ fontFamily: "Garamond, Georgia, serif", fontSize: "0.82rem", color: DARK_TEXT, lineHeight: 1.9, marginTop: "0.2in", textAlign: "justify" }}>
-            The family of {m.name} wishes to express their heartfelt gratitude to all who have offered prayers, kind words, and unwavering support during this time of bereavement. Your love and presence bring comfort beyond measure.
-          </p>
-          <p style={{ fontFamily: "Garamond, Georgia, serif", fontSize: "0.82rem", color: FAINT_TEXT, fontStyle: "italic", lineHeight: 1.9, marginTop: "0.4in", textAlign: "center" }}>
-            [ Add specific acknowledgements here — pallbearers, ushers, singers, clergy, organizations ]
-          </p>
+          {ack ? (
+            <>
+              {ack.sections.map((section, i) => (
+                <div key={i} style={{ marginTop: "0.18in" }}>
+                  <div style={{ fontFamily: "Garamond, Georgia, serif", fontSize: "0.78rem", fontWeight: 700, color: GOLD, letterSpacing: "0.04em", marginBottom: "0.08rem" }}>
+                    {section.title}
+                  </div>
+                  <p style={{ fontFamily: "Garamond, Georgia, serif", fontSize: "0.8rem", color: DARK_TEXT, lineHeight: 1.85, textAlign: "justify", margin: 0 }}>
+                    {section.names}
+                  </p>
+                </div>
+              ))}
+              {ack.closing && (
+                <p style={{ fontFamily: "Garamond, Georgia, serif", fontSize: "0.78rem", color: MID_TEXT, lineHeight: 1.85, textAlign: "justify", marginTop: "0.2in", fontStyle: "italic" }}>
+                  {ack.closing}
+                </p>
+              )}
+            </>
+          ) : (
+            <p style={{ fontFamily: "Garamond, Georgia, serif", fontSize: "0.82rem", color: FAINT_TEXT, fontStyle: "italic", lineHeight: 1.9, marginTop: "0.2in", textAlign: "center" }}>
+              [ Add acknowledgements to the memorial config ]
+            </p>
+          )}
           <FloralDivider />
         </div>
       </div>

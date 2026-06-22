@@ -43,6 +43,10 @@ export interface MemorialConfig {
   biography?: string;
   survivors?: { relation: string; name: string }[];
   preceded?: { relation: string; name: string }[];
+  acknowledgements?: {
+    sections: { title: string; names: string }[];
+    closing?: string;
+  };
   hymns?: {
     title: string;
     lyrics: string;
