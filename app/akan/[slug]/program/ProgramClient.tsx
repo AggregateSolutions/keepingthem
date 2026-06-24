@@ -179,65 +179,64 @@ function CoverPage({ m }: { m: MemorialConfig }) {
   const photo = m.photos[0];
   return (
     <PagePage>
-      <div style={{ padding: "0.46in 0.65in 0.46in", display: "flex", flexDirection: "column", alignItems: "center", gap: "0.2rem", position: "relative" }}>
+      <div style={{ padding: "0.18in 0.65in 0", display: "flex", flexDirection: "column", alignItems: "center", gap: "0.1rem", position: "relative" }}>
         {/* Corner flowers */}
-        <div style={{ position: "absolute", top: "0.65in", left: "0.52in" }}><CornerFlower size={52} /></div>
-        <div style={{ position: "absolute", top: "0.65in", right: "0.52in" }}><CornerFlower size={52} flip /></div>
+        <div style={{ position: "absolute", top: "0.3in", left: "0.52in" }}><CornerFlower size={48} /></div>
+        <div style={{ position: "absolute", top: "0.3in", right: "0.52in" }}><CornerFlower size={48} flip /></div>
 
-        <div style={{ fontSize: "0.72rem", color: FAINT_TEXT, letterSpacing: "0.18em", textTransform: "uppercase", marginTop: "0.6rem" }}>
+        <div style={{ fontSize: "0.7rem", color: FAINT_TEXT, letterSpacing: "0.18em", textTransform: "uppercase", marginTop: "0.2rem" }}>
           In Loving Memory
         </div>
         <FloralDivider />
-        <h1 style={{ fontFamily: "Garamond, Georgia, serif", fontSize: "2.6rem", fontWeight: 400, color: DARK_TEXT, textAlign: "center", margin: "0.1rem 0", letterSpacing: "0.03em", lineHeight: 1.2 }}>
+        <h1 style={{ fontFamily: "Garamond, Georgia, serif", fontSize: "2.4rem", fontWeight: 400, color: DARK_TEXT, textAlign: "center", margin: "0 0", letterSpacing: "0.03em", lineHeight: 1.15 }}>
           {m.name}
         </h1>
-        <div style={{ fontFamily: "Garamond, Georgia, serif", fontSize: "1.3rem", color: GOLD, letterSpacing: "0.14em", margin: "0.1rem 0" }}>
+        <div style={{ fontFamily: "Garamond, Georgia, serif", fontSize: "1.15rem", color: GOLD, letterSpacing: "0.14em", margin: "0.04rem 0" }}>
           {m.years}
         </div>
-        <div style={{ fontSize: "0.78rem", color: FAINT_TEXT, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "0.3rem" }}>
+        <div style={{ fontSize: "0.75rem", color: FAINT_TEXT, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "0" }}>
           {m.title}
         </div>
-        <GoldRule />
       </div>
 
       {/* Photo */}
       {photo && (
-        <div style={{ position: "relative", width: "100%", height: "4.2in", overflow: "hidden" }}>
-          <Image src={photo.src} alt={photo.alt} fill style={{ objectFit: "cover", objectPosition: "center 20%" }} />
+        <div style={{ position: "relative", width: "100%", height: "6.8in", overflow: "hidden" }}>
+          <Image src={photo.src} alt={photo.alt} fill style={{ objectFit: "cover", objectPosition: "center 35%", transform: "scale(0.72)", transformOrigin: "center 35%" }} />
           <div style={{ position: "absolute", inset: 0, background: `linear-gradient(to bottom, rgba(253,246,236,0.15) 0%, transparent 20%, transparent 75%, rgba(253,246,236,0.8) 100%)` }} />
+          <div style={{ position: "absolute", bottom: 0, left: 0, right: 0 }}><FloralDivider /></div>
         </div>
       )}
 
       {/* Service info */}
-      <div style={{ padding: "0.33in 0.65in 0.1in", textAlign: "center" }}>
-        <FloralDivider />
-        <div style={{ fontSize: "0.85rem", color: FAINT_TEXT, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "0.2rem" }}>
+      <div style={{ padding: "0 0.65in 0.22in", textAlign: "center" }}>
+        <div style={{ fontSize: "0.75rem", color: FAINT_TEXT, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "0.06rem" }}>
           Funeral Service
         </div>
-        <div style={{ fontFamily: "Garamond, Georgia, serif", fontSize: "1.1rem", color: DARK_TEXT, lineHeight: 1.7 }}>
+        <div style={{ fontFamily: "Garamond, Georgia, serif", fontSize: "0.95rem", color: DARK_TEXT, lineHeight: 1.5 }}>
           {m.funeralService.date} · {m.funeralService.time}<br />
           {m.funeralService.name}<br />
-          <span style={{ fontSize: "0.98rem", color: MID_TEXT }}>{m.funeralService.address}</span>
+          <span style={{ fontSize: "0.88rem", color: MID_TEXT }}>{m.funeralService.address}</span>
         </div>
         {m.viewing && (
-          <div style={{ fontFamily: "Garamond, Georgia, serif", fontSize: "0.98rem", color: MID_TEXT, marginTop: "0.15rem" }}>
+          <div style={{ fontFamily: "Garamond, Georgia, serif", fontSize: "0.85rem", color: MID_TEXT, marginTop: "0.05rem" }}>
             Viewing (optional): {m.viewing.date} · {m.viewing.startTime} – {m.viewing.endTime}
           </div>
         )}
         {m.reception && (
-          <div style={{ marginTop: "0.18rem" }}>
-            <div style={{ fontSize: "0.78rem", color: FAINT_TEXT, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "0.1rem", marginTop: "0.15rem" }}>
+          <div style={{ marginTop: "0.06rem" }}>
+            <div style={{ fontSize: "0.72rem", color: FAINT_TEXT, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "0.04rem", marginTop: "0.06rem" }}>
               Reception
             </div>
-            <div style={{ fontFamily: "Garamond, Georgia, serif", fontSize: "1rem", color: DARK_TEXT, lineHeight: 1.6 }}>
+            <div style={{ fontFamily: "Garamond, Georgia, serif", fontSize: "0.88rem", color: DARK_TEXT, lineHeight: 1.45 }}>
               {m.reception.date} · {m.reception.time}<br />
-              <span style={{ fontSize: "0.9rem", color: MID_TEXT }}>{m.reception.name} · {m.reception.address}</span>
+              <span style={{ fontSize: "0.82rem", color: MID_TEXT }}>{m.reception.name} · {m.reception.address}</span>
             </div>
           </div>
         )}
-        <div style={{ marginTop: "0.2rem", display: "flex", justifyContent: "space-between" }}>
-          <CornerFlower size={40} />
-          <CornerFlower size={40} flip />
+        <div style={{ marginTop: "0.1rem", display: "flex", justifyContent: "space-between" }}>
+          <CornerFlower size={36} />
+          <CornerFlower size={36} flip />
         </div>
       </div>
     </PagePage>

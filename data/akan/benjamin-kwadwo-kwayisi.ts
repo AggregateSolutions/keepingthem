@@ -6,7 +6,7 @@ const config: MemorialConfig = {
   years: "January 16th, 1936 – June 9th, 2026",
   title: "Elder, Father, Okyeame",
   tribute:
-    "A man of quiet wisdom, unshakeable dignity, and deep roots. Born of Akropong, he carried the spirit of the Akan people across generations and oceans. His counsel was sought by many; his laughter is remembered by all.",
+    "A man of quiet wisdom, unshakeable dignity, and deep roots. Born in Akropong, he carried the spirit of the Akan people across generations and oceans. His counsel was sought by many; his laughter is remembered by all.",
   photos: [
     { src: "/Papa_62.png", alt: "Memorial photo", primaryDuration: 8000 },
     // Add additional photos below — they will cycle every 4 seconds
@@ -144,7 +144,7 @@ Upon returning from Africa, his focus shifted back to his family and his higher 
 
 **Political Unrest & Systemic Barriers:**
 
-While he was advancing his highest academic achievements and pursuing his Ph.D., his home country underwent a hostile political takeover led by Jerry Rawlings. Because Benjamin was entirely unaffiliated with the new ruling party, and there were political tensions brewing back home and civil aviation, he determined that returning home would not be advisable. This decision went on to weigh heavily on him as it separated him from his aviation roots, his culture, and his older children on a different continent.
+While he was advancing his highest academic achievements and pursuing his Ph.D., his home country underwent a hostile political takeover led by Jerry Rawlings. Because Benjamin was entirely unaffiliated with the new ruling party, and there were political tensions brewing back home and in civil aviation, he determined that returning home would not be advisable. This decision went on to weigh heavily on him as it separated him from his aviation roots, his culture, and his older children on a different continent.
 
 Following his academic success, he set out to build a corporate and operational career in the United States, applying for high-level Air Traffic Control, corporate aviation management, and executive MBA-level roles. However, despite holding advanced degrees from Embry-Riddle and rare global flight experience, he faced a complex web of systemic challenges. As a foreign-born professional navigating the American corporate landscape in his late 40s, he encountered deep-seated institutional barriers. In an era where executive aviation roles lacked diverse representation, his accent, background, and age became arbitrary hurdles that overshadowed his immense capability. 
 
