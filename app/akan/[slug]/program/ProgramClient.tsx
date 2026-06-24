@@ -112,7 +112,7 @@ function SideBorder({ side }: { side: "left" | "right" }) {
 /* Row of small Adinkra glyphs as page footer decoration */
 function AdinkraFooterStrip() {
   return (
-    <div style={{ position: "absolute", bottom: 18, left: 0, right: 0, display: "flex", justifyContent: "center", gap: "0.35in", pointerEvents: "none", zIndex: 1, opacity: 0.18 }}>
+    <div style={{ position: "absolute", bottom: 18, left: 0, right: 0, display: "flex", justifyContent: "center", gap: "0.46in", pointerEvents: "none", zIndex: 1, opacity: 0.18 }}>
       {/* Gye Nyame simplified */}
       {[0,1,2,3,4].map((i) => (
         <svg key={i} width="14" height="14" viewBox="0 0 80 80" fill={GOLD}>
@@ -154,8 +154,8 @@ function PageBorder({ children, style }: { children: React.ReactNode; style?: Re
       background: PAGE_BG,
       border: `2px solid ${BORDER}`,
       margin: "0 auto",
-      width: "5.5in",
-      minHeight: "8.5in",
+      width: "8.5in",
+      minHeight: "11in",
       boxSizing: "border-box",
       pageBreakAfter: "always",
       ...style,
@@ -179,22 +179,22 @@ function CoverPage({ m }: { m: MemorialConfig }) {
   const photo = m.photos[0];
   return (
     <PagePage>
-      <div style={{ padding: "0.35in 0.5in 0.35in", display: "flex", flexDirection: "column", alignItems: "center", gap: "0.2rem", position: "relative" }}>
+      <div style={{ padding: "0.46in 0.65in 0.46in", display: "flex", flexDirection: "column", alignItems: "center", gap: "0.2rem", position: "relative" }}>
         {/* Corner flowers */}
-        <div style={{ position: "absolute", top: "0.5in", left: "0.4in" }}><CornerFlower size={52} /></div>
-        <div style={{ position: "absolute", top: "0.5in", right: "0.4in" }}><CornerFlower size={52} flip /></div>
+        <div style={{ position: "absolute", top: "0.65in", left: "0.52in" }}><CornerFlower size={52} /></div>
+        <div style={{ position: "absolute", top: "0.65in", right: "0.52in" }}><CornerFlower size={52} flip /></div>
 
-        <div style={{ fontSize: "0.55rem", color: FAINT_TEXT, letterSpacing: "0.18em", textTransform: "uppercase", marginTop: "0.6rem" }}>
+        <div style={{ fontSize: "0.72rem", color: FAINT_TEXT, letterSpacing: "0.18em", textTransform: "uppercase", marginTop: "0.6rem" }}>
           In Loving Memory
         </div>
         <FloralDivider />
-        <h1 style={{ fontFamily: "Garamond, Georgia, serif", fontSize: "2rem", fontWeight: 400, color: DARK_TEXT, textAlign: "center", margin: "0.1rem 0", letterSpacing: "0.03em", lineHeight: 1.2 }}>
+        <h1 style={{ fontFamily: "Garamond, Georgia, serif", fontSize: "2.6rem", fontWeight: 400, color: DARK_TEXT, textAlign: "center", margin: "0.1rem 0", letterSpacing: "0.03em", lineHeight: 1.2 }}>
           {m.name}
         </h1>
-        <div style={{ fontFamily: "Garamond, Georgia, serif", fontSize: "1rem", color: GOLD, letterSpacing: "0.14em", margin: "0.1rem 0" }}>
+        <div style={{ fontFamily: "Garamond, Georgia, serif", fontSize: "1.3rem", color: GOLD, letterSpacing: "0.14em", margin: "0.1rem 0" }}>
           {m.years}
         </div>
-        <div style={{ fontSize: "0.6rem", color: FAINT_TEXT, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "0.3rem" }}>
+        <div style={{ fontSize: "0.78rem", color: FAINT_TEXT, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "0.3rem" }}>
           {m.title}
         </div>
         <GoldRule />
@@ -202,36 +202,36 @@ function CoverPage({ m }: { m: MemorialConfig }) {
 
       {/* Photo */}
       {photo && (
-        <div style={{ position: "relative", width: "100%", height: "2.8in", overflow: "hidden" }}>
+        <div style={{ position: "relative", width: "100%", height: "4.2in", overflow: "hidden" }}>
           <Image src={photo.src} alt={photo.alt} fill style={{ objectFit: "cover", objectPosition: "center 20%" }} />
           <div style={{ position: "absolute", inset: 0, background: `linear-gradient(to bottom, rgba(253,246,236,0.15) 0%, transparent 20%, transparent 75%, rgba(253,246,236,0.8) 100%)` }} />
         </div>
       )}
 
       {/* Service info */}
-      <div style={{ padding: "0.25in 0.5in 0.1in", textAlign: "center" }}>
+      <div style={{ padding: "0.33in 0.65in 0.1in", textAlign: "center" }}>
         <FloralDivider />
-        <div style={{ fontSize: "0.65rem", color: FAINT_TEXT, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "0.2rem" }}>
+        <div style={{ fontSize: "0.85rem", color: FAINT_TEXT, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "0.2rem" }}>
           Funeral Service
         </div>
-        <div style={{ fontFamily: "Garamond, Georgia, serif", fontSize: "0.85rem", color: DARK_TEXT, lineHeight: 1.7 }}>
+        <div style={{ fontFamily: "Garamond, Georgia, serif", fontSize: "1.1rem", color: DARK_TEXT, lineHeight: 1.7 }}>
           {m.funeralService.date} · {m.funeralService.time}<br />
           {m.funeralService.name}<br />
-          <span style={{ fontSize: "0.75rem", color: MID_TEXT }}>{m.funeralService.address}</span>
+          <span style={{ fontSize: "0.98rem", color: MID_TEXT }}>{m.funeralService.address}</span>
         </div>
         {m.viewing && (
-          <div style={{ fontFamily: "Garamond, Georgia, serif", fontSize: "0.75rem", color: MID_TEXT, marginTop: "0.15rem" }}>
+          <div style={{ fontFamily: "Garamond, Georgia, serif", fontSize: "0.98rem", color: MID_TEXT, marginTop: "0.15rem" }}>
             Viewing (optional): {m.viewing.date} · {m.viewing.startTime} – {m.viewing.endTime}
           </div>
         )}
         {m.reception && (
           <div style={{ marginTop: "0.18rem" }}>
-            <div style={{ fontSize: "0.6rem", color: FAINT_TEXT, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "0.1rem", marginTop: "0.15rem" }}>
+            <div style={{ fontSize: "0.78rem", color: FAINT_TEXT, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "0.1rem", marginTop: "0.15rem" }}>
               Reception
             </div>
-            <div style={{ fontFamily: "Garamond, Georgia, serif", fontSize: "0.78rem", color: DARK_TEXT, lineHeight: 1.6 }}>
+            <div style={{ fontFamily: "Garamond, Georgia, serif", fontSize: "1rem", color: DARK_TEXT, lineHeight: 1.6 }}>
               {m.reception.date} · {m.reception.time}<br />
-              <span style={{ fontSize: "0.7rem", color: MID_TEXT }}>{m.reception.name} · {m.reception.address}</span>
+              <span style={{ fontSize: "0.9rem", color: MID_TEXT }}>{m.reception.name} · {m.reception.address}</span>
             </div>
           </div>
         )}
@@ -248,18 +248,18 @@ function TributePage({ m }: { m: MemorialConfig }) {
   const photo = m.photos[1] ?? m.photos[0];
   return (
     <PagePage>
-      <div style={{ padding: "0.35in 0.5in 0.2in", position: "relative" }}>
+      <div style={{ padding: "0.46in 0.65in 0.26in", position: "relative" }}>
         <AdinkraWatermark />
         <div style={{ position: "relative", zIndex: 1 }}>
           <SectionHeading>In Remembrance</SectionHeading>
           <GoldRule />
           {photo && (
-            <div style={{ position: "relative", width: "2.2in", height: "2.8in", margin: "0.2in auto", border: `1px solid ${BORDER}` }}>
+            <div style={{ position: "relative", width: "3.2in", height: "4in", margin: "0.26in auto", border: `1px solid ${BORDER}` }}>
               <Image src={photo.src} alt={photo.alt} fill style={{ objectFit: "cover", objectPosition: "center 15%" }} />
             </div>
           )}
           <FloralDivider />
-          <p style={{ fontFamily: "Garamond, Georgia, serif", fontSize: "0.85rem", fontStyle: "italic", color: MID_TEXT, lineHeight: 1.9, textAlign: "center", margin: "0.1in 0.3in" }}>
+          <p style={{ fontFamily: "Garamond, Georgia, serif", fontSize: "1.1rem", fontStyle: "italic", color: MID_TEXT, lineHeight: 1.9, textAlign: "center", margin: "0.1in 0.39in" }}>
             {m.tribute}
           </p>
         </div>
@@ -268,20 +268,21 @@ function TributePage({ m }: { m: MemorialConfig }) {
   );
 }
 
-// px available for bio content inside a page (8.5in - kente top/bottom - padding top/bottom)
-// 8.5in @ 96dpi = 816px, minus 8px kente × 2, minus ~48px padding top/bottom = ~752px
-const BIO_CONTENT_HEIGHT_PX = 752;
-const BIO_PADDING = "0.25in 0.3in 0.25in";
+// px available for bio content inside a page (11.5in - kente top/bottom - padding top/bottom)
+// 11.5in @ 96dpi = 1104px, minus 8px kente × 2, minus ~48px padding top/bottom = ~1040px
+// kept at 1008 to leave a small bottom margin buffer
+const BIO_CONTENT_HEIGHT_PX = 1008;
+const BIO_PADDING = "0.33in 0.39in 0.33in";
 
 function renderBioPara(para: string, i: number) {
   const isHeading = para.startsWith("**") && para.endsWith("**");
   const text = isHeading ? para.slice(2, -2) : para;
   return isHeading ? (
-    <div key={i} style={{ fontFamily: "Garamond, Georgia, serif", fontSize: "0.82rem", fontWeight: 700, color: GOLD, marginBottom: "0.2rem", marginTop: "0.35rem", letterSpacing: "0.03em" }}>
+    <div key={i} style={{ fontFamily: "Garamond, Georgia, serif", fontSize: "1.07rem", fontWeight: 700, color: GOLD, marginBottom: "0.2rem", marginTop: "0.35rem", letterSpacing: "0.03em" }}>
       {text}
     </div>
   ) : (
-    <p key={i} style={{ fontFamily: "Garamond, Georgia, serif", fontSize: "0.82rem", color: DARK_TEXT, lineHeight: 1.8, marginBottom: "0.4rem", textAlign: "justify", margin: "0 0 0.4rem" }}>
+    <p key={i} style={{ fontFamily: "Garamond, Georgia, serif", fontSize: "1.07rem", color: DARK_TEXT, lineHeight: 1.8, marginBottom: "0.4rem", textAlign: "justify", margin: "0 0 0.4rem" }}>
       {para}
     </p>
   );
@@ -341,7 +342,7 @@ function BiographyPage({ m }: { m: MemorialConfig }) {
           <div style={{ position: "relative", zIndex: 1 }}>
             <SectionHeading>Biography</SectionHeading>
             <GoldRule />
-            <p style={{ fontFamily: "Garamond, Georgia, serif", fontSize: "0.82rem", color: FAINT_TEXT, fontStyle: "italic", lineHeight: 1.85, marginTop: "0.2in" }}>
+            <p style={{ fontFamily: "Garamond, Georgia, serif", fontSize: "1.07rem", color: FAINT_TEXT, fontStyle: "italic", lineHeight: 1.85, marginTop: "0.26in" }}>
               [ Biography to be added ]
             </p>
           </div>
@@ -354,8 +355,8 @@ function BiographyPage({ m }: { m: MemorialConfig }) {
     <>
       {/* Off-screen probe: render all paras at actual width to measure heights */}
       <div ref={probeRef} style={{
-        position: "fixed", top: 0, left: "-9999px", width: "calc(5.5in - 0.6in)",
-        fontFamily: "Garamond, Georgia, serif", fontSize: "0.82rem", lineHeight: 1.8,
+        position: "fixed", top: 0, left: "-9999px", width: "calc(9in - 0.6in)",
+        fontFamily: "Garamond, Georgia, serif", fontSize: "1.07rem", lineHeight: 1.8,
         visibility: "hidden", pointerEvents: "none", zIndex: -1,
       }}>
         {allParas.map((para, i) => renderBioPara(para, i))}
@@ -376,7 +377,7 @@ function BiographyPage({ m }: { m: MemorialConfig }) {
                   </>
                 ) : (
                   <div style={{ textAlign: "center", marginBottom: "0.08in" }}>
-                    <div style={{ fontFamily: "Garamond, Georgia, serif", fontSize: "0.6rem", color: FAINT_TEXT, letterSpacing: "0.1em", fontStyle: "italic" }}>
+                    <div style={{ fontFamily: "Garamond, Georgia, serif", fontSize: "0.78rem", color: FAINT_TEXT, letterSpacing: "0.1em", fontStyle: "italic" }}>
                       Biography (continued)
                     </div>
                     <GoldRule />
@@ -386,9 +387,9 @@ function BiographyPage({ m }: { m: MemorialConfig }) {
                   {paras.map((para, i) => renderBioPara(para, i))}
                 </div>
                 {isLastPage && (m.preceded?.length || m.survivors?.length) && (
-                  <div style={{ marginTop: "0.2in", borderTop: `1px solid #e8d8b8`, paddingTop: "0.15in" }}>
+                  <div style={{ marginTop: "0.26in", borderTop: `1px solid #e8d8b8`, paddingTop: "0.15in" }}>
                     {m.preceded && m.preceded.length > 0 && (
-                      <p style={{ fontFamily: "Garamond, Georgia, serif", fontSize: "0.8rem", color: DARK_TEXT, lineHeight: 1.8, marginBottom: "0.3rem" }}>
+                      <p style={{ fontFamily: "Garamond, Georgia, serif", fontSize: "1.04rem", color: DARK_TEXT, lineHeight: 1.8, marginBottom: "0.3rem" }}>
                         <strong>Preceded in death by:</strong>{" "}
                         {m.preceded.map((p, i) => (
                           <span key={i}>{i > 0 ? "; " : ""}{p.relation === p.name ? p.name : `his ${p.relation.toLowerCase()}, ${p.name}`}</span>
@@ -396,7 +397,7 @@ function BiographyPage({ m }: { m: MemorialConfig }) {
                       </p>
                     )}
                     {m.survivors && m.survivors.length > 0 && (
-                      <p style={{ fontFamily: "Garamond, Georgia, serif", fontSize: "0.8rem", color: DARK_TEXT, lineHeight: 1.8 }}>
+                      <p style={{ fontFamily: "Garamond, Georgia, serif", fontSize: "1.04rem", color: DARK_TEXT, lineHeight: 1.8 }}>
                         <strong>He is survived by:</strong>{" "}
                         {m.survivors.map((s, i) => (
                           <span key={i}>{i > 0 ? "; " : ""}{`his ${s.relation.toLowerCase()}, ${s.name}`}</span>
@@ -429,11 +430,11 @@ function OrderOfServiceItemList({ items, startIndex, totalItems }: { items: { ti
             padding: "0.12rem 0",
             borderBottom: globalIndex < totalItems - 1 ? `1px solid #e8d8b8` : "none",
           }}>
-            <span style={{ fontFamily: "Garamond, Georgia, serif", fontSize: "0.7rem", color: GOLD, minWidth: "1.2rem", paddingTop: 1, fontWeight: 600 }}>
+            <span style={{ fontFamily: "Garamond, Georgia, serif", fontSize: "0.9rem", color: GOLD, minWidth: "1.2rem", paddingTop: 1, fontWeight: 600 }}>
               {String(globalIndex + 1).padStart(2, "0")}
             </span>
             <div style={{ flex: 1 }}>
-              <span style={{ fontFamily: "Garamond, Georgia, serif", fontSize: "0.82rem", color: DARK_TEXT, fontWeight: 600 }}>
+              <span style={{ fontFamily: "Garamond, Georgia, serif", fontSize: "1.07rem", color: DARK_TEXT, fontWeight: 600 }}>
                 {item.title}
               </span>
               {item.sub && (
@@ -457,29 +458,29 @@ function OrderOfServicePage({ m }: { m: MemorialConfig }) {
     <>
       {pages.map((pageItems, pageIndex) => (
         <PagePage key={pageIndex}>
-          <div style={{ padding: "0.3in 0.45in 0.15in", position: "relative" }}>
+          <div style={{ padding: "0.39in 0.59in 0.15in", position: "relative" }}>
             <AdinkraWatermark />
             <div style={{ position: "relative", zIndex: 1 }}>
               {pageIndex === 0 ? (
                 <>
                   <SectionHeading>Order of Service</SectionHeading>
                   <div style={{ textAlign: "center", marginBottom: "0.08in" }}>
-                    <div style={{ fontSize: "0.62rem", color: FAINT_TEXT, fontFamily: "Garamond, Georgia, serif", fontStyle: "italic" }}>
+                    <div style={{ fontSize: "0.8rem", color: FAINT_TEXT, fontFamily: "Garamond, Georgia, serif", fontStyle: "italic" }}>
                       {m.funeralService.date} · {m.funeralService.time}
                     </div>
                     {m.program.mc && (
-                      <div style={{ fontSize: "0.6rem", color: FAINT_TEXT, marginTop: "0.03rem" }}>
+                      <div style={{ fontSize: "0.78rem", color: FAINT_TEXT, marginTop: "0.03rem" }}>
                         Master of Ceremonies: {m.program.mc}
                       </div>
                     )}
-                    <div style={{ fontSize: "0.6rem", color: FAINT_TEXT, marginTop: "0.03rem" }}>
+                    <div style={{ fontSize: "0.78rem", color: FAINT_TEXT, marginTop: "0.03rem" }}>
                       Officiant: {m.program.officiant}
                     </div>
                   </div>
                 </>
               ) : (
                 <div style={{ textAlign: "center", marginBottom: "0.08in" }}>
-                  <div style={{ fontFamily: "Garamond, Georgia, serif", fontSize: "0.6rem", color: FAINT_TEXT, letterSpacing: "0.1em", fontStyle: "italic" }}>
+                  <div style={{ fontFamily: "Garamond, Georgia, serif", fontSize: "0.78rem", color: FAINT_TEXT, letterSpacing: "0.1em", fontStyle: "italic" }}>
                     Order of Service (continued)
                   </div>
                 </div>
@@ -502,18 +503,18 @@ function OrderOfServicePage({ m }: { m: MemorialConfig }) {
 function HymnPage({ hymn, num }: { hymn: { title: string; lyrics: string }; num: number }) {
   return (
     <PagePage>
-      <div style={{ padding: "0.35in 0.5in", position: "relative" }}>
+      <div style={{ padding: "0.46in 0.65in", position: "relative" }}>
         <AdinkraWatermark />
         <div style={{ position: "relative", zIndex: 1 }}>
           <div style={{ textAlign: "center", marginBottom: "0.05in" }}>
-            <div style={{ fontSize: "0.55rem", color: FAINT_TEXT, letterSpacing: "0.14em", textTransform: "uppercase" }}>Hymn {num}</div>
+            <div style={{ fontSize: "0.72rem", color: FAINT_TEXT, letterSpacing: "0.14em", textTransform: "uppercase" }}>Hymn {num}</div>
           </div>
           <SectionHeading>{hymn.title}</SectionHeading>
           <GoldRule />
-          <div style={{ marginTop: "0.2in" }}>
+          <div style={{ marginTop: "0.26in" }}>
             {hymn.lyrics.split("\n\n").map((verse, i) => (
               <div key={i} style={{ marginBottom: "0.6rem" }}>
-                <p style={{ fontFamily: "Garamond, Georgia, serif", fontSize: "0.82rem", color: DARK_TEXT, lineHeight: 1.9, textAlign: "center", whiteSpace: "pre-line", margin: 0 }}>
+                <p style={{ fontFamily: "Garamond, Georgia, serif", fontSize: "1.07rem", color: DARK_TEXT, lineHeight: 1.9, textAlign: "center", whiteSpace: "pre-line", margin: 0 }}>
                   {verse}
                 </p>
               </div>
@@ -530,11 +531,11 @@ type PhotoEntry = { src: string; alt: string; caption?: string; fit?: "cover" | 
 function PhotoPage({ section, photos, showSection }: { section: string; photos: PhotoEntry[]; showSection: boolean }) {
   return (
     <PagePage>
-      <div style={{ padding: "0.2in 0.4in 0.15in", position: "relative" }}>
+      <div style={{ padding: "0.26in 0.52in 0.15in", position: "relative" }}>
         {showSection && (
           <>
             <div style={{ textAlign: "center", margin: "0.05in 0 0" }}>
-              <div style={{ fontFamily: "Garamond, Georgia, serif", fontSize: "0.65rem", color: FAINT_TEXT, letterSpacing: "0.14em", textTransform: "uppercase", marginBottom: "0.05in" }}>
+              <div style={{ fontFamily: "Garamond, Georgia, serif", fontSize: "0.85rem", color: FAINT_TEXT, letterSpacing: "0.14em", textTransform: "uppercase", marginBottom: "0.05in" }}>
                 {section}
               </div>
             </div>
@@ -544,7 +545,7 @@ function PhotoPage({ section, photos, showSection }: { section: string; photos: 
         )}
         {!showSection && (
           <div style={{ textAlign: "center", marginBottom: "0.1in" }}>
-            <div style={{ fontFamily: "Garamond, Georgia, serif", fontSize: "0.6rem", color: FAINT_TEXT, letterSpacing: "0.1em", fontStyle: "italic" }}>
+            <div style={{ fontFamily: "Garamond, Georgia, serif", fontSize: "0.78rem", color: FAINT_TEXT, letterSpacing: "0.1em", fontStyle: "italic" }}>
               {section} (continued)
             </div>
             <GoldRule />
@@ -553,7 +554,7 @@ function PhotoPage({ section, photos, showSection }: { section: string; photos: 
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.15in" }}>
           {photos.map((p, i) => (
             <div key={i}>
-              <div style={{ position: "relative", height: "2.35in", border: `1px solid ${BORDER}`, background: "#f0e6d0", overflow: "hidden" }}>
+              <div style={{ position: "relative", height: "3.5in", border: `1px solid ${BORDER}`, background: "#f0e6d0", overflow: "hidden" }}>
                 <Image src={p.src} alt={p.alt} fill style={{ objectFit: p.fit ?? "cover", objectPosition: p.position ?? (p.fit === "contain" ? "center center" : "center 15%"), transform: p.scale ? `scale(${p.scale})` : undefined, transformOrigin: p.position ?? "center center" }} />
               </div>
               {p.caption && (
@@ -574,7 +575,7 @@ function AcknowledgementsPage({ m }: { m: MemorialConfig }) {
   const ack = m.acknowledgements;
   return (
     <PagePage>
-      <div style={{ padding: "0.3in 0.45in 0.2in", position: "relative" }}>
+      <div style={{ padding: "0.39in 0.59in 0.26in", position: "relative" }}>
         <AdinkraWatermark />
         <div style={{ position: "relative", zIndex: 1 }}>
           <SectionHeading>Acknowledgements</SectionHeading>
@@ -583,22 +584,22 @@ function AcknowledgementsPage({ m }: { m: MemorialConfig }) {
             <>
               {ack.sections.map((section, i) => (
                 <div key={i} style={{ marginTop: "0.18in" }}>
-                  <div style={{ fontFamily: "Garamond, Georgia, serif", fontSize: "0.78rem", fontWeight: 700, color: GOLD, letterSpacing: "0.04em", marginBottom: "0.08rem" }}>
+                  <div style={{ fontFamily: "Garamond, Georgia, serif", fontSize: "1rem", fontWeight: 700, color: GOLD, letterSpacing: "0.04em", marginBottom: "0.08rem" }}>
                     {section.title}
                   </div>
-                  <p style={{ fontFamily: "Garamond, Georgia, serif", fontSize: "0.8rem", color: DARK_TEXT, lineHeight: 1.85, textAlign: "justify", margin: 0 }}>
+                  <p style={{ fontFamily: "Garamond, Georgia, serif", fontSize: "1.04rem", color: DARK_TEXT, lineHeight: 1.85, textAlign: "justify", margin: 0 }}>
                     {section.names}
                   </p>
                 </div>
               ))}
               {ack.closing && (
-                <p style={{ fontFamily: "Garamond, Georgia, serif", fontSize: "0.78rem", color: MID_TEXT, lineHeight: 1.85, textAlign: "justify", marginTop: "0.2in", fontStyle: "italic" }}>
+                <p style={{ fontFamily: "Garamond, Georgia, serif", fontSize: "1rem", color: MID_TEXT, lineHeight: 1.85, textAlign: "justify", marginTop: "0.26in", fontStyle: "italic" }}>
                   {ack.closing}
                 </p>
               )}
             </>
           ) : (
-            <p style={{ fontFamily: "Garamond, Georgia, serif", fontSize: "0.82rem", color: FAINT_TEXT, fontStyle: "italic", lineHeight: 1.9, marginTop: "0.2in", textAlign: "center" }}>
+            <p style={{ fontFamily: "Garamond, Georgia, serif", fontSize: "1.07rem", color: FAINT_TEXT, fontStyle: "italic", lineHeight: 1.9, marginTop: "0.26in", textAlign: "center" }}>
               [ Add acknowledgements to the memorial config ]
             </p>
           )}
@@ -613,35 +614,35 @@ function BackCoverPage({ m }: { m: MemorialConfig }) {
   const lastPhoto = m.photos[m.photos.length - 1];
   return (
     <PagePage>
-      <div style={{ padding: "0.35in 0.5in", display: "flex", flexDirection: "column", alignItems: "center", gap: "0.15rem", position: "relative" }}>
-        <div style={{ position: "absolute", top: "0.4in", left: "0.4in" }}><CornerFlower size={52} /></div>
-        <div style={{ position: "absolute", top: "0.4in", right: "0.4in" }}><CornerFlower size={52} flip /></div>
+      <div style={{ padding: "0.46in 0.65in", display: "flex", flexDirection: "column", alignItems: "center", gap: "0.15rem", position: "relative" }}>
+        <div style={{ position: "absolute", top: "0.52in", left: "0.52in" }}><CornerFlower size={52} /></div>
+        <div style={{ position: "absolute", top: "0.52in", right: "0.52in" }}><CornerFlower size={52} flip /></div>
         <div style={{ position: "relative", zIndex: 1, width: "100%", textAlign: "center" }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/GyeNyame.png" alt="Gye Nyame" style={{ width: 64, height: 64, objectFit: "contain", filter: "sepia(1) saturate(3) hue-rotate(5deg) brightness(0.75)", opacity: 0.7, margin: "0.3in auto 0.1in" }} />
-          <div style={{ fontFamily: "Garamond, Georgia, serif", fontSize: "0.75rem", color: GOLD, letterSpacing: "0.1em" }}>
+          <img src="/GyeNyame.png" alt="Gye Nyame" style={{ width: 64, height: 64, objectFit: "contain", filter: "sepia(1) saturate(3) hue-rotate(5deg) brightness(0.75)", opacity: 0.7, margin: "0.39in auto 0.1in" }} />
+          <div style={{ fontFamily: "Garamond, Georgia, serif", fontSize: "0.98rem", color: GOLD, letterSpacing: "0.1em" }}>
             {m.adinkra.symbol}
           </div>
-          <div style={{ fontFamily: "Garamond, Georgia, serif", fontSize: "0.65rem", color: FAINT_TEXT, fontStyle: "italic", marginBottom: "0.15in" }}>
+          <div style={{ fontFamily: "Garamond, Georgia, serif", fontSize: "0.85rem", color: FAINT_TEXT, fontStyle: "italic", marginBottom: "0.15in" }}>
             {m.adinkra.meaning}
           </div>
           <GoldRule />
           {lastPhoto && (
-            <div style={{ position: "relative", width: "2in", height: "2.5in", margin: "0.2in auto", border: `1px solid ${BORDER}` }}>
+            <div style={{ position: "relative", width: "3in", height: "3.8in", margin: "0.26in auto", border: `1px solid ${BORDER}` }}>
               <Image src={lastPhoto.src} alt={lastPhoto.alt} fill style={{ objectFit: "cover", objectPosition: "center 15%" }} />
             </div>
           )}
           <FloralDivider />
-          <div style={{ fontFamily: "Garamond, Georgia, serif", fontSize: "1.1rem", color: DARK_TEXT, letterSpacing: "0.03em", marginTop: "0.1in" }}>
+          <div style={{ fontFamily: "Garamond, Georgia, serif", fontSize: "1.43rem", color: DARK_TEXT, letterSpacing: "0.03em", marginTop: "0.1in" }}>
             {m.name}
           </div>
-          <div style={{ fontFamily: "Garamond, Georgia, serif", fontSize: "0.8rem", color: GOLD, letterSpacing: "0.12em", margin: "0.05rem 0" }}>
+          <div style={{ fontFamily: "Garamond, Georgia, serif", fontSize: "1.04rem", color: GOLD, letterSpacing: "0.12em", margin: "0.05rem 0" }}>
             {m.years}
           </div>
-          <div style={{ fontFamily: "Garamond, Georgia, serif", fontSize: "0.7rem", color: FAINT_TEXT, fontStyle: "italic", marginTop: "0.15in" }}>
+          <div style={{ fontFamily: "Garamond, Georgia, serif", fontSize: "0.9rem", color: FAINT_TEXT, fontStyle: "italic", marginTop: "0.15in" }}>
             Until we meet again.
           </div>
-          <div style={{ marginTop: "0.2in", display: "flex", justifyContent: "space-between" }}>
+          <div style={{ marginTop: "0.26in", display: "flex", justifyContent: "space-between" }}>
             <CornerFlower size={40} />
             <CornerFlower size={40} flip />
           </div>
@@ -657,8 +658,8 @@ function PagePage({ children }: { children: React.ReactNode }) {
   return (
     <div className="program-page" style={{
       background: PAGE_BG,
-      width: "5.5in",
-      height: "8.5in",
+      width: "9in",        // 8.5in + 0.25in bleed each side
+      height: "11.5in",   // 11in + 0.25in bleed top and bottom
       margin: "0 auto",
       boxSizing: "border-box",
       position: "relative",
@@ -697,7 +698,7 @@ function SectionHeading({ children }: { children: React.ReactNode }) {
         background: PAGE_BG,
         padding: "0 0.15in",
         fontFamily: "Garamond, Georgia, serif",
-        fontSize: "1.05rem",
+        fontSize: "1.37rem",
         fontWeight: 400,
         color: GOLD,
         letterSpacing: "0.1em",
@@ -718,11 +719,18 @@ function chunkArray<T>(arr: T[], size: number): T[][] {
   return chunks;
 }
 
-const PAGE_WIDTH_IN = 5.5;
-const PAGE_HEIGHT_IN = 8.5;
+const PAGE_WIDTH_IN = 9;    // includes 0.25in bleed each side
+const PAGE_HEIGHT_IN = 11.5; // includes 0.25in bleed top and bottom
 
 /* ── Main component ─────────────────────────────────────────── */
 export default function ProgramClient({ m }: { m: MemorialConfig }) {
+  const [pageCount, setPageCount] = useState<number>(0);
+
+  useEffect(() => {
+    const count = document.querySelectorAll(".program-page").length;
+    setPageCount(count);
+  });
+
   useEffect(() => {
     function scalePages() {
       const pxPerIn = 96;
@@ -773,7 +781,7 @@ export default function ProgramClient({ m }: { m: MemorialConfig }) {
             onClick={() => window.print()}
             style={{
               background: GOLD, color: "#0e0b07", border: "none", borderRadius: "4px",
-              padding: "0.6rem 1.5rem", fontFamily: "sans-serif", fontSize: "0.85rem",
+              padding: "0.6rem 1.5rem", fontFamily: "sans-serif", fontSize: "1.1rem",
               fontWeight: 600, cursor: "pointer", letterSpacing: "0.05em",
             }}
           >
@@ -782,7 +790,7 @@ export default function ProgramClient({ m }: { m: MemorialConfig }) {
           <a href={`/akan/${m.slug}`} style={{
             background: "transparent", color: GOLD, border: `1px solid ${GOLD}`,
             borderRadius: "4px", padding: "0.6rem 1.5rem", fontFamily: "sans-serif",
-            fontSize: "0.85rem", textDecoration: "none", letterSpacing: "0.05em",
+            fontSize: "1.1rem", textDecoration: "none", letterSpacing: "0.05em",
           }}>
             ← Memorial page
           </a>
@@ -796,31 +804,53 @@ export default function ProgramClient({ m }: { m: MemorialConfig }) {
           borderRadius: "6px",
           padding: "1rem 1.25rem",
           fontFamily: "sans-serif",
-          fontSize: "0.78rem",
+          fontSize: "1rem",
           color: "#c4a86a",
           lineHeight: 1.7,
         }}>
-          <div style={{ fontWeight: 700, color: GOLD, marginBottom: "0.4rem", letterSpacing: "0.05em", textTransform: "uppercase", fontSize: "0.7rem" }}>
+          <div style={{ fontWeight: 700, color: GOLD, marginBottom: "0.4rem", letterSpacing: "0.05em", textTransform: "uppercase", fontSize: "0.9rem" }}>
             Printing as a booklet
           </div>
           <div style={{ color: "#9a7a4a", marginBottom: "0.6rem" }}>
-            Each page is 5.5″ × 8.5″. To print as a center-fold booklet on standard 8.5″ × 11″ paper:
+            Each page is 8.5″ × 11″. To print as a center-fold booklet on standard 11″ × 17″ paper:
           </div>
           <ol style={{ margin: 0, paddingLeft: "1.2rem", color: "#b09060", display: "flex", flexDirection: "column", gap: "0.25rem" }}>
             <li>Click <strong style={{ color: GOLD }}>Print / Save PDF</strong> above and save as PDF first</li>
             <li>Open the PDF in <strong style={{ color: GOLD }}>Adobe Acrobat</strong> (free Reader works)</li>
             <li>File → Print → under <strong style={{ color: GOLD }}>Page Sizing</strong>, choose <strong style={{ color: GOLD }}>Booklet</strong></li>
-            <li>Set paper to <strong style={{ color: GOLD }}>Letter (8.5″ × 11″) landscape</strong></li>
+            <li>Set paper to <strong style={{ color: GOLD }}>Tabloid/Ledger (11″ × 17″) landscape</strong></li>
             <li>Print double-sided, flip on short edge, then fold and staple in the center</li>
           </ol>
-          <div style={{ marginTop: "0.6rem", color: "#6a5030", fontSize: "0.72rem" }}>
+          <div style={{ marginTop: "0.6rem", color: "#6a5030", fontSize: "0.94rem" }}>
             On Mac: Print dialog → Layout → Two-Sided → Short-Edge binding also works for simple folded booklets.
           </div>
         </div>
 
-        <div style={{ fontSize: "0.72rem", color: "#7a6a52", fontFamily: "sans-serif" }}>
+        <div style={{ fontSize: "0.94rem", color: "#7a6a52", fontFamily: "sans-serif" }}>
           Enable "Background graphics" in print settings to preserve colors
         </div>
+
+        {pageCount > 0 && (
+          <div className="booklet-instructions" style={{
+            maxWidth: "480px", width: "100%",
+            background: "#1e1408",
+            border: `1px solid #4a3820`,
+            borderRadius: "6px",
+            padding: "0.75rem 1.25rem",
+            fontFamily: "sans-serif",
+            fontSize: "1rem",
+            color: "#9a7a4a",
+            lineHeight: 1.7,
+          }}>
+            <span style={{ color: GOLD, fontWeight: 700 }}>{pageCount} pages</span>
+            {" · "}
+            {Math.ceil(pageCount / 4) * 4 !== pageCount
+              ? <>Round up to <span style={{ color: GOLD, fontWeight: 700 }}>{Math.ceil(pageCount / 4) * 4} pages</span> for booklet printing (must be a multiple of 4){" · "}</>
+              : null
+            }
+            <span style={{ color: GOLD, fontWeight: 700 }}>{Math.ceil(pageCount / 4) * 2} sheets</span> of 11″ × 17″ paper
+          </div>
+        )}
 
         {/* Pages */}
         <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem", alignItems: "center" }}>
@@ -838,7 +868,7 @@ export default function ProgramClient({ m }: { m: MemorialConfig }) {
           <BackCoverPage m={m} />
         </div>
 
-        <div style={{ fontSize: "0.72rem", color: "#4a3a2a", fontFamily: "sans-serif" }}>
+        <div style={{ fontSize: "0.94rem", color: "#4a3a2a", fontFamily: "sans-serif" }}>
           keepingthem.net
         </div>
       </div>
@@ -847,6 +877,7 @@ export default function ProgramClient({ m }: { m: MemorialConfig }) {
         .program-page {
           transform-origin: top center;
         }
+        @page { size: 9in 11.5in; margin: 0; }
         @media print {
           body { margin: 0; background: white; }
           .program-screen-wrapper {
@@ -860,8 +891,8 @@ export default function ProgramClient({ m }: { m: MemorialConfig }) {
             page-break-after: always;
             margin: 0 !important;
             border: none !important;
-            width: 5.5in !important;
-            min-height: 8.5in !important;
+            width: 9in !important;
+            min-height: 11.5in !important;
             transform: none !important;
           }
           * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }

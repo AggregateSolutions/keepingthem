@@ -68,7 +68,7 @@ const config: MemorialConfig = {
       { title: "Music Dedication",                sub: "Aliah Aiken - You Raised Me Up" },
       { title: "Scripture Reading",               sub: "Isaiah 40:28-31 (For His Aviation Roots & Resilience) - Cairo Kwayisi" },
       { title: "Sermon",                          sub: "Pastor, Danny Newbern" },
-      { title: "Ghanaian Music Dedication",       sub: "Juliet Tetteh-Hao" },
+      { title: "Ghanaian Music Dedication",       sub: "Juliet Tetteh-Hago" },
       { title: "Euology",                         sub: "Peter Onen" },
       //{ title: "Poem Reading",                    sub: "TBA"},
       { title: "Tributes",                        sub: "Family, Friends, Colleagues"},
