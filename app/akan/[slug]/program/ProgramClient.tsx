@@ -609,6 +609,46 @@ function AcknowledgementsPage({ m }: { m: MemorialConfig }) {
   );
 }
 
+function InLovingMemoryPage({ m }: { m: MemorialConfig }) {
+  return (
+    <PagePage>
+      <div style={{ height: "100%", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0.6in 0.8in", position: "relative" }}>
+        <PageCorners />
+        <div style={{ position: "relative", zIndex: 1, textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center", gap: "0.3in" }}>
+          {/* Top ornament */}
+          <div style={{ opacity: 0.55 }}>
+            <CornerFlower size={64} />
+          </div>
+
+          <FloralDivider />
+
+          {/* Main text */}
+          <div style={{ fontFamily: "Garamond, Georgia, serif", fontSize: "0.85rem", color: FAINT_TEXT, letterSpacing: "0.28em", textTransform: "uppercase" }}>
+            ~ &nbsp; In Loving Memory &nbsp; ~
+          </div>
+
+          <h2 style={{ fontFamily: "Garamond, Georgia, serif", fontSize: "3.6rem", fontWeight: 400, color: DARK_TEXT, margin: 0, letterSpacing: "0.04em", lineHeight: 1.15, textAlign: "center" }}>
+            {m.name}
+          </h2>
+
+          <div style={{ fontFamily: "Garamond, Georgia, serif", fontSize: "1.4rem", color: GOLD, letterSpacing: "0.16em" }}>
+            {m.years}
+          </div>
+
+          <GoldRule />
+
+          <FloralDivider />
+
+          {/* Bottom ornament */}
+          <div style={{ opacity: 0.55, transform: "scaleY(-1)" }}>
+            <CornerFlower size={64} />
+          </div>
+        </div>
+      </div>
+    </PagePage>
+  );
+}
+
 function BackCoverPage({ m }: { m: MemorialConfig }) {
   const lastPhoto = m.photos[m.photos.length - 1];
   return (
@@ -680,8 +720,6 @@ function PagePage({ children }: { children: React.ReactNode }) {
       <SideBorder side="right" />
       {/* Four corner flowers */}
       <PageCorners />
-      {/* Adinkra footer strip */}
-      <AdinkraFooterStrip />
       {children}
     </div>
   );
@@ -843,11 +881,7 @@ export default function ProgramClient({ m }: { m: MemorialConfig }) {
           }}>
             <span style={{ color: GOLD, fontWeight: 700 }}>{pageCount} pages</span>
             {" · "}
-            {Math.ceil(pageCount / 4) * 4 !== pageCount
-              ? <>Round up to <span style={{ color: GOLD, fontWeight: 700 }}>{Math.ceil(pageCount / 4) * 4} pages</span> for booklet printing (must be a multiple of 4){" · "}</>
-              : null
-            }
-            <span style={{ color: GOLD, fontWeight: 700 }}>{Math.ceil(pageCount / 4) * 2} sheets</span> of 11″ × 17″ paper
+            <span style={{ color: GOLD, fontWeight: 700 }}>{Math.ceil(pageCount / 2)}</span> sheets of 11″ × 17″ paper
           </div>
         )}
 
@@ -855,6 +889,7 @@ export default function ProgramClient({ m }: { m: MemorialConfig }) {
         <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem", alignItems: "center" }}>
           <CoverPage m={m} />
           <TributePage m={m} />
+          <InLovingMemoryPage m={m} />
           <BiographyPage m={m} />
           <OrderOfServicePage m={m} />
           {m.hymns?.map((hymn, i) => (
@@ -864,6 +899,7 @@ export default function ProgramClient({ m }: { m: MemorialConfig }) {
             <PhotoPage key={i} section={page.section} photos={page.photos} showSection={page.showSection} />
           ))}
           <AcknowledgementsPage m={m} />
+          <InLovingMemoryPage m={m} />
           <BackCoverPage m={m} />
         </div>
 
