@@ -44,7 +44,7 @@ const config: MemorialConfig = {
     privateLocation: true,
   },
   stream: {
-    url: "",
+    url: "https://player.funeralvue.com/events/42haeuwj/player",
     label: "Watch the service live",
   },
   florists: [

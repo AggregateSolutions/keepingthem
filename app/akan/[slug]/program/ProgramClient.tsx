@@ -202,7 +202,7 @@ function CoverPage({ m }: { m: MemorialConfig }) {
       {/* Photo */}
       {photo && (
         <div style={{ position: "relative", width: "100%", height: "6.8in", overflow: "hidden" }}>
-          <Image src={photo.src} alt={photo.alt} fill style={{ objectFit: "cover", objectPosition: "center 35%", transform: "scale(0.72)", transformOrigin: "center 35%" }} />
+          <Image src={photo.src} alt={photo.alt} fill loading="eager" style={{ objectFit: "cover", objectPosition: "center 35%", transform: "scale(0.72)", transformOrigin: "center 35%" }} />
           <div style={{ position: "absolute", inset: 0, background: `linear-gradient(to bottom, rgba(253,246,236,0.15) 0%, transparent 20%, transparent 75%, rgba(253,246,236,0.8) 100%)` }} />
           <div style={{ position: "absolute", bottom: 0, left: 0, right: 0 }}><FloralDivider /></div>
         </div>
@@ -254,7 +254,7 @@ function TributePage({ m }: { m: MemorialConfig }) {
           <GoldRule />
           {photo && (
             <div style={{ position: "relative", width: "3.2in", height: "4in", margin: "0.26in auto", border: `1px solid ${BORDER}` }}>
-              <Image src={photo.src} alt={photo.alt} fill style={{ objectFit: "cover", objectPosition: "center 15%" }} />
+              <Image src={photo.src} alt={photo.alt} fill loading="eager" style={{ objectFit: "cover", objectPosition: "center 15%" }} />
             </div>
           )}
           <FloralDivider />
@@ -554,7 +554,7 @@ function PhotoPage({ section, photos, showSection }: { section: string; photos: 
           {photos.map((p, i) => (
             <div key={i}>
               <div style={{ position: "relative", height: "3.5in", border: `1px solid ${BORDER}`, background: "#f0e6d0", overflow: "hidden" }}>
-                <Image src={p.src} alt={p.alt} fill style={{ objectFit: p.fit ?? "cover", objectPosition: p.position ?? (p.fit === "contain" ? "center center" : "center 15%"), transform: p.scale ? `scale(${p.scale})` : undefined, transformOrigin: p.position ?? "center center" }} />
+                <Image src={p.src} alt={p.alt} fill loading="eager" style={{ objectFit: p.fit ?? "cover", objectPosition: p.position ?? (p.fit === "contain" ? "center center" : "center 15%"), transform: p.scale ? `scale(${p.scale})` : undefined, transformOrigin: p.position ?? "center center" }} />
               </div>
               {p.caption && (
                 <div style={{ fontFamily: "Garamond, Georgia, serif", fontSize: "0.58rem", color: FAINT_TEXT, fontStyle: "italic", textAlign: "center", marginTop: "0.04in" }}>
@@ -668,7 +668,7 @@ function BackCoverPage({ m }: { m: MemorialConfig }) {
           <GoldRule />
           {lastPhoto && (
             <div style={{ position: "relative", width: "3in", height: "3.8in", margin: "0.26in auto", border: `1px solid ${BORDER}` }}>
-              <Image src={lastPhoto.src} alt={lastPhoto.alt} fill style={{ objectFit: "cover", objectPosition: "center 15%" }} />
+              <Image src={lastPhoto.src} alt={lastPhoto.alt} fill loading="eager" style={{ objectFit: "cover", objectPosition: "center 15%" }} />
             </div>
           )}
           <FloralDivider />
@@ -703,7 +703,6 @@ function PagePage({ children }: { children: React.ReactNode }) {
       boxSizing: "border-box",
       position: "relative",
       border: `1.5px solid ${BORDER}`,
-      pageBreakAfter: "always",
       overflow: "hidden",
     }}>
       {/* Kente stripes pinned to top and bottom */}
@@ -813,7 +812,7 @@ export default function ProgramClient({ m }: { m: MemorialConfig }) {
         gap: "1.5rem",
       }}>
         {/* Controls */}
-        <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap", justifyContent: "center" }}>
+        <div className="program-no-print" style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap", justifyContent: "center" }}>
           <button
             onClick={() => window.print()}
             style={{
@@ -863,7 +862,7 @@ export default function ProgramClient({ m }: { m: MemorialConfig }) {
           </div>
         </div>
 
-        <div style={{ fontSize: "0.94rem", color: "#7a6a52", fontFamily: "sans-serif" }}>
+        <div className="program-no-print" style={{ fontSize: "0.94rem", color: "#7a6a52", fontFamily: "sans-serif" }}>
           Enable "Background graphics" in print settings to preserve colors
         </div>
 
@@ -885,8 +884,11 @@ export default function ProgramClient({ m }: { m: MemorialConfig }) {
           </div>
         )}
 
-        {/* Pages */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem", alignItems: "center" }}>
+        <div className="program-no-print" style={{ fontSize: "0.94rem", color: "#4a3a2a", fontFamily: "sans-serif" }}>
+          keepingthem.net
+        </div>
+
+        <div className="program-pages-container" style={{ display: "flex", flexDirection: "column", gap: "1.5rem", alignItems: "center", width: "100%" }}>
           <CoverPage m={m} />
           <TributePage m={m} />
           <InLovingMemoryPage m={m} />
@@ -902,10 +904,6 @@ export default function ProgramClient({ m }: { m: MemorialConfig }) {
           <InLovingMemoryPage m={m} />
           <BackCoverPage m={m} />
         </div>
-
-        <div style={{ fontSize: "0.94rem", color: "#4a3a2a", fontFamily: "sans-serif" }}>
-          keepingthem.net
-        </div>
       </div>
 
       <style>{`
@@ -914,21 +912,37 @@ export default function ProgramClient({ m }: { m: MemorialConfig }) {
         }
         @page { size: 9in 11.5in; margin: 0; }
         @media print {
-          body { margin: 0; background: white; }
+          body { margin: 0; }
           .program-screen-wrapper {
-            background: white !important;
+            background: none !important;
             padding: 0 !important;
             gap: 0 !important;
             min-height: unset !important;
+            display: block !important;
           }
-          button, a[href], .booklet-instructions { display: none !important; }
+          .booklet-instructions,
+          .program-no-print,
+          button, a {
+            display: none !important;
+          }
+          .program-pages-container {
+            display: block !important;
+            gap: 0 !important;
+            padding: 0 !important;
+            background: none !important;
+          }
           .program-page {
-            page-break-after: always;
+            width: 9in !important;
+            height: 11.5in !important;
+            overflow: hidden !important;
             margin: 0 !important;
             border: none !important;
-            width: 9in !important;
-            min-height: 11.5in !important;
             transform: none !important;
+            page-break-after: always;
+            page-break-inside: avoid;
+          }
+          .program-page:last-child {
+            page-break-after: avoid !important;
           }
           * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
         }
