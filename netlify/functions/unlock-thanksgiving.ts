@@ -40,18 +40,9 @@ export const handler: Handler = async (event) => {
   // Verify passphrase
   const correctPassphrase = process.env.THANKSGIVING_PASSPHRASE;
   const location = process.env.THANKSGIVING_LOCATION;
-  const expiryDate = process.env.THANKSGIVING_EXPIRY_DATE; // format: YYYY-MM-DD
 
   if (!correctPassphrase || !location) {
     return { statusCode: 500, body: JSON.stringify({ error: "Not configured" }) };
-  }
-
-  // Check expiry
-  if (expiryDate && new Date() > new Date(expiryDate)) {
-    return {
-      statusCode: 410,
-      body: JSON.stringify({ error: "This information is no longer available." }),
-    };
   }
 
   if (!slug) {
