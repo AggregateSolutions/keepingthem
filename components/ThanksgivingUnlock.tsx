@@ -48,18 +48,22 @@ export default function ThanksgivingUnlock({ slug }: { slug: string }) {
   }
 
   return (
-    <span>
+    <span style={{ display: "block" }}>
       <span style={{ color: "var(--text-muted)", fontStyle: "italic" }}>Private residence · Dacula, GA</span>
+      <span style={{ display: "block", fontSize: "0.8rem", color: "var(--text-faint)", marginTop: "0.35rem", fontStyle: "italic" }}>
+        Address shared with RSVP confirmation — enter your family passphrase to view.
+      </span>
       {!open && (
         <button
           onClick={() => setOpen(true)}
           style={{
-            marginLeft: "0.6rem", background: "none", border: "none",
-            color: "var(--gold)", fontSize: "0.8rem", cursor: "pointer",
-            textDecoration: "underline", padding: 0, fontFamily: "var(--font-sans)",
+            marginTop: "0.4rem", display: "inline-block", background: "var(--gold)",
+            color: "var(--bg-deep)", border: "none", borderRadius: "4px",
+            padding: "0.35rem 0.9rem", fontSize: "0.8rem", cursor: "pointer",
+            fontFamily: "var(--font-sans)", fontWeight: 600, letterSpacing: "0.03em",
           }}
         >
-          View address
+          Enter passphrase
         </button>
       )}
       {open && (
