@@ -1,4 +1,5 @@
 import { supabase } from "./supabase";
+import { getAdminClient } from "./supabaseAdmin";
 import type { MemorialConfig } from "@/types/memorial";
 
 export type MemorialRow = {
@@ -32,7 +33,7 @@ export async function listMemorialsFromDb(): Promise<MemorialRow[]> {
 }
 
 export async function upsertMemorial(config: MemorialConfig): Promise<{ error: string | null }> {
-  const { error } = await supabase
+  const { error } = await getAdminClient()
     .from("memorials")
     .upsert({
       slug: config.slug,
@@ -45,7 +46,7 @@ export async function upsertMemorial(config: MemorialConfig): Promise<{ error: s
 }
 
 export async function deleteMemorial(slug: string): Promise<{ error: string | null }> {
-  const { error } = await supabase
+  const { error } = await getAdminClient()
     .from("memorials")
     .delete()
     .eq("slug", slug);
