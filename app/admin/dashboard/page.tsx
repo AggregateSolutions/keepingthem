@@ -1,6 +1,7 @@
 import { listMemorialsFromDb } from "@/lib/memorialDb";
 import Link from "next/link";
 import AdminShell from "@/components/admin/AdminShell";
+import SeedButton from "@/components/admin/SeedButton";
 
 export const dynamic = "force-dynamic";
 
@@ -13,13 +14,16 @@ export default async function DashboardPage() {
         <div style={{ fontSize: "0.85rem", color: "#7a6a52" }}>
           {memorials.length} memorial{memorials.length !== 1 ? "s" : ""} on file
         </div>
-        <Link href="/admin/memorial/new" style={{
-          background: "#c8962e", color: "#0e0b07", borderRadius: "4px",
-          padding: "0.5rem 1.25rem", fontSize: "0.85rem", fontWeight: 600,
-          textDecoration: "none", letterSpacing: "0.04em",
-        }}>
-          + New memorial
-        </Link>
+        <div style={{ display: "flex", gap: "0.75rem" }}>
+          {memorials.length === 0 && <SeedButton />}
+          <Link href="/admin/memorial/new" style={{
+            background: "#c8962e", color: "#0e0b07", borderRadius: "4px",
+            padding: "0.5rem 1.25rem", fontSize: "0.85rem", fontWeight: 600,
+            textDecoration: "none", letterSpacing: "0.04em",
+          }}>
+            + New memorial
+          </Link>
+        </div>
       </div>
 
       {memorials.length === 0 ? (
@@ -27,7 +31,8 @@ export default async function DashboardPage() {
           background: "#241a0a", border: "1px solid #4a3820", borderRadius: "6px",
           padding: "2rem", textAlign: "center", color: "#7a6a52", fontSize: "0.9rem",
         }}>
-          No memorials yet. Create your first one above.
+          No memorials yet.{" "}
+          <span style={{ color: "#9a7a52" }}>Use "Seed from files" above to import existing memorials, or create a new one.</span>
         </div>
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
