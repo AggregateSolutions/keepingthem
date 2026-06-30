@@ -98,7 +98,7 @@ export default function RsvpForm({ funeral, thanksgiving, reception, memorialSlu
     setError("");
 
     const { error: dbError } = await supabase
-      .from("rsvps")
+      .from("keepingthem_rsvps")
       .insert({
         memorial_slug:       memorialSlug,
         culture:             culture,
