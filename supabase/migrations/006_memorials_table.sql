@@ -1,5 +1,9 @@
--- Run this in Supabase SQL Editor
-create table if not exists keepingthem_memorials (
+-- ============================================================
+-- keepingthem.net — memorials table
+-- Run this in Supabase Studio SQL Editor
+-- ============================================================
+
+create table if not exists keepingthem.memorials (
   id          bigint generated always as identity primary key,
   slug        text unique not null,
   culture     text not null default 'akan',
@@ -9,17 +13,17 @@ create table if not exists keepingthem_memorials (
 );
 
 -- Index for fast slug lookups
-create index if not exists keepingthem_memorials_slug_idx on keepingthem_memorials (slug);
+create index if not exists memorials_slug_idx on keepingthem.memorials (slug);
 
 -- Enable RLS
-alter table keepingthem_memorials enable row level security;
+alter table keepingthem.memorials enable row level security;
 
 -- Public can read memorials (needed for memorial pages to load config)
 create policy "Public can read memorials"
-  on keepingthem_memorials for select
+  on keepingthem.memorials for select
   using (true);
 
--- Only service role (server-side) can insert/update/delete
-create policy "Service role can write memorials"
-  on keepingthem_memorials for all
-  using (auth.role() = 'service_role');
+-- Authenticated users (admin) can insert/update/delete
+create policy "Authenticated users can write memorials"
+  on keepingthem.memorials for all
+  using (auth.role() = 'authenticated');

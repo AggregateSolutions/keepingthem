@@ -12,7 +12,7 @@ export type MemorialRow = {
 
 export async function getMemorialFromDb(slug: string): Promise<MemorialConfig | null> {
   const { data, error } = await supabase
-    .from("keepingthem_memorials")
+    .from("memorials")
     .select("config")
     .eq("slug", slug)
     .single();
@@ -23,7 +23,7 @@ export async function getMemorialFromDb(slug: string): Promise<MemorialConfig | 
 
 export async function listMemorialsFromDb(): Promise<MemorialRow[]> {
   const { data, error } = await supabase
-    .from("keepingthem_memorials")
+    .from("memorials")
     .select("*")
     .order("created_at", { ascending: false });
 
@@ -33,7 +33,7 @@ export async function listMemorialsFromDb(): Promise<MemorialRow[]> {
 
 export async function upsertMemorial(config: MemorialConfig): Promise<{ error: string | null }> {
   const { error } = await supabase
-    .from("keepingthem_memorials")
+    .from("memorials")
     .upsert({
       slug: config.slug,
       culture: config.culture,
@@ -46,7 +46,7 @@ export async function upsertMemorial(config: MemorialConfig): Promise<{ error: s
 
 export async function deleteMemorial(slug: string): Promise<{ error: string | null }> {
   const { error } = await supabase
-    .from("keepingthem_memorials")
+    .from("memorials")
     .delete()
     .eq("slug", slug);
 

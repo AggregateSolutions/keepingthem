@@ -74,7 +74,7 @@ export default function TributeWall({ slug, limit = 4 }: { slug: string; limit?:
   useEffect(() => {
     async function load() {
       const { data, count } = await supabase
-        .from("keepingthem_rsvps")
+        .from("rsvps")
         .select("id, name, relation, message, created_at", { count: "exact" })
         .eq("memorial_slug", slug)
         .not("message", "is", null)
