@@ -28,8 +28,8 @@ export async function POST(req: NextRequest) {
 
   // Fetch all RSVPs for this memorial that have an email
   const { data: rsvps, error } = await supabase
-    .schema("public")
-    .from("keepingthem_rsvps")
+    .schema("keepingthem")
+    .from("rsvps")
     .select("name, email, attend_funeral, attend_reception, attend_thanksgiving")
     .eq("memorial_slug", slug)
     .not("email", "is", null)
@@ -112,8 +112,8 @@ export async function GET(req: NextRequest) {
   const supabase = getAdminClient();
 
   const { data, error } = await supabase
-    .schema("public")
-    .from("keepingthem_rsvps")
+    .schema("keepingthem")
+    .from("rsvps")
     .select("id, name, email, phone, guests, relation, attend_funeral, attend_reception, attend_thanksgiving, message, created_at")
     .eq("memorial_slug", slug)
     .order("created_at", { ascending: false });
