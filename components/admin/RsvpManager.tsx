@@ -188,14 +188,15 @@ export default function RsvpManager({
     loadData(); // refresh log
   }
 
-  async function handlePreview(email?: string) {
+  async function handlePreview(email?: string, overrideTemplate?: "attendance" | "donor" | "combined") {
     const recipient = email
       ? merged.find(r => r.email === email)
       : merged.find(r => r.email && !r.ambiguous);
 
+    const template = overrideTemplate ?? activeTemplate;
     const templateMessage =
-      recipient?.cardType === "combined" ? combinedMsg :
-      recipient?.cardType === "donor" ? donorMsg :
+      template === "combined" ? combinedMsg :
+      template === "donor" ? donorMsg :
       attendanceMsg;
 
     const res = await fetch("/api/admin/preview-ecard", {
@@ -551,7 +552,7 @@ export default function RsvpManager({
                       </td>
                       <td style={{ padding: "0.5rem 0.75rem" }}>
                         {r.email && !r.ambiguous && (
-                          <button onClick={() => handlePreview(r.email!)} style={{ background: "none", border: "none", color: MUTED, cursor: "pointer", fontSize: "0.75rem", textDecoration: "underline" }}>
+                          <button onClick={() => handlePreview(r.email!, r.cardType)} style={{ background: "none", border: "none", color: MUTED, cursor: "pointer", fontSize: "0.75rem", textDecoration: "underline" }}>
                             Preview
                           </button>
                         )}
@@ -644,7 +645,7 @@ export default function RsvpManager({
                 style={{ ...inputStyle, minHeight: "220px", lineHeight: 1.75, resize: "vertical", fontFamily: "Garamond, Georgia, serif", fontSize: "0.9rem" }} />
             )}
 
-            <button onClick={() => handlePreview()} style={{ background: "none", border: `1px solid ${BORDER}`, borderRadius: "4px", color: MUTED, padding: "0.55rem 1.25rem", fontSize: "0.85rem", cursor: "pointer", alignSelf: "flex-start" }}>
+            <button onClick={() => handlePreview(undefined, activeTemplate)} style={{ background: "none", border: `1px solid ${BORDER}`, borderRadius: "4px", color: MUTED, padding: "0.55rem 1.25rem", fontSize: "0.85rem", cursor: "pointer", alignSelf: "flex-start" }}>
               Preview {activeTemplate} card
             </button>
           </div>
