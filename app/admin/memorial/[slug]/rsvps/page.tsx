@@ -17,7 +17,12 @@ export default async function RsvpsPage({ params }: { params: Promise<{ slug: st
           ← Back to memorial
         </a>
       </div>
-      <RsvpManager slug={slug} deceasedName={config.name} />
+      <RsvpManager
+        slug={slug}
+        deceasedName={config.name}
+        years={config.years}
+        photoUrl={config.photos?.[0]?.src}
+      />
     </AdminShell>
   );
 }

@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import type { MergedRecipient } from "@/app/api/admin/send-thankyou/route";
 
 const GOLD = "#c8962e";
 const BORDER = "#4a3820";
@@ -9,6 +10,8 @@ const CARD = "#241a0a";
 const TEXT = "#f5ead8";
 const MUTED = "#9a7a52";
 const DIM = "#7a6a52";
+const RED = "#d68f8f";
+const GREEN = "#6aaa6a";
 
 type Rsvp = {
   id: string;
@@ -24,77 +27,294 @@ type Rsvp = {
   created_at: string;
 };
 
-const DEFAULT_MESSAGE = `Dear {name},
+type Tribute = {
+  id: string;
+  name: string;
+  email: string | null;
+  relation: string | null;
+  message: string;
+  created_at: string;
+};
 
-On behalf of our family, we want to express our deepest gratitude for your love, your presence, and your support during this time. Your being there meant more than words can say.
+type Donor = {
+  id: string;
+  created_at: string;
+  name: string;
+  email: string | null;
+  phone: string | null;
+  note: string | null;
+};
+
+type LogEntry = {
+  id: string;
+  sent_at: string;
+  recipient_name: string;
+  recipient_email: string | null;
+  card_type: string;
+};
+
+const ATTENDANCE_MESSAGE = `Dear {name},
+
+On behalf of our family, we want to express our deepest gratitude for your love, your presence, and your support during this time. As {relation}, your being there meant more than words can say.
 
 We are comforted knowing that so many hearts carry the memory of our beloved with us.
 
-With love and gratitude,
-The Family`;
+With love and gratitude,`;
 
-export default function RsvpManager({ slug, deceasedName }: { slug: string; deceasedName: string }) {
+const DONOR_MESSAGE = `Dear {name},
+
+On behalf of our family, we are deeply moved by your generosity. {contribution} Your kindness during this time of loss has meant more than we can express.
+
+We are grateful beyond words.
+
+With love and gratitude,`;
+
+const COMBINED_MESSAGE = `Dear {name},
+
+On behalf of our family, we want to express our heartfelt gratitude for both your presence and your generosity. As {relation}, your attendance at {events} and your thoughtful gift touched our hearts deeply.
+
+{contribution} We are comforted knowing that so many hearts carry the memory of our beloved with us.
+
+With love and gratitude,`;
+
+export default function RsvpManager({
+  slug,
+  deceasedName,
+  years,
+  photoUrl,
+}: {
+  slug: string;
+  deceasedName: string;
+  years?: string;
+  photoUrl?: string;
+}) {
   const [rsvps, setRsvps] = useState<Rsvp[]>([]);
+  const [tributes, setTributes] = useState<Tribute[]>([]);
+  const [donors, setDonors] = useState<Donor[]>([]);
+  const [log, setLog] = useState<LogEntry[]>([]);
+  const [merged, setMerged] = useState<MergedRecipient[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [message, setMessage] = useState(DEFAULT_MESSAGE);
-  const [sending, setSending] = useState(false);
-  const [result, setResult] = useState<{ sent: number; failed: number; failures: string[] } | null>(null);
-  const [confirmed, setConfirmed] = useState(false);
-  const [tab, setTab] = useState<"rsvps" | "thankyou">("rsvps");
+  const [tab, setTab] = useState<"rsvps" | "tributes" | "donors" | "thankyou">("rsvps");
 
-  useEffect(() => {
+  // Donor form state
+  const [donorForm, setDonorForm] = useState({ name: "", email: "", phone: "", note: "" });
+  const [donorSaving, setDonorSaving] = useState(false);
+  const [donorError, setDonorError] = useState("");
+  const [editingDonorId, setEditingDonorId] = useState<string | null>(null);
+
+  // Thank-you sender state
+  const [attendanceMsg, setAttendanceMsg] = useState(ATTENDANCE_MESSAGE);
+  const [donorMsg, setDonorMsg] = useState(DONOR_MESSAGE);
+  const [combinedMsg, setCombinedMsg] = useState(COMBINED_MESSAGE);
+  const [activeTemplate, setActiveTemplate] = useState<"attendance" | "donor" | "combined">("attendance");
+  const [familyName, setFamilyName] = useState("");
+  const [contributionNote, setContributionNote] = useState("");
+  const [includeTributes, setIncludeTributes] = useState(false);
+  const [skipAlreadySent, setSkipAlreadySent] = useState(true);
+  const [signatureUrl, setSignatureUrl] = useState("");
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState("");
+  const [sending, setSending] = useState(false);
+  const [sendResult, setSendResult] = useState<{ sent: number; failed: number; failures: string[] } | null>(null);
+  const [confirmed, setConfirmed] = useState(false);
+  const [previewEmail, setPreviewEmail] = useState("");
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  function loadData() {
+    setLoading(true);
     fetch(`/api/admin/send-thankyou?slug=${slug}`)
       .then(r => r.json())
       .then(d => {
-        if (d.error) setError(d.error);
-        else setRsvps(d.rsvps);
+        if (d.error) { setError(d.error); return; }
+        setRsvps(d.rsvps ?? []);
+        setTributes(d.tributes ?? []);
+        setDonors(d.donors ?? []);
+        setLog(d.log ?? []);
+        setMerged(d.merged ?? []);
       })
-      .catch(() => setError("Failed to load RSVPs"))
+      .catch(() => setError("Failed to load data"))
       .finally(() => setLoading(false));
-  }, [slug]);
+  }
+
+  useEffect(() => { loadData(); }, [slug]);
 
   const withEmail = rsvps.filter(r => r.email);
   const withPhone = rsvps.filter(r => r.phone);
   const totalGuests = rsvps.reduce((sum, r) => sum + (parseInt(r.guests) || 1), 0);
+  const tributesWithEmail = tributes.filter(t => t.email);
+  const ambiguous = merged.filter(r => r.ambiguous);
+  const readyToSend = merged.filter(r => r.email && !r.ambiguous && (!skipAlreadySent || !r.alreadySent));
+  const alreadySentCount = merged.filter(r => r.alreadySent).length;
+
+  async function handleSignatureUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true); setUploadError("");
+    const form = new FormData();
+    form.append("file", file);
+    form.append("slug", slug);
+    const res = await fetch("/api/admin/signature", { method: "POST", body: form });
+    const data = await res.json();
+    setUploading(false);
+    if (!res.ok) setUploadError(data.error ?? "Upload failed");
+    else setSignatureUrl(data.url);
+  }
 
   async function handleSend() {
     if (!confirmed) { setConfirmed(true); return; }
-    setSending(true);
-    setResult(null);
+    setSending(true); setSendResult(null);
 
     const res = await fetch("/api/admin/send-thankyou", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ slug, message, deceasedName }),
+      body: JSON.stringify({
+        slug, deceasedName, years, photoUrl,
+        message: attendanceMsg,
+        donorMessage: donorMsg,
+        combinedMessage: combinedMsg,
+        familyName: familyName || deceasedName.split(" ").slice(-1)[0],
+        signatureUrl: signatureUrl || undefined,
+        contributionNote: contributionNote || undefined,
+        includeTributes,
+        skipAlreadySent,
+      }),
     });
 
     const data = await res.json();
-    setSending(false);
-    setConfirmed(false);
-
-    if (!res.ok) {
-      setError(data.error ?? "Send failed");
-      return;
-    }
-    setResult(data);
+    setSending(false); setConfirmed(false);
+    if (!res.ok) { setError(data.error ?? "Send failed"); return; }
+    setSendResult(data);
+    loadData(); // refresh log
   }
 
+  async function handlePreview(email?: string) {
+    const recipient = email
+      ? merged.find(r => r.email === email)
+      : merged.find(r => r.email && !r.ambiguous);
+
+    const templateMessage =
+      recipient?.cardType === "combined" ? combinedMsg :
+      recipient?.cardType === "donor" ? donorMsg :
+      attendanceMsg;
+
+    const res = await fetch("/api/admin/preview-ecard", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        deceasedName, years, photoUrl,
+        message: templateMessage,
+        familyName: familyName || deceasedName.split(" ").slice(-1)[0],
+        signatureUrl: signatureUrl || undefined,
+        contributionNote: recipient?.contribution ?? contributionNote ?? undefined,
+        recipientName: recipient?.name,
+        recipientRelation: recipient?.relation,
+        recipientEvents: recipient?.events,
+      }),
+    });
+    const html = await res.text();
+    const win = window.open("", "_blank");
+    win?.document.write(html);
+    win?.document.close();
+  }
+
+  // Donor CRUD
+  async function saveDonor() {
+    if (!donorForm.name.trim()) { setDonorError("Name is required"); return; }
+    setDonorSaving(true); setDonorError("");
+
+    if (editingDonorId) {
+      const res = await fetch(`/api/admin/donors?id=${editingDonorId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(donorForm),
+      });
+      if (!res.ok) { setDonorError("Save failed"); setDonorSaving(false); return; }
+      setEditingDonorId(null);
+    } else {
+      const res = await fetch("/api/admin/donors", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ memorial_slug: slug, ...donorForm }),
+      });
+      if (!res.ok) { setDonorError("Save failed"); setDonorSaving(false); return; }
+    }
+
+    setDonorForm({ name: "", email: "", phone: "", note: "" });
+    setDonorSaving(false);
+    loadData();
+  }
+
+  async function deleteDonor(id: string) {
+    await fetch(`/api/admin/donors?id=${id}`, { method: "DELETE" });
+    loadData();
+  }
+
+  function editDonor(d: Donor) {
+    setEditingDonorId(d.id);
+    setDonorForm({ name: d.name, email: d.email ?? "", phone: d.phone ?? "", note: d.note ?? "" });
+  }
+
+  function exportDonorsCsv() {
+    const rows = [
+      ["Name", "Email", "Phone", "Gift note", "Added"],
+      ...donors.map(d => [
+        d.name,
+        d.email ?? "",
+        d.phone ?? "",
+        d.note ?? "",
+        new Date(d.created_at).toLocaleDateString(),
+      ]),
+    ];
+    const csv = rows.map(r => r.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(",")).join("\n");
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${slug}-donors.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  const labelStyle = {
+    fontSize: "0.72rem", color: MUTED, textTransform: "uppercase" as const,
+    letterSpacing: "0.08em", display: "block", marginBottom: "0.4rem",
+  };
+  const inputStyle = {
+    width: "100%", padding: "0.55rem 0.75rem", background: BG,
+    border: `1px solid ${BORDER}`, borderRadius: "4px", color: TEXT,
+    fontSize: "0.85rem", boxSizing: "border-box" as const,
+  };
   const events = (r: Rsvp) => [
     r.attend_funeral && "Funeral",
     r.attend_reception && "Reception",
     r.attend_thanksgiving && "Thanksgiving",
   ].filter(Boolean).join(" · ") || "—";
 
+  const cardTypeBadge = (type: string) => {
+    const styles: Record<string, { bg: string; color: string; label: string }> = {
+      attendance: { bg: "#1a2a1a", color: GREEN, label: "Attended" },
+      donor: { bg: "#1a1a2a", color: "#7a9aff", label: "Donor" },
+      combined: { bg: "#2a1a0a", color: GOLD, label: "Both" },
+    };
+    const s = styles[type] ?? styles.attendance;
+    return (
+      <span style={{ background: s.bg, color: s.color, fontSize: "0.7rem", padding: "0.15rem 0.5rem", borderRadius: "3px", whiteSpace: "nowrap" as const }}>
+        {s.label}
+      </span>
+    );
+  };
+
   return (
     <div>
       {/* Summary stats */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "0.75rem", marginBottom: "1.5rem" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: "0.75rem", marginBottom: "1.5rem" }}>
         {[
           { label: "Total RSVPs", value: rsvps.length },
           { label: "Total guests", value: totalGuests },
           { label: "Have email", value: withEmail.length },
-          { label: "Have phone", value: withPhone.length },
+          { label: "Donors", value: donors.length },
+          { label: "Cards sent", value: log.length },
         ].map(s => (
           <div key={s.label} style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: "6px", padding: "0.75rem 1rem" }}>
             <div style={{ fontSize: "1.4rem", fontFamily: "Garamond, Georgia, serif", color: GOLD }}>{s.value}</div>
@@ -103,9 +323,22 @@ export default function RsvpManager({ slug, deceasedName }: { slug: string; dece
         ))}
       </div>
 
+      {/* Ambiguous match warnings */}
+      {ambiguous.length > 0 && (
+        <div style={{ background: "#1f1208", border: "1px solid #8b4a0a", borderRadius: "6px", padding: "0.75rem 1rem", marginBottom: "1rem", fontSize: "0.82rem", color: "#d4a86a" }}>
+          <strong>⚠ {ambiguous.length} possible duplicate{ambiguous.length !== 1 ? "s" : ""} detected</strong> — an RSVP name matches a donor name but no email to confirm.
+          These will be skipped until resolved. Go to the Donors tab to add their email or remove the duplicate.
+          <ul style={{ margin: "0.4rem 0 0", paddingLeft: "1.2rem" }}>
+            {ambiguous.map((r, i) => (
+              <li key={i}>{r.ambiguousMatch?.rsvpName} (RSVP) ↔ {r.ambiguousMatch?.donorName} (Donor)</li>
+            ))}
+          </ul>
+        </div>
+      )}
+
       {/* Tabs */}
       <div style={{ display: "flex", gap: "0.25rem", borderBottom: `1px solid ${BORDER}`, marginBottom: "1.25rem" }}>
-        {(["rsvps", "thankyou"] as const).map(t => (
+        {(["rsvps", "tributes", "donors", "thankyou"] as const).map(t => (
           <button key={t} onClick={() => setTab(t)} style={{
             background: tab === t ? CARD : "none",
             border: `1px solid ${tab === t ? BORDER : "transparent"}`,
@@ -115,7 +348,10 @@ export default function RsvpManager({ slug, deceasedName }: { slug: string; dece
             padding: "0.5rem 1rem", fontSize: "0.82rem", cursor: "pointer",
             marginBottom: tab === t ? "-1px" : "0",
           }}>
-            {t === "rsvps" ? `RSVPs (${rsvps.length})` : "Send thank-you"}
+            {t === "rsvps" ? `RSVPs (${rsvps.length})`
+              : t === "tributes" ? `Tributes (${tributes.length})`
+              : t === "donors" ? `Donors (${donors.length})`
+              : "Send thank-you"}
           </button>
         ))}
       </div>
@@ -126,99 +362,348 @@ export default function RsvpManager({ slug, deceasedName }: { slug: string; dece
           {loading ? (
             <div style={{ padding: "2rem", textAlign: "center", color: DIM, fontSize: "0.85rem" }}>Loading…</div>
           ) : error ? (
-            <div style={{ padding: "1.5rem", color: "#d68f8f", fontSize: "0.85rem" }}>{error}</div>
+            <div style={{ padding: "1.5rem", color: RED, fontSize: "0.85rem" }}>{error}</div>
           ) : rsvps.length === 0 ? (
             <div style={{ padding: "2rem", textAlign: "center", color: DIM, fontSize: "0.85rem", fontStyle: "italic" }}>No RSVPs yet.</div>
           ) : (
-            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.82rem" }}>
-              <thead>
-                <tr style={{ borderBottom: `1px solid ${BORDER}` }}>
-                  {["Name", "Email", "Phone", "Guests", "Relation", "Events", "Message", "Date"].map(h => (
-                    <th key={h} style={{ padding: "0.6rem 0.75rem", textAlign: "left", color: MUTED, fontWeight: 400, fontSize: "0.72rem", textTransform: "uppercase", letterSpacing: "0.06em" }}>{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {rsvps.map((r, i) => (
-                  <tr key={r.id} style={{ borderBottom: i < rsvps.length - 1 ? `1px solid ${BORDER}` : "none", background: i % 2 === 0 ? "transparent" : "#1e1408" }}>
-                    <td style={{ padding: "0.6rem 0.75rem", color: TEXT, fontWeight: 500 }}>{r.name}</td>
-                    <td style={{ padding: "0.6rem 0.75rem", color: MUTED }}>{r.email ?? <span style={{ color: DIM }}>—</span>}</td>
-                    <td style={{ padding: "0.6rem 0.75rem", color: MUTED }}>{r.phone ?? <span style={{ color: DIM }}>—</span>}</td>
-                    <td style={{ padding: "0.6rem 0.75rem", color: MUTED, textAlign: "center" }}>{r.guests}</td>
-                    <td style={{ padding: "0.6rem 0.75rem", color: MUTED }}>{r.relation ?? "—"}</td>
-                    <td style={{ padding: "0.6rem 0.75rem", color: MUTED }}>{events(r)}</td>
-                    <td style={{ padding: "0.6rem 0.75rem", color: DIM, fontStyle: "italic", maxWidth: "180px" }}>
-                      {r.message ? `"${r.message.slice(0, 60)}${r.message.length > 60 ? "…" : ""}"` : <span style={{ color: DIM }}>—</span>}
-                    </td>
-                    <td style={{ padding: "0.6rem 0.75rem", color: DIM, whiteSpace: "nowrap" }}>
-                      {new Date(r.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
-                    </td>
+            <div style={{ overflowX: "auto" }}>
+              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.82rem" }}>
+                <thead>
+                  <tr style={{ borderBottom: `1px solid ${BORDER}` }}>
+                    {["Name", "Email", "Phone", "Guests", "Relation", "Events", "Message", "Date"].map(h => (
+                      <th key={h} style={{ padding: "0.6rem 0.75rem", textAlign: "left", color: MUTED, fontWeight: 400, fontSize: "0.72rem", textTransform: "uppercase", letterSpacing: "0.06em", whiteSpace: "nowrap" }}>{h}</th>
+                    ))}
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {rsvps.map((r, i) => (
+                    <tr key={r.id} style={{ borderBottom: i < rsvps.length - 1 ? `1px solid ${BORDER}` : "none", background: i % 2 === 0 ? "transparent" : "#1e1408" }}>
+                      <td style={{ padding: "0.6rem 0.75rem", color: TEXT, fontWeight: 500, whiteSpace: "nowrap" }}>{r.name}</td>
+                      <td style={{ padding: "0.6rem 0.75rem", color: MUTED }}>{r.email ?? <span style={{ color: DIM }}>—</span>}</td>
+                      <td style={{ padding: "0.6rem 0.75rem", color: MUTED, whiteSpace: "nowrap" }}>{r.phone ?? <span style={{ color: DIM }}>—</span>}</td>
+                      <td style={{ padding: "0.6rem 0.75rem", color: MUTED, textAlign: "center" }}>{r.guests}</td>
+                      <td style={{ padding: "0.6rem 0.75rem", color: MUTED }}>{r.relation ?? "—"}</td>
+                      <td style={{ padding: "0.6rem 0.75rem", color: MUTED, whiteSpace: "nowrap" }}>{events(r)}</td>
+                      <td style={{ padding: "0.6rem 0.75rem", color: DIM, fontStyle: "italic", maxWidth: "180px" }}>
+                        {r.message ? `"${r.message.slice(0, 60)}${r.message.length > 60 ? "…" : ""}"` : <span style={{ color: DIM }}>—</span>}
+                      </td>
+                      <td style={{ padding: "0.6rem 0.75rem", color: DIM, whiteSpace: "nowrap" }}>
+                        {new Date(r.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Tribute wall */}
+      {tab === "tributes" && (
+        <div style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: "6px", overflow: "hidden" }}>
+          {tributes.length === 0 ? (
+            <div style={{ padding: "2rem", textAlign: "center", color: DIM, fontSize: "0.85rem", fontStyle: "italic" }}>No tribute messages yet.</div>
+          ) : (
+            <div style={{ overflowX: "auto" }}>
+              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.82rem" }}>
+                <thead>
+                  <tr style={{ borderBottom: `1px solid ${BORDER}` }}>
+                    {["Name", "Email", "Relation", "Message", "Date"].map(h => (
+                      <th key={h} style={{ padding: "0.6rem 0.75rem", textAlign: "left", color: MUTED, fontWeight: 400, fontSize: "0.72rem", textTransform: "uppercase", letterSpacing: "0.06em" }}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {tributes.map((t, i) => (
+                    <tr key={t.id} style={{ borderBottom: i < tributes.length - 1 ? `1px solid ${BORDER}` : "none", background: i % 2 === 0 ? "transparent" : "#1e1408" }}>
+                      <td style={{ padding: "0.6rem 0.75rem", color: TEXT, fontWeight: 500, whiteSpace: "nowrap" }}>{t.name}</td>
+                      <td style={{ padding: "0.6rem 0.75rem", color: MUTED }}>{t.email ?? <span style={{ color: DIM }}>—</span>}</td>
+                      <td style={{ padding: "0.6rem 0.75rem", color: MUTED }}>{t.relation ?? "—"}</td>
+                      <td style={{ padding: "0.6rem 0.75rem", color: DIM, fontStyle: "italic", maxWidth: "220px" }}>
+                        {`"${t.message.slice(0, 80)}${t.message.length > 80 ? "…" : ""}"`}
+                      </td>
+                      <td style={{ padding: "0.6rem 0.75rem", color: DIM, whiteSpace: "nowrap" }}>
+                        {new Date(t.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Donors tab */}
+      {tab === "donors" && (
+        <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+          {/* Add/edit form */}
+          <div style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: "6px", padding: "1.25rem" }}>
+            <div style={{ fontSize: "0.82rem", color: MUTED, marginBottom: "1rem" }}>
+              {editingDonorId ? "Edit donor" : "Add donor — flowers, monetary gifts, or other contributions"}
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem" }}>
+              <div>
+                <label style={labelStyle}>Name *</label>
+                <input style={inputStyle} value={donorForm.name} onChange={e => setDonorForm(f => ({ ...f, name: e.target.value }))} placeholder="Full name" />
+              </div>
+              <div>
+                <label style={labelStyle}>Email</label>
+                <input style={inputStyle} value={donorForm.email} onChange={e => setDonorForm(f => ({ ...f, email: e.target.value }))} placeholder="email@example.com" type="email" />
+              </div>
+              <div>
+                <label style={labelStyle}>Phone</label>
+                <input style={inputStyle} value={donorForm.phone} onChange={e => setDonorForm(f => ({ ...f, phone: e.target.value }))} placeholder="(555) 000-0000" />
+              </div>
+              <div>
+                <label style={labelStyle}>Gift / contribution note</label>
+                <input style={inputStyle} value={donorForm.note} onChange={e => setDonorForm(f => ({ ...f, note: e.target.value }))} placeholder="e.g. White lily arrangement, $100 donation" />
+              </div>
+            </div>
+            {donorError && <div style={{ color: RED, fontSize: "0.78rem", marginTop: "0.5rem" }}>{donorError}</div>}
+            <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.75rem" }}>
+              <button onClick={saveDonor} disabled={donorSaving} style={{ background: GOLD, color: "#0e0b07", border: "none", borderRadius: "4px", padding: "0.5rem 1.25rem", fontSize: "0.85rem", fontWeight: 600, cursor: "pointer" }}>
+                {donorSaving ? "Saving…" : editingDonorId ? "Save changes" : "Add donor"}
+              </button>
+              {editingDonorId && (
+                <button onClick={() => { setEditingDonorId(null); setDonorForm({ name: "", email: "", phone: "", note: "" }); }} style={{ background: "none", border: `1px solid ${BORDER}`, borderRadius: "4px", padding: "0.5rem 1rem", fontSize: "0.85rem", color: MUTED, cursor: "pointer" }}>
+                  Cancel
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Donor list */}
+          {donors.length > 0 && (
+            <div style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: "6px", overflow: "hidden" }}>
+              <div style={{ padding: "0.6rem 1rem", borderBottom: `1px solid ${BORDER}`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <span style={{ fontSize: "0.72rem", color: MUTED, textTransform: "uppercase", letterSpacing: "0.08em" }}>{donors.length} donor{donors.length !== 1 ? "s" : ""}</span>
+                <button onClick={exportDonorsCsv} style={{ background: "none", border: `1px solid ${BORDER}`, borderRadius: "4px", color: MUTED, padding: "0.3rem 0.75rem", fontSize: "0.75rem", cursor: "pointer" }}>
+                  Export CSV
+                </button>
+              </div>
+              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.82rem" }}>
+                <thead>
+                  <tr style={{ borderBottom: `1px solid ${BORDER}` }}>
+                    {["Name", "Email", "Phone", "Gift note", ""].map((h, i) => (
+                      <th key={i} style={{ padding: "0.6rem 0.75rem", textAlign: "left", color: MUTED, fontWeight: 400, fontSize: "0.72rem", textTransform: "uppercase", letterSpacing: "0.06em" }}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {donors.map((d, i) => (
+                    <tr key={d.id} style={{ borderBottom: i < donors.length - 1 ? `1px solid ${BORDER}` : "none", background: i % 2 === 0 ? "transparent" : "#1e1408" }}>
+                      <td style={{ padding: "0.6rem 0.75rem", color: TEXT, fontWeight: 500 }}>{d.name}</td>
+                      <td style={{ padding: "0.6rem 0.75rem", color: MUTED }}>{d.email ?? <span style={{ color: DIM }}>—</span>}</td>
+                      <td style={{ padding: "0.6rem 0.75rem", color: MUTED }}>{d.phone ?? <span style={{ color: DIM }}>—</span>}</td>
+                      <td style={{ padding: "0.6rem 0.75rem", color: DIM, fontStyle: "italic" }}>{d.note ?? "—"}</td>
+                      <td style={{ padding: "0.6rem 0.75rem", whiteSpace: "nowrap" }}>
+                        <button onClick={() => editDonor(d)} style={{ background: "none", border: "none", color: MUTED, cursor: "pointer", fontSize: "0.78rem", marginRight: "0.5rem" }}>Edit</button>
+                        <button onClick={() => deleteDonor(d.id)} style={{ background: "none", border: "none", color: RED, cursor: "pointer", fontSize: "0.78rem" }}>Remove</button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           )}
         </div>
       )}
 
       {/* Thank-you sender */}
       {tab === "thankyou" && (
-        <div style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: "6px", padding: "1.5rem", display: "flex", flexDirection: "column", gap: "1.25rem" }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
 
-          <div style={{ fontSize: "0.82rem", color: MUTED, background: BG, border: `1px solid ${BORDER}`, borderRadius: "4px", padding: "0.75rem 1rem", lineHeight: 1.7 }}>
-            This will send a personalized email to <strong style={{ color: GOLD }}>{withEmail.length} recipient{withEmail.length !== 1 ? "s" : ""}</strong> who provided an email address.
-            Use <code style={{ color: GOLD, fontSize: "0.78rem" }}>{"{name}"}</code> for first name,{" "}
-            <code style={{ color: GOLD, fontSize: "0.78rem" }}>{"{fullname}"}</code> for full name,{" "}
-            <code style={{ color: GOLD, fontSize: "0.78rem" }}>{"{events}"}</code> for events they attended.
+          {/* Merged recipient list */}
+          <div style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: "6px", overflow: "hidden" }}>
+            <div style={{ padding: "0.75rem 1rem", borderBottom: `1px solid ${BORDER}`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <span style={{ fontSize: "0.82rem", color: MUTED }}>
+                <strong style={{ color: TEXT }}>{readyToSend.length}</strong> ready to send
+                {alreadySentCount > 0 && <span style={{ color: DIM }}> · {alreadySentCount} already sent</span>}
+                {ambiguous.length > 0 && <span style={{ color: "#d4a86a" }}> · {ambiguous.length} flagged</span>}
+              </span>
+              <label style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontSize: "0.78rem", color: MUTED, cursor: "pointer" }}>
+                <input type="checkbox" checked={skipAlreadySent} onChange={e => setSkipAlreadySent(e.target.checked)} style={{ accentColor: GOLD }} />
+                Skip already sent
+              </label>
+            </div>
+            <div style={{ overflowX: "auto" }}>
+              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.8rem" }}>
+                <thead>
+                  <tr style={{ borderBottom: `1px solid ${BORDER}` }}>
+                    {["Name", "Email", "Type", "Contribution", "Status", "Preview"].map(h => (
+                      <th key={h} style={{ padding: "0.5rem 0.75rem", textAlign: "left", color: MUTED, fontWeight: 400, fontSize: "0.7rem", textTransform: "uppercase", letterSpacing: "0.06em", whiteSpace: "nowrap" }}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {merged.map((r, i) => (
+                    <tr key={i} style={{ borderBottom: i < merged.length - 1 ? `1px solid ${BORDER}` : "none", background: i % 2 === 0 ? "transparent" : "#1e1408", opacity: r.ambiguous ? 0.5 : 1 }}>
+                      <td style={{ padding: "0.5rem 0.75rem", color: TEXT, whiteSpace: "nowrap" }}>{r.name}</td>
+                      <td style={{ padding: "0.5rem 0.75rem", color: MUTED }}>{r.email ?? <span style={{ color: DIM }}>no email</span>}</td>
+                      <td style={{ padding: "0.5rem 0.75rem" }}>{cardTypeBadge(r.cardType)}</td>
+                      <td style={{ padding: "0.5rem 0.75rem", color: DIM, fontStyle: "italic", maxWidth: "160px" }}>{r.contribution ?? "—"}</td>
+                      <td style={{ padding: "0.5rem 0.75rem", whiteSpace: "nowrap" }}>
+                        {r.ambiguous ? <span style={{ color: "#d4a86a", fontSize: "0.72rem" }}>⚠ flagged</span>
+                          : r.alreadySent ? <span style={{ color: DIM, fontSize: "0.72rem" }}>✓ sent {new Date(r.alreadySent.sent_at).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</span>
+                          : <span style={{ color: GREEN, fontSize: "0.72rem" }}>pending</span>}
+                      </td>
+                      <td style={{ padding: "0.5rem 0.75rem" }}>
+                        {r.email && !r.ambiguous && (
+                          <button onClick={() => handlePreview(r.email!)} style={{ background: "none", border: "none", color: MUTED, cursor: "pointer", fontSize: "0.75rem", textDecoration: "underline" }}>
+                            Preview
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
 
-          <div>
-            <label style={{ fontSize: "0.72rem", color: MUTED, textTransform: "uppercase", letterSpacing: "0.08em", display: "block", marginBottom: "0.4rem" }}>
-              Message
-            </label>
-            <textarea
-              value={message}
-              onChange={e => { setMessage(e.target.value); setConfirmed(false); setResult(null); }}
-              style={{
-                width: "100%", minHeight: "280px", padding: "0.75rem", background: BG,
-                border: `1px solid ${BORDER}`, borderRadius: "4px", color: TEXT,
-                fontSize: "0.9rem", lineHeight: 1.75, resize: "vertical",
-                fontFamily: "Garamond, Georgia, serif", boxSizing: "border-box",
-              }}
-            />
+          {/* Card settings */}
+          <div style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: "6px", padding: "1.25rem", display: "flex", flexDirection: "column", gap: "1rem" }}>
+            <div style={{ fontSize: "0.82rem", color: MUTED, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em" }}>Card settings</div>
+
+            {/* Family name + signature */}
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem" }}>
+              <div>
+                <label style={labelStyle}>Family name <span style={{ color: DIM }}>(for signature)</span></label>
+                <input type="text" value={familyName} onChange={e => setFamilyName(e.target.value)} placeholder={`e.g. Kwayisi`} style={inputStyle} />
+              </div>
+              <div>
+                <label style={labelStyle}>Default contribution note <span style={{ color: DIM }}>(fallback if donor has no note)</span></label>
+                <input type="text" value={contributionNote} onChange={e => setContributionNote(e.target.value)} placeholder="e.g. Your generous gift" style={inputStyle} />
+              </div>
+            </div>
+
+            {/* Signature upload */}
+            <div>
+              <label style={labelStyle}>Family signature image <span style={{ color: DIM }}>(PNG/JPG, transparent bg recommended, max 2MB)</span></label>
+              <div style={{ display: "flex", alignItems: "center", gap: "1rem", flexWrap: "wrap" }}>
+                <button onClick={() => fileRef.current?.click()} disabled={uploading} style={{ background: "none", border: `1px solid ${BORDER}`, borderRadius: "4px", color: MUTED, padding: "0.5rem 1rem", fontSize: "0.82rem", cursor: "pointer" }}>
+                  {uploading ? "Uploading…" : signatureUrl ? "Replace signature" : "Upload signature"}
+                </button>
+                {signatureUrl && <img src={signatureUrl} alt="Signature" style={{ maxHeight: "48px", maxWidth: "180px", objectFit: "contain" }} />}
+                {!signatureUrl && familyName && <span style={{ color: DIM, fontSize: "0.8rem", fontStyle: "italic" }}>Will show "The {familyName} Family" in gold</span>}
+              </div>
+              <input ref={fileRef} type="file" accept="image/*" onChange={handleSignatureUpload} style={{ display: "none" }} />
+              {uploadError && <div style={{ color: RED, fontSize: "0.78rem", marginTop: "0.4rem" }}>{uploadError}</div>}
+            </div>
+
+            {/* Include tributes */}
+            {tributesWithEmail.length > 0 && (
+              <label style={{ display: "flex", alignItems: "center", gap: "0.6rem", cursor: "pointer", fontSize: "0.85rem", color: MUTED }}>
+                <input type="checkbox" checked={includeTributes} onChange={e => setIncludeTributes(e.target.checked)} style={{ accentColor: GOLD }} />
+                Also send to {tributesWithEmail.length} tribute wall contributor{tributesWithEmail.length !== 1 ? "s" : ""} with email
+              </label>
+            )}
           </div>
 
-          {result && (
-            <div style={{
-              background: result.failed > 0 ? "#1f1208" : "#0d1f0d",
-              border: `1px solid ${result.failed > 0 ? "#4a2a0a" : "#1a4a1a"}`,
-              borderRadius: "4px", padding: "0.75rem 1rem", fontSize: "0.85rem",
-              color: result.failed > 0 ? "#d4a86a" : "#6aaa6a",
-            }}>
-              ✓ Sent to {result.sent} recipient{result.sent !== 1 ? "s" : ""}.
-              {result.failed > 0 && ` ${result.failed} failed: ${result.failures.join(", ")}`}
+          {/* Message templates */}
+          <div style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: "6px", padding: "1.25rem", display: "flex", flexDirection: "column", gap: "1rem" }}>
+            <div style={{ fontSize: "0.82rem", color: MUTED, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em" }}>Message templates</div>
+
+            <div style={{ fontSize: "0.78rem", color: DIM, lineHeight: 1.6 }}>
+              Variables: <code style={{ color: GOLD }}>{"{name}"}</code> first name · <code style={{ color: GOLD }}>{"{fullname}"}</code> · <code style={{ color: GOLD }}>{"{relation}"}</code> · <code style={{ color: GOLD }}>{"{events}"}</code> · <code style={{ color: GOLD }}>{"{contribution}"}</code> gift note
+            </div>
+
+            {/* Template tabs */}
+            <div style={{ display: "flex", gap: "0.25rem", borderBottom: `1px solid ${BORDER}` }}>
+              {([
+                { key: "attendance", label: `Attendance (${merged.filter(r => r.cardType === "attendance").length})` },
+                { key: "donor", label: `Donor only (${merged.filter(r => r.cardType === "donor").length})` },
+                { key: "combined", label: `Combined (${merged.filter(r => r.cardType === "combined").length})` },
+              ] as const).map(t => (
+                <button key={t.key} onClick={() => setActiveTemplate(t.key)} style={{
+                  background: activeTemplate === t.key ? BG : "none",
+                  border: `1px solid ${activeTemplate === t.key ? BORDER : "transparent"}`,
+                  borderBottom: activeTemplate === t.key ? `1px solid ${BG}` : "none",
+                  borderRadius: "4px 4px 0 0",
+                  color: activeTemplate === t.key ? GOLD : DIM,
+                  padding: "0.4rem 0.9rem", fontSize: "0.78rem", cursor: "pointer",
+                  marginBottom: activeTemplate === t.key ? "-1px" : "0",
+                }}>
+                  {t.label}
+                </button>
+              ))}
+            </div>
+
+            {activeTemplate === "attendance" && (
+              <textarea value={attendanceMsg} onChange={e => setAttendanceMsg(e.target.value)}
+                style={{ ...inputStyle, minHeight: "220px", lineHeight: 1.75, resize: "vertical", fontFamily: "Garamond, Georgia, serif", fontSize: "0.9rem" }} />
+            )}
+            {activeTemplate === "donor" && (
+              <textarea value={donorMsg} onChange={e => setDonorMsg(e.target.value)}
+                style={{ ...inputStyle, minHeight: "220px", lineHeight: 1.75, resize: "vertical", fontFamily: "Garamond, Georgia, serif", fontSize: "0.9rem" }} />
+            )}
+            {activeTemplate === "combined" && (
+              <textarea value={combinedMsg} onChange={e => setCombinedMsg(e.target.value)}
+                style={{ ...inputStyle, minHeight: "220px", lineHeight: 1.75, resize: "vertical", fontFamily: "Garamond, Georgia, serif", fontSize: "0.9rem" }} />
+            )}
+
+            <button onClick={() => handlePreview()} style={{ background: "none", border: `1px solid ${BORDER}`, borderRadius: "4px", color: MUTED, padding: "0.55rem 1.25rem", fontSize: "0.85rem", cursor: "pointer", alignSelf: "flex-start" }}>
+              Preview {activeTemplate} card
+            </button>
+          </div>
+
+          {/* Send log */}
+          {log.length > 0 && (
+            <div style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: "6px", overflow: "hidden" }}>
+              <div style={{ padding: "0.6rem 1rem", borderBottom: `1px solid ${BORDER}`, fontSize: "0.72rem", color: MUTED, textTransform: "uppercase", letterSpacing: "0.08em" }}>
+                Send history
+              </div>
+              <div style={{ overflowX: "auto" }}>
+                <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.78rem" }}>
+                  <thead>
+                    <tr style={{ borderBottom: `1px solid ${BORDER}` }}>
+                      {["Recipient", "Email", "Type", "Sent"].map(h => (
+                        <th key={h} style={{ padding: "0.5rem 0.75rem", textAlign: "left", color: MUTED, fontWeight: 400, fontSize: "0.7rem", textTransform: "uppercase", letterSpacing: "0.06em" }}>{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {log.map((entry, i) => (
+                      <tr key={entry.id} style={{ borderBottom: i < log.length - 1 ? `1px solid ${BORDER}` : "none" }}>
+                        <td style={{ padding: "0.5rem 0.75rem", color: TEXT }}>{entry.recipient_name}</td>
+                        <td style={{ padding: "0.5rem 0.75rem", color: MUTED }}>{entry.recipient_email ?? "—"}</td>
+                        <td style={{ padding: "0.5rem 0.75rem" }}>{cardTypeBadge(entry.card_type)}</td>
+                        <td style={{ padding: "0.5rem 0.75rem", color: DIM, whiteSpace: "nowrap" }}>
+                          {new Date(entry.sent_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {/* Result */}
+          {sendResult && (
+            <div style={{ background: sendResult.failed > 0 ? "#1f1208" : "#0d1f0d", border: `1px solid ${sendResult.failed > 0 ? "#4a2a0a" : "#1a4a1a"}`, borderRadius: "4px", padding: "0.75rem 1rem", fontSize: "0.85rem", color: sendResult.failed > 0 ? "#d4a86a" : GREEN }}>
+              Sent to {sendResult.sent} recipient{sendResult.sent !== 1 ? "s" : ""}.
+              {sendResult.failed > 0 && ` ${sendResult.failed} failed: ${sendResult.failures.join(", ")}`}
             </div>
           )}
 
           {confirmed && !sending && (
             <div style={{ fontSize: "0.82rem", color: "#d4a86a", background: "#1f1208", border: "1px solid #4a2a0a", borderRadius: "4px", padding: "0.75rem 1rem" }}>
-              Click again to confirm — this will send to {withEmail.length} email address{withEmail.length !== 1 ? "es" : ""}.
+              Click again to confirm — this will send to {readyToSend.length} recipient{readyToSend.length !== 1 ? "s" : ""}.
+              {alreadySentCount > 0 && skipAlreadySent && ` (${alreadySentCount} already sent will be skipped)`}
             </div>
           )}
 
-          <button
-            onClick={handleSend}
-            disabled={sending || withEmail.length === 0}
-            style={{
-              background: confirmed ? "#8b4a0a" : GOLD,
-              color: "#0e0b07", border: "none", borderRadius: "4px",
-              padding: "0.65rem 2rem", fontSize: "0.9rem", fontWeight: 600,
-              cursor: sending || withEmail.length === 0 ? "not-allowed" : "pointer",
-              alignSelf: "flex-start", letterSpacing: "0.04em",
-              opacity: withEmail.length === 0 ? 0.5 : 1,
-            }}
-          >
-            {sending ? "Sending…" : confirmed ? `Confirm — send to ${withEmail.length} people` : "Send thank-you emails"}
+          <button onClick={handleSend} disabled={sending || readyToSend.length === 0} style={{
+            background: confirmed ? "#8b4a0a" : GOLD, color: "#0e0b07", border: "none", borderRadius: "4px",
+            padding: "0.65rem 2rem", fontSize: "0.9rem", fontWeight: 600,
+            cursor: sending || readyToSend.length === 0 ? "not-allowed" : "pointer",
+            alignSelf: "flex-start", letterSpacing: "0.04em",
+            opacity: readyToSend.length === 0 ? 0.5 : 1,
+          }}>
+            {sending ? "Sending…" : confirmed ? `Confirm — send to ${readyToSend.length} people` : `Send thank-you cards (${readyToSend.length})`}
           </button>
         </div>
       )}
