@@ -85,6 +85,7 @@ export default async function ThankYouPage({ params }: { params: Promise<{ token
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <title>A message for you</title>
+        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
       </head>
       <body
         style={{ margin: 0, padding: 0 }}
