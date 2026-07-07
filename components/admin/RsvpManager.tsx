@@ -70,17 +70,19 @@ With love and gratitude,`;
 
 const DONOR_MESSAGE = `Dear {name},
 
-On behalf of our family, we are deeply moved by your generosity. {contribution} Your kindness during this time of loss has meant more than we can express.
+On behalf of our family, we are deeply moved by your generosity and thoughtfulness during this difficult time. {contribution}
 
-We are grateful beyond words.
+Your kindness has meant more than words can express, and we are grateful beyond measure.
 
 With love and gratitude,`;
 
 const COMBINED_MESSAGE = `Dear {name},
 
-On behalf of our family, we want to express our heartfelt gratitude for both your presence and your generosity. As {relation}, your attendance at {events} and your thoughtful gift touched our hearts deeply.
+On behalf of our family, we want to express our heartfelt gratitude for both your presence and your generosity. As {relation}, your being with us at {events} meant the world to us.
 
-{contribution} We are comforted knowing that so many hearts carry the memory of our beloved with us.
+{contribution}
+
+We are comforted knowing that so many hearts carry the memory of our beloved with us.
 
 With love and gratitude,`;
 
@@ -628,7 +630,7 @@ export default function RsvpManager({
                   <div><label style={labelStyle}>Name *</label><input style={inputStyle} value={donorForm.name} onChange={e => setDonorForm(f => ({ ...f, name: e.target.value }))} placeholder="Full name" /></div>
                   <div><label style={labelStyle}>Email</label><input style={inputStyle} value={donorForm.email} onChange={e => setDonorForm(f => ({ ...f, email: e.target.value }))} placeholder="email@example.com" type="email" /></div>
                   <div><label style={labelStyle}>Phone</label><input style={inputStyle} value={donorForm.phone} onChange={e => setDonorForm(f => ({ ...f, phone: e.target.value }))} placeholder="(555) 000-0000" /></div>
-                  <div><label style={labelStyle}>What they gave</label><input style={inputStyle} value={donorForm.note} onChange={e => setDonorForm(f => ({ ...f, note: e.target.value }))} placeholder="e.g. White lily arrangement, $100 donation" /></div>
+                  <div><label style={labelStyle}>What they gave</label><input style={inputStyle} value={donorForm.note} onChange={e => setDonorForm(f => ({ ...f, note: e.target.value }))} placeholder="e.g. The beautiful floral arrangement you sent brought warmth to the room." /></div>
                 </div>
                 {donorError && <div style={{ color: RED, fontSize: "0.78rem", marginTop: "0.5rem" }}>{donorError}</div>}
                 <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.75rem" }}>
@@ -708,9 +710,9 @@ export default function RsvpManager({
                   placeholder={`e.g. ${deceasedName.split(" ").slice(-1)[0]}`} style={inputStyle} />
               </div>
               <div>
-                <label style={labelStyle}>Default gift note <span style={{ color: DIM }}>(used if no specific note was entered)</span></label>
+                <label style={labelStyle}>Default gift note <span style={{ color: DIM }}>(used if no specific note was entered — write a complete sentence)</span></label>
                 <input type="text" value={contributionNote} onChange={e => setContributionNote(e.target.value)}
-                  placeholder="e.g. Your generous gift" style={inputStyle} />
+                  placeholder="e.g. Your generous gift touched our hearts deeply." style={inputStyle} />
               </div>
             </div>
 
