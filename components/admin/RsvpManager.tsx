@@ -366,8 +366,50 @@ export default function RsvpManager({
     setDonorForm({ name: d.name, email: d.email ?? "", phone: d.phone ?? "", note: d.note ?? "" });
   }
 
+  function downloadCsv(rows: string[][], label: string) {
+    const csv = rows.map(r => r.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(",")).join("\n");
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${slug}-${label}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function exportRsvpsCsv() {
+    downloadCsv([
+      ["Name", "Email", "Phone", "Guests", "Relation", "Funeral", "Reception", "Thanksgiving", "Message", "RSVP date"],
+      ...rsvps.map(r => [
+        r.name,
+        r.email ?? "",
+        r.phone ?? "",
+        r.guests,
+        r.relation ?? "",
+        r.attend_funeral ? "Yes" : "No",
+        r.attend_reception ? "Yes" : "No",
+        r.attend_thanksgiving ? "Yes" : "No",
+        r.message ?? "",
+        new Date(r.created_at).toLocaleDateString(),
+      ]),
+    ], "rsvps");
+  }
+
+  function exportTributesCsv() {
+    downloadCsv([
+      ["Name", "Email", "Relation", "Message", "Date"],
+      ...tributes.map(t => [
+        t.name,
+        t.email ?? "",
+        t.relation ?? "",
+        t.message,
+        new Date(t.created_at).toLocaleDateString(),
+      ]),
+    ], "tributes");
+  }
+
   function exportDonorsCsv() {
-    const rows = [
+    downloadCsv([
       ["Name", "Email", "Phone", "Gift note", "Added"],
       ...donors.map(d => [
         d.name,
@@ -376,15 +418,18 @@ export default function RsvpManager({
         d.note ?? "",
         new Date(d.created_at).toLocaleDateString(),
       ]),
-    ];
-    const csv = rows.map(r => r.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(",")).join("\n");
-    const blob = new Blob([csv], { type: "text/csv" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${slug}-donors.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
+    ], "donors");
+  }
+
+  function exportSmsCsv() {
+    downloadCsv([
+      ["Name", "Phone", "Email"],
+      ...smsRecipients.map(r => [
+        r.name,
+        r.phone,
+        r.email ?? "",
+      ]),
+    ], "sms-recipients");
   }
 
   const labelStyle = {
@@ -534,6 +579,13 @@ export default function RsvpManager({
             ) : rsvps.length === 0 ? (
               <div style={{ padding: "2rem", textAlign: "center", color: DIM, fontSize: "0.85rem", fontStyle: "italic" }}>No RSVPs yet.</div>
             ) : (
+              <>
+                <div style={{ padding: "0.6rem 1rem", borderBottom: `1px solid ${BORDER}`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <span style={{ fontSize: "0.72rem", color: MUTED, textTransform: "uppercase", letterSpacing: "0.08em" }}>{rsvps.length} RSVP{rsvps.length !== 1 ? "s" : ""}</span>
+                  <button onClick={exportRsvpsCsv} style={{ background: "none", border: `1px solid ${BORDER}`, borderRadius: "4px", color: MUTED, padding: "0.3rem 0.75rem", fontSize: "0.75rem", cursor: "pointer" }}>
+                    Export CSV
+                  </button>
+                </div>
               <div style={{ overflowX: "auto" }}>
                 <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.82rem" }}>
                   <thead>
@@ -568,6 +620,7 @@ export default function RsvpManager({
                   </tbody>
                 </table>
               </div>
+              </>
             )}
           </div>
         </div>
@@ -579,6 +632,13 @@ export default function RsvpManager({
           {tributes.length === 0 ? (
             <div style={{ padding: "2rem", textAlign: "center", color: DIM, fontSize: "0.85rem", fontStyle: "italic" }}>No tribute messages yet.</div>
           ) : (
+            <>
+              <div style={{ padding: "0.6rem 1rem", borderBottom: `1px solid ${BORDER}`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <span style={{ fontSize: "0.72rem", color: MUTED, textTransform: "uppercase", letterSpacing: "0.08em" }}>{tributes.length} tribute{tributes.length !== 1 ? "s" : ""}</span>
+                <button onClick={exportTributesCsv} style={{ background: "none", border: `1px solid ${BORDER}`, borderRadius: "4px", color: MUTED, padding: "0.3rem 0.75rem", fontSize: "0.75rem", cursor: "pointer" }}>
+                  Export CSV
+                </button>
+              </div>
             <div style={{ overflowX: "auto" }}>
               <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.82rem" }}>
                 <thead>
@@ -605,6 +665,7 @@ export default function RsvpManager({
                 </tbody>
               </table>
             </div>
+            </>
           )}
         </div>
       )}
@@ -917,8 +978,15 @@ export default function RsvpManager({
 
           {/* Recipient list */}
           <div style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: "6px", overflow: "hidden" }}>
-            <div style={{ padding: "0.6rem 1rem", borderBottom: `1px solid ${BORDER}`, fontSize: "0.72rem", color: MUTED, textTransform: "uppercase", letterSpacing: "0.08em" }}>
-              {smsLoading ? "Loading recipients…" : `${smsRecipients.length} SMS recipient${smsRecipients.length !== 1 ? "s" : ""}`}
+            <div style={{ padding: "0.6rem 1rem", borderBottom: `1px solid ${BORDER}`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <span style={{ fontSize: "0.72rem", color: MUTED, textTransform: "uppercase", letterSpacing: "0.08em" }}>
+                {smsLoading ? "Loading recipients…" : `${smsRecipients.length} SMS recipient${smsRecipients.length !== 1 ? "s" : ""}`}
+              </span>
+              {!smsLoading && smsRecipients.length > 0 && (
+                <button onClick={exportSmsCsv} style={{ background: "none", border: `1px solid ${BORDER}`, borderRadius: "4px", color: MUTED, padding: "0.3rem 0.75rem", fontSize: "0.75rem", cursor: "pointer" }}>
+                  Export CSV
+                </button>
+              )}
             </div>
             {smsLoading ? (
               <div style={{ padding: "2rem", textAlign: "center", color: DIM, fontSize: "0.85rem" }}>Loading…</div>
