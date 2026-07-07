@@ -266,7 +266,7 @@ export default function RsvpManager({
           r.relation ?? "",
           r.cardType,
           r.events ?? "",
-          r.contribution ?? donorMatch?.note ?? "",
+          r.contribution || donorMatch?.note || "",
           r.alreadySent ? "sent" : r.ambiguous ? "flagged" : "pending",
           r.alreadySent ? new Date(r.alreadySent.sent_at).toLocaleDateString() : "",
         ];
