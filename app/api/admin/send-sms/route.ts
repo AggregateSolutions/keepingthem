@@ -36,6 +36,7 @@ export async function POST(req: NextRequest) {
     signatureUrl,
     contributionNote,
     siteUrl,
+    testPhone,
   }: {
     slug: string;
     message: string;
@@ -48,10 +49,38 @@ export async function POST(req: NextRequest) {
     signatureUrl?: string;
     contributionNote?: string;
     siteUrl: string;
+    testPhone?: string;
   } = await req.json();
 
   if (!slug || !message) {
     return NextResponse.json({ error: "slug and message are required" }, { status: 400 });
+  }
+
+  // Test send — fire directly to the given number, no log write, no dedup check
+  if (testPhone) {
+    const resolvedFamily = familyName ?? deceasedName.split(" ").slice(-1)[0];
+    const token = generateToken();
+    const cardUrl = `${siteUrl}/thankyou/${token}`;
+    const smsBody = `${resolvedFamily ? `The ${resolvedFamily} family` : "The family"} has sent you a personal thank-you message. View it here: ${cardUrl}`;
+
+    try {
+      await getTwilio().messages.create({ body: smsBody, from: process.env.TWILIO_FROM_NUMBER!, to: testPhone });
+      await fetch(ktUrl("thank_you_tokens"), {
+        method: "POST",
+        headers: { ...ktHeaders(true), "Prefer": "return=minimal" },
+        body: JSON.stringify([{
+          token, memorial_slug: slug,
+          recipient_name: "Test Recipient", recipient_phone: testPhone,
+          card_type: "attendance",
+          relation: null, events: null, contribution: contributionNote ?? null,
+          message, deceased_name: deceasedName, years: years ?? "",
+          family_name: resolvedFamily, photo_url: photoUrl ?? null, signature_url: signatureUrl ?? null,
+        }]),
+      });
+      return NextResponse.json({ sent: 1, failed: 0, failures: [] });
+    } catch {
+      return NextResponse.json({ sent: 0, failed: 1, failures: [testPhone] });
+    }
   }
 
   const [rsvpRes, donorRes, logRes] = await Promise.all([

@@ -207,15 +207,24 @@ export default function RsvpManager({
   const [includeTributes, setIncludeTributes] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
-  // Step 2 — email recipients (checkboxes)
+  // Step 1 — test send
+  const [testEmail, setTestEmail] = useState("");
+  const [testPhone, setTestPhone] = useState("");
+  const [testTemplate, setTestTemplate] = useState<"attendance" | "donor" | "combined">("attendance");
+  const [testSending, setTestSending] = useState(false);
+  const [testResult, setTestResult] = useState<string | null>(null);
+
+  // Step 2 — email recipients (checkboxes + filter)
   const [selectedEmails, setSelectedEmails] = useState<Set<string>>(new Set());
   const [skipAlreadySent, setSkipAlreadySent] = useState(true);
+  const [emailFilter, setEmailFilter] = useState<"all" | "unsent" | "attendance" | "donor" | "combined">("unsent");
 
-  // Step 3 — SMS recipients (checkboxes)
+  // Step 3 — SMS recipients (checkboxes + filter)
   const [smsRecipients, setSmsRecipients] = useState<SmsRecipient[]>([]);
   const [smsLoading, setSmsLoading] = useState(false);
   const [selectedPhones, setSelectedPhones] = useState<Set<string>>(new Set());
   const [smsSentPhones, setSmsSentPhones] = useState<Set<string>>(new Set());
+  const [smsFilter, setSmsFilter] = useState<"all" | "unsent" | "email-too" | "sms-only">("unsent");
 
   // Step 4 — send
   const [sending, setSending] = useState(false);
@@ -288,6 +297,21 @@ export default function RsvpManager({
     ? emailRecipients.filter(r => !r.alreadySent)
     : emailRecipients;
 
+  const filteredEmailRecipients = effectiveEmailRecipients.filter(r => {
+    if (emailFilter === "unsent") return !r.alreadySent;
+    if (emailFilter === "attendance") return r.cardType === "attendance";
+    if (emailFilter === "donor") return r.cardType === "donor";
+    if (emailFilter === "combined") return r.cardType === "combined";
+    return true; // "all"
+  });
+
+  const filteredSmsRecipients = smsRecipients.filter(r => {
+    if (smsFilter === "unsent") return !smsSentPhones.has(r.phone);
+    if (smsFilter === "email-too") return !!r.email;
+    if (smsFilter === "sms-only") return !r.email;
+    return true; // "all"
+  });
+
   const absPhotoUrl = photoUrl
     ? (photoUrl.startsWith("http") ? photoUrl : (typeof window !== "undefined" ? `${window.location.origin}${photoUrl}` : photoUrl))
     : undefined;
@@ -340,6 +364,56 @@ export default function RsvpManager({
     setUploading(false);
     if (!res.ok) setUploadError(data.error ?? "Upload failed");
     else setSignatureUrl(data.url);
+  }
+
+  async function handleTestSend() {
+    const hasEmail = testEmail.trim();
+    const hasPhone = testPhone.trim();
+    if (!hasEmail && !hasPhone) { setTestResult("Enter an email or phone number above."); return; }
+    setTestSending(true); setTestResult(null);
+
+    const templateMessage = testTemplate === "combined" ? combinedMsg : testTemplate === "donor" ? donorMsg : attendanceMsg;
+    const sharedPayload = {
+      slug, deceasedName, years, photoUrl: absPhotoUrl,
+      message: templateMessage, donorMessage: donorMsg, combinedMessage: combinedMsg,
+      familyName: familyName || deceasedName.split(" ").slice(-1)[0],
+      signatureUrl: signatureUrl || undefined,
+      contributionNote: contributionNote || undefined,
+    };
+
+    const results: string[] = [];
+
+    if (hasEmail) {
+      const res = await fetch("/api/admin/send-thankyou", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...sharedPayload,
+          message: templateMessage,
+          recipientEmails: [testEmail.trim()],
+          skipAlreadySent: false,
+          isTest: true,
+        }),
+      }).then(r => r.json());
+      results.push(res.sent > 0 ? `Email sent to ${testEmail.trim()}` : `Email failed: ${res.failures?.join(", ") ?? "unknown error"}`);
+    }
+
+    if (hasPhone) {
+      const res = await fetch("/api/admin/send-sms", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...sharedPayload,
+          message: templateMessage,
+          siteUrl: window.location.origin,
+          testPhone: testPhone.trim(),
+        }),
+      }).then(r => r.json());
+      results.push(res.sent > 0 ? `Text sent to ${testPhone.trim()}` : `Text failed: ${res.failures?.join(", ") ?? "unknown error"}`);
+    }
+
+    setTestSending(false);
+    setTestResult(results.join(" · "));
   }
 
   async function handleSend() {
@@ -789,6 +863,57 @@ export default function RsvpManager({
               </label>
             )}
 
+            {/* Test send */}
+            <div style={{ background: BG, border: `1px solid ${BORDER}`, borderRadius: "6px", padding: "1.25rem" }}>
+              <div style={{ fontSize: "0.82rem", color: MUTED, marginBottom: "0.75rem", fontWeight: 600 }}>
+                Send a test card to yourself
+              </div>
+              <p style={{ margin: "0 0 1rem", fontSize: "0.82rem", color: DIM, lineHeight: 1.6 }}>
+                Enter your own email or phone number to see exactly what a recipient will receive before sending to anyone else.
+              </p>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem", marginBottom: "0.75rem" }}>
+                <div>
+                  <label style={labelStyle}>Your email</label>
+                  <input type="email" value={testEmail} onChange={e => { setTestEmail(e.target.value); setTestResult(null); }}
+                    placeholder="you@example.com" style={inputStyle} />
+                </div>
+                <div>
+                  <label style={labelStyle}>Your phone</label>
+                  <input type="tel" value={testPhone} onChange={e => { setTestPhone(e.target.value); setTestResult(null); }}
+                    placeholder="+1 (555) 000-0000" style={inputStyle} />
+                </div>
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: "1rem", flexWrap: "wrap" }}>
+                <div style={{ display: "flex", gap: "0.4rem" }}>
+                  {([
+                    { key: "attendance", label: "Attended" },
+                    { key: "donor", label: "Gift only" },
+                    { key: "combined", label: "Attended + gift" },
+                  ] as const).map(t => (
+                    <button key={t.key} onClick={() => setTestTemplate(t.key)} style={{
+                      background: testTemplate === t.key ? CARD : "none",
+                      border: `1px solid ${testTemplate === t.key ? GOLD : BORDER}`,
+                      borderRadius: "4px", color: testTemplate === t.key ? GOLD : DIM,
+                      padding: "0.3rem 0.75rem", fontSize: "0.75rem", cursor: "pointer",
+                    }}>
+                      {t.label}
+                    </button>
+                  ))}
+                </div>
+                <button onClick={handleTestSend} disabled={testSending || (!testEmail.trim() && !testPhone.trim())} style={{
+                  ...btnSecondary, fontSize: "0.82rem",
+                  opacity: (!testEmail.trim() && !testPhone.trim()) ? 0.5 : 1,
+                }}>
+                  {testSending ? "Sending…" : "Send test"}
+                </button>
+              </div>
+              {testResult && (
+                <div style={{ marginTop: "0.75rem", fontSize: "0.82rem", color: testResult.includes("failed") ? RED : GREEN }}>
+                  {testResult}
+                </div>
+              )}
+            </div>
+
             <div style={{ display: "flex", justifyContent: "flex-end" }}>
               <button onClick={() => setStep(2)} style={btnPrimary()}>Next: Choose who receives by email →</button>
             </div>
@@ -805,50 +930,65 @@ export default function RsvpManager({
               Everyone below has an email address on file. All are selected by default — uncheck anyone you'd like to skip.
             </p>
 
-            <div style={{ display: "flex", alignItems: "center", gap: "1rem", flexWrap: "wrap" }}>
-              <label style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontSize: "0.82rem", color: MUTED, cursor: "pointer" }}>
-                <input type="checkbox" checked={skipAlreadySent} onChange={e => {
-                  setSkipAlreadySent(e.target.checked);
-                  if (e.target.checked) {
-                    setSelectedEmails(new Set(effectiveEmailRecipients.map(r => r.email!)));
-                  }
-                }} style={{ accentColor: GOLD }} />
-                Hide people who were already sent a card
+            {/* Filter row */}
+            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", flexWrap: "wrap" }}>
+              <span style={{ fontSize: "0.75rem", color: DIM, marginRight: "0.25rem" }}>Show:</span>
+              {([
+                { key: "unsent", label: "Not yet sent" },
+                { key: "all", label: "Everyone" },
+                { key: "attendance", label: "Attended" },
+                { key: "donor", label: "Gift only" },
+                { key: "combined", label: "Attended + gift" },
+              ] as const).map(f => (
+                <button key={f.key} onClick={() => setEmailFilter(f.key)} style={{
+                  background: emailFilter === f.key ? GOLD : "none",
+                  border: `1px solid ${emailFilter === f.key ? GOLD : BORDER}`,
+                  borderRadius: "20px", color: emailFilter === f.key ? "#0e0b07" : DIM,
+                  padding: "0.25rem 0.75rem", fontSize: "0.75rem", cursor: "pointer", fontWeight: emailFilter === f.key ? 600 : 400,
+                }}>
+                  {f.label}
+                </button>
+              ))}
+              <label style={{ display: "flex", alignItems: "center", gap: "0.4rem", fontSize: "0.78rem", color: MUTED, cursor: "pointer", marginLeft: "auto" }}>
+                <input type="checkbox" checked={skipAlreadySent} onChange={e => setSkipAlreadySent(e.target.checked)} style={{ accentColor: GOLD }} />
+                Hide already sent
               </label>
-              {alreadySentCount > 0 && (
-                <span style={{ fontSize: "0.78rem", color: DIM }}>{alreadySentCount} already sent</span>
-              )}
               <button onClick={() => downloadCsv([
                 ["Name", "Email", "Card type", "Status"],
                 ...emailRecipients.map(r => [r.name, r.email ?? "", r.cardType, r.alreadySent ? "sent" : "pending"]),
-              ], "email-recipients")} style={{ ...btnGhost, marginLeft: "auto" }}>Export CSV</button>
+              ], "email-recipients")} style={btnGhost}>Export CSV</button>
             </div>
 
-            {effectiveEmailRecipients.length === 0 ? (
+            {filteredEmailRecipients.length === 0 ? (
               <div style={{ padding: "2rem", textAlign: "center", color: DIM, fontSize: "0.85rem", fontStyle: "italic", background: BG, borderRadius: "6px" }}>
-                {emailRecipients.length === 0 ? "No email addresses found in attendance or gift records." : "Everyone has already been sent a card. Uncheck 'Hide already sent' to resend."}
+                {emailRecipients.length === 0
+                  ? "No email addresses found in attendance or gift records."
+                  : "No one matches this filter. Try a different group or uncheck 'Hide already sent'."}
               </div>
             ) : (
               <div style={{ background: BG, border: `1px solid ${BORDER}`, borderRadius: "6px", overflow: "hidden" }}>
-                {/* Select all */}
+                {/* Select all filtered */}
                 <div style={{ padding: "0.65rem 1rem", borderBottom: `1px solid ${BORDER}`, display: "flex", alignItems: "center", gap: "0.75rem" }}>
                   <input
                     type="checkbox"
                     style={{ accentColor: GOLD, width: "16px", height: "16px" }}
-                    checked={effectiveEmailRecipients.every(r => selectedEmails.has(r.email!))}
+                    checked={filteredEmailRecipients.length > 0 && filteredEmailRecipients.every(r => selectedEmails.has(r.email!))}
                     onChange={e => {
-                      if (e.target.checked) setSelectedEmails(new Set(effectiveEmailRecipients.map(r => r.email!)));
-                      else setSelectedEmails(new Set());
+                      const s = new Set(selectedEmails);
+                      if (e.target.checked) filteredEmailRecipients.forEach(r => s.add(r.email!));
+                      else filteredEmailRecipients.forEach(r => s.delete(r.email!));
+                      setSelectedEmails(s);
                     }}
                   />
                   <span style={{ fontSize: "0.78rem", color: MUTED }}>
-                    Select all · <strong style={{ color: TEXT }}>{selectedEmails.size}</strong> selected
+                    Select all in view · <strong style={{ color: TEXT }}>{selectedEmails.size}</strong> selected total
+                    {alreadySentCount > 0 && <span style={{ color: DIM }}> · {alreadySentCount} already sent</span>}
                   </span>
                 </div>
                 <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.82rem" }}>
                   <tbody>
-                    {effectiveEmailRecipients.map((r, i) => (
-                      <tr key={i} style={{ borderBottom: i < effectiveEmailRecipients.length - 1 ? `1px solid ${BORDER}` : "none", background: selectedEmails.has(r.email!) ? "#1e1a08" : "transparent" }}>
+                    {filteredEmailRecipients.map((r, i) => (
+                      <tr key={i} style={{ borderBottom: i < filteredEmailRecipients.length - 1 ? `1px solid ${BORDER}` : "none", background: selectedEmails.has(r.email!) ? "#1e1a08" : "transparent" }}>
                         <td style={{ padding: "0.65rem 1rem", width: "36px" }}>
                           <input
                             type="checkbox"
@@ -898,39 +1038,67 @@ export default function RsvpManager({
                 " Everyone has already been sent a text."}
             </p>
 
+            {/* Filter row */}
+            {!smsLoading && smsRecipients.length > 0 && (
+              <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", flexWrap: "wrap" }}>
+                <span style={{ fontSize: "0.75rem", color: DIM, marginRight: "0.25rem" }}>Show:</span>
+                {([
+                  { key: "unsent", label: "Not yet sent" },
+                  { key: "all", label: "Everyone" },
+                  { key: "email-too", label: "Also has email" },
+                  { key: "sms-only", label: "Text only" },
+                ] as const).map(f => (
+                  <button key={f.key} onClick={() => setSmsFilter(f.key)} style={{
+                    background: smsFilter === f.key ? GOLD : "none",
+                    border: `1px solid ${smsFilter === f.key ? GOLD : BORDER}`,
+                    borderRadius: "20px", color: smsFilter === f.key ? "#0e0b07" : DIM,
+                    padding: "0.25rem 0.75rem", fontSize: "0.75rem", cursor: "pointer", fontWeight: smsFilter === f.key ? 600 : 400,
+                  }}>
+                    {f.label}
+                  </button>
+                ))}
+                <button onClick={() => downloadCsv([
+                  ["Name", "Phone", "Email"],
+                  ...smsRecipients.map(r => [r.name, r.phone, r.email ?? ""]),
+                ], "sms-recipients")} style={{ ...btnGhost, marginLeft: "auto" }}>Export CSV</button>
+              </div>
+            )}
+
             {smsLoading ? (
               <div style={{ padding: "2rem", textAlign: "center", color: DIM }}>Loading…</div>
             ) : smsRecipients.length === 0 ? (
               <div style={{ padding: "2rem", textAlign: "center", color: DIM, fontSize: "0.85rem", fontStyle: "italic", background: BG, borderRadius: "6px" }}>
                 No phone numbers found. You can add them in the attendance or gift records above.
               </div>
+            ) : filteredSmsRecipients.length === 0 ? (
+              <div style={{ padding: "2rem", textAlign: "center", color: DIM, fontSize: "0.85rem", fontStyle: "italic", background: BG, borderRadius: "6px" }}>
+                No one matches this filter. Try a different group.
+              </div>
             ) : (
               <div style={{ background: BG, border: `1px solid ${BORDER}`, borderRadius: "6px", overflow: "hidden" }}>
-                {/* Select all */}
+                {/* Select all filtered */}
                 <div style={{ padding: "0.65rem 1rem", borderBottom: `1px solid ${BORDER}`, display: "flex", alignItems: "center", gap: "0.75rem" }}>
                   <input
                     type="checkbox"
                     style={{ accentColor: GOLD, width: "16px", height: "16px" }}
-                    checked={smsRecipients.length > 0 && smsRecipients.every(r => selectedPhones.has(r.phone))}
+                    checked={filteredSmsRecipients.length > 0 && filteredSmsRecipients.every(r => selectedPhones.has(r.phone))}
                     onChange={e => {
-                      if (e.target.checked) setSelectedPhones(new Set(smsRecipients.map(r => r.phone)));
-                      else setSelectedPhones(new Set());
+                      const s = new Set(selectedPhones);
+                      if (e.target.checked) filteredSmsRecipients.forEach(r => s.add(r.phone));
+                      else filteredSmsRecipients.forEach(r => s.delete(r.phone));
+                      setSelectedPhones(s);
                     }}
                   />
                   <span style={{ fontSize: "0.78rem", color: MUTED }}>
-                    Select all · <strong style={{ color: TEXT }}>{selectedPhones.size}</strong> selected
+                    Select all in view · <strong style={{ color: TEXT }}>{selectedPhones.size}</strong> selected total
                   </span>
-                  <button onClick={() => downloadCsv([
-                    ["Name", "Phone", "Email"],
-                    ...smsRecipients.map(r => [r.name, r.phone, r.email ?? ""]),
-                  ], "sms-recipients")} style={{ ...btnGhost, marginLeft: "auto" }}>Export CSV</button>
                 </div>
                 <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.82rem" }}>
                   <tbody>
-                    {smsRecipients.map((r, i) => {
+                    {filteredSmsRecipients.map((r, i) => {
                       const alreadySent = smsSentPhones.has(r.phone);
                       return (
-                        <tr key={i} style={{ borderBottom: i < smsRecipients.length - 1 ? `1px solid ${BORDER}` : "none", background: selectedPhones.has(r.phone) ? "#1e1a08" : "transparent" }}>
+                        <tr key={i} style={{ borderBottom: i < filteredSmsRecipients.length - 1 ? `1px solid ${BORDER}` : "none", background: selectedPhones.has(r.phone) ? "#1e1a08" : "transparent" }}>
                           <td style={{ padding: "0.65rem 1rem", width: "36px" }}>
                             <input
                               type="checkbox"

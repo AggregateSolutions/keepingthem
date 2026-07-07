@@ -62,6 +62,7 @@ export async function POST(req: NextRequest) {
     includeTributes,
     skipAlreadySent,
     recipientEmails,
+    isTest,
   }: {
     slug: string;
     message: string;
@@ -76,10 +77,37 @@ export async function POST(req: NextRequest) {
     includeTributes?: boolean;
     skipAlreadySent?: boolean;
     recipientEmails?: string[];
+    isTest?: boolean;
   } = await req.json();
 
   if (!slug || !message) {
     return NextResponse.json({ error: "slug and message are required" }, { status: 400 });
+  }
+
+  // Test send — fire directly to provided email with a generic recipient, no log write
+  if (isTest && recipientEmails?.length === 1) {
+    const testAddr = recipientEmails[0];
+    const html = buildEcardHtml({
+      deceasedName, years: years ?? "",
+      photoUrl, familyName: familyName ?? "the",
+      signatureUrl, contributionNote,
+      recipientFirstName: "Friend",
+      recipientFullName: "Friend",
+      relation: "friend",
+      events: "the service",
+      message,
+    });
+    const subject = `[TEST] A message from the family of ${deceasedName}`;
+    const { error: sendError } = await getResend().emails.send({
+      from: "keepingthem.net <noreply@droptools.net>",
+      to: testAddr,
+      subject,
+      html,
+    });
+    return NextResponse.json(sendError
+      ? { sent: 0, failed: 1, failures: [testAddr] }
+      : { sent: 1, failed: 0, failures: [] }
+    );
   }
 
   const [rsvpRes, donorRes, logRes] = await Promise.all([
@@ -175,7 +203,7 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  if (logEntries.length > 0) {
+  if (logEntries.length > 0 && !isTest) {
     await fetch(ktUrl("thank_you_log"), {
       method: "POST",
       headers: { ...ktHeaders(true), "Prefer": "return=minimal" },
