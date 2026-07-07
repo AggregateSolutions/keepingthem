@@ -1,28 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import twilio from "twilio";
-import { buildEcardHtml } from "@/lib/ecard";
 import { randomBytes } from "crypto";
+import { ktUrl, ktHeaders, buildRecipientList, buildEventsList } from "@/lib/thankyou";
+import type { Rsvp, Donor, LogEntry, TokenRecipientData } from "@/lib/thankyou";
 
 async function isAuthorized(): Promise<boolean> {
   const store = await cookies();
   const token = store.get("admin_token")?.value;
   return !!process.env.ADMIN_PASSWORD && token === process.env.ADMIN_PASSWORD;
-}
-
-function ktUrl(path: string) {
-  return `${process.env.NEXT_PUBLIC_SUPABASE_URL}/keepingthem/v1/${path}`;
-}
-
-function ktHeaders(json = false) {
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-  return {
-    "apikey": key,
-    "Authorization": `Bearer ${key}`,
-    "Accept-Profile": "keepingthem",
-    "Content-Profile": "keepingthem",
-    ...(json ? { "Content-Type": "application/json" } : {}),
-  };
 }
 
 function getTwilio() {
@@ -68,61 +54,55 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "slug and message are required" }, { status: 400 });
   }
 
-  // Fetch RSVPs with phone but no email (email recipients handled separately)
   const [rsvpRes, donorRes, logRes] = await Promise.all([
     fetch(ktUrl(`rsvps?memorial_slug=eq.${encodeURIComponent(slug)}&phone=not.is.null&phone=neq.&select=name,email,phone,relation,attend_funeral,attend_reception,attend_thanksgiving`), { headers: ktHeaders() }),
     fetch(ktUrl(`donors?memorial_slug=eq.${encodeURIComponent(slug)}&phone=not.is.null&phone=neq.`), { headers: ktHeaders() }),
     fetch(ktUrl(`thank_you_log?memorial_slug=eq.${encodeURIComponent(slug)}`), { headers: ktHeaders() }),
   ]);
 
-  const rsvps: Array<{ name: string; email: string | null; phone: string; relation: string | null; attend_funeral: boolean; attend_reception: boolean; attend_thanksgiving: boolean }> = rsvpRes.ok ? await rsvpRes.json() : [];
-  const donors: Array<{ id: string; name: string; email: string | null; phone: string; note: string | null }> = donorRes.ok ? await donorRes.json() : [];
-  const log: Array<{ recipient_phone?: string; sent_at: string }> = logRes.ok ? await logRes.json() : [];
+  const rsvps: Rsvp[] = rsvpRes.ok ? await rsvpRes.json() : [];
+  const donors: Donor[] = donorRes.ok ? await donorRes.json() : [];
+  const log: LogEntry[] = logRes.ok ? await logRes.json() : [];
 
   const sentPhones = new Set(log.map(l => l.recipient_phone).filter(Boolean));
 
+  // Build phone-based recipient list — RSVPs first, then remaining donors
   type SmsRecipient = {
     name: string;
     phone: string;
+    email: string | null;
     relation?: string;
     events?: string;
     contribution?: string;
     cardType: "attendance" | "donor" | "combined";
   };
 
-  const recipients: SmsRecipient[] = [];
+  const smsRecipients: SmsRecipient[] = [];
   const usedPhones = new Set<string>();
-
-  // Build donor phone index
   const donorByPhone = new Map(donors.map(d => [d.phone, d]));
 
   for (const r of rsvps) {
-    const events = [
-      r.attend_funeral && "the funeral service",
-      r.attend_reception && "the reception",
-      r.attend_thanksgiving && "the thanksgiving celebration",
-    ].filter(Boolean).join(", ");
-
+    if (!r.phone) continue;
+    const events = buildEventsList(r);
     const donorMatch = donorByPhone.get(r.phone);
-    const cardType = donorMatch ? "combined" : "attendance";
-
-    recipients.push({
+    smsRecipients.push({
       name: r.name,
       phone: r.phone,
+      email: r.email,
       relation: r.relation ?? undefined,
       events: events || undefined,
       contribution: donorMatch?.note ?? undefined,
-      cardType,
+      cardType: donorMatch ? "combined" : "attendance",
     });
     usedPhones.add(r.phone);
   }
 
-  // Add remaining donors not already in RSVPs
   for (const d of donors) {
-    if (usedPhones.has(d.phone)) continue;
-    recipients.push({
+    if (!d.phone || usedPhones.has(d.phone)) continue;
+    smsRecipients.push({
       name: d.name,
       phone: d.phone,
+      email: d.email,
       contribution: d.note ?? undefined,
       cardType: "donor",
     });
@@ -131,36 +111,36 @@ export async function POST(req: NextRequest) {
   let sent = 0;
   let failed = 0;
   const failures: string[] = [];
+  const tokenEntries: TokenRecipientData[] = [];
+  const tokenMap: { token: string; data: TokenRecipientData }[] = [];
   const logEntries: object[] = [];
-  const tokenEntries: object[] = [];
 
-  for (const recipient of recipients) {
+  for (const recipient of smsRecipients) {
     if (sentPhones.has(recipient.phone)) continue;
 
-    const firstName = recipient.name.split(" ")[0];
     const templateMessage =
       recipient.cardType === "combined" && combinedMessage ? combinedMessage :
       recipient.cardType === "donor" && donorMessage ? donorMessage :
       message;
 
-    const html = buildEcardHtml({
-      deceasedName,
-      years: years ?? "",
-      photoUrl,
-      recipientFirstName: firstName,
-      recipientFullName: recipient.name,
-      relation: recipient.relation,
-      events: recipient.events,
+    const tokenData: TokenRecipientData = {
+      recipient_name: recipient.name,
+      recipient_phone: recipient.phone,
+      card_type: recipient.cardType,
+      relation: recipient.relation ?? null,
+      events: recipient.events ?? null,
+      contribution: recipient.contribution ?? contributionNote ?? null,
       message: templateMessage,
-      familyName: familyName ?? "the",
-      signatureUrl,
-      contributionNote: recipient.contribution ?? contributionNote,
-    });
+      deceased_name: deceasedName,
+      years: years ?? "",
+      family_name: familyName ?? deceasedName.split(" ").slice(-1)[0],
+      photo_url: photoUrl ?? null,
+      signature_url: signatureUrl ?? null,
+    };
 
     const token = generateToken();
     const cardUrl = `${siteUrl}/thankyou/${token}`;
-
-    const smsBody = `${familyName ? `The ${familyName} family` : "The family"} has sent you a personal thank-you message. View it here: ${cardUrl}`;
+    const smsBody = `${tokenData.family_name ? `The ${tokenData.family_name} family` : "The family"} has sent you a personal thank-you message. View it here: ${cardUrl}`;
 
     try {
       await getTwilio().messages.create({
@@ -170,18 +150,11 @@ export async function POST(req: NextRequest) {
       });
 
       sent++;
-      tokenEntries.push({
-        token,
-        memorial_slug: slug,
-        recipient_name: recipient.name,
-        recipient_phone: recipient.phone,
-        card_type: recipient.cardType,
-        ecard_html: html,
-      });
+      tokenMap.push({ token, data: tokenData });
       logEntries.push({
         memorial_slug: slug,
         recipient_name: recipient.name,
-        recipient_email: null,
+        recipient_email: recipient.email ?? null,
         recipient_phone: recipient.phone,
         card_type: recipient.cardType,
         subject: "SMS thank-you",
@@ -192,16 +165,32 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  // Write tokens
-  if (tokenEntries.length > 0) {
+  // Write tokens — one row per recipient, data fields only (no pre-rendered HTML)
+  if (tokenMap.length > 0) {
+    const rows = tokenMap.map(({ token, data }) => ({
+      token,
+      memorial_slug: slug,
+      recipient_name: data.recipient_name,
+      recipient_phone: data.recipient_phone,
+      card_type: data.card_type,
+      relation: data.relation,
+      events: data.events,
+      contribution: data.contribution,
+      message: data.message,
+      deceased_name: data.deceased_name,
+      years: data.years,
+      family_name: data.family_name,
+      photo_url: data.photo_url,
+      signature_url: data.signature_url,
+    }));
+
     await fetch(ktUrl("thank_you_tokens"), {
       method: "POST",
       headers: { ...ktHeaders(true), "Prefer": "return=minimal" },
-      body: JSON.stringify(tokenEntries),
+      body: JSON.stringify(rows),
     });
   }
 
-  // Write log
   if (logEntries.length > 0) {
     await fetch(ktUrl("thank_you_log"), {
       method: "POST",
@@ -213,7 +202,7 @@ export async function POST(req: NextRequest) {
   return NextResponse.json({ sent, failed, failures });
 }
 
-// GET — preview SMS recipients (phone-only, not already sent by email)
+// GET — preview SMS recipients
 export async function GET(req: NextRequest) {
   if (!(await isAuthorized())) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
