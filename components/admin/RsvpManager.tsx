@@ -219,6 +219,57 @@ export default function RsvpManager({
     win?.document.close();
   }
 
+  // RSVP editing
+  const [editingRsvpId, setEditingRsvpId] = useState<string | null>(null);
+  const [rsvpForm, setRsvpForm] = useState<Partial<Rsvp>>({});
+  const [rsvpSaving, setRsvpSaving] = useState(false);
+  const [rsvpError, setRsvpError] = useState("");
+
+  function startEditRsvp(r: Rsvp) {
+    setEditingRsvpId(r.id);
+    setRsvpForm({ ...r });
+    setRsvpError("");
+  }
+
+  async function saveRsvp() {
+    if (!editingRsvpId) return;
+    setRsvpSaving(true); setRsvpError("");
+    const res = await fetch(`/api/admin/rsvps?id=${editingRsvpId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(rsvpForm),
+    });
+    setRsvpSaving(false);
+    if (!res.ok) { setRsvpError("Save failed"); return; }
+    setEditingRsvpId(null);
+    loadData();
+  }
+
+  // Merged list CSV export
+  function exportMergedCsv() {
+    const rows = [
+      ["Name", "Email", "Relation", "Card type", "Events attended", "Contribution", "Status", "Sent date"],
+      ...merged.map(r => [
+        r.name,
+        r.email ?? "",
+        r.relation ?? "",
+        r.cardType,
+        r.events ?? "",
+        r.contribution ?? "",
+        r.alreadySent ? "sent" : r.ambiguous ? "flagged" : "pending",
+        r.alreadySent ? new Date(r.alreadySent.sent_at).toLocaleDateString() : "",
+      ]),
+    ];
+    const csv = rows.map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(",")).join("\n");
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${slug}-thankyou-list.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
   // Donor CRUD
   async function saveDonor() {
     if (!donorForm.name.trim()) { setDonorError("Name is required"); return; }
@@ -359,44 +410,91 @@ export default function RsvpManager({
 
       {/* RSVP list */}
       {tab === "rsvps" && (
-        <div style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: "6px", overflow: "hidden" }}>
-          {loading ? (
-            <div style={{ padding: "2rem", textAlign: "center", color: DIM, fontSize: "0.85rem" }}>Loading…</div>
-          ) : error ? (
-            <div style={{ padding: "1.5rem", color: RED, fontSize: "0.85rem" }}>{error}</div>
-          ) : rsvps.length === 0 ? (
-            <div style={{ padding: "2rem", textAlign: "center", color: DIM, fontSize: "0.85rem", fontStyle: "italic" }}>No RSVPs yet.</div>
-          ) : (
-            <div style={{ overflowX: "auto" }}>
-              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.82rem" }}>
-                <thead>
-                  <tr style={{ borderBottom: `1px solid ${BORDER}` }}>
-                    {["Name", "Email", "Phone", "Guests", "Relation", "Events", "Message", "Date"].map(h => (
-                      <th key={h} style={{ padding: "0.6rem 0.75rem", textAlign: "left", color: MUTED, fontWeight: 400, fontSize: "0.72rem", textTransform: "uppercase", letterSpacing: "0.06em", whiteSpace: "nowrap" }}>{h}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {rsvps.map((r, i) => (
-                    <tr key={r.id} style={{ borderBottom: i < rsvps.length - 1 ? `1px solid ${BORDER}` : "none", background: i % 2 === 0 ? "transparent" : "#1e1408" }}>
-                      <td style={{ padding: "0.6rem 0.75rem", color: TEXT, fontWeight: 500, whiteSpace: "nowrap" }}>{r.name}</td>
-                      <td style={{ padding: "0.6rem 0.75rem", color: MUTED }}>{r.email ?? <span style={{ color: DIM }}>—</span>}</td>
-                      <td style={{ padding: "0.6rem 0.75rem", color: MUTED, whiteSpace: "nowrap" }}>{r.phone ?? <span style={{ color: DIM }}>—</span>}</td>
-                      <td style={{ padding: "0.6rem 0.75rem", color: MUTED, textAlign: "center" }}>{r.guests}</td>
-                      <td style={{ padding: "0.6rem 0.75rem", color: MUTED }}>{r.relation ?? "—"}</td>
-                      <td style={{ padding: "0.6rem 0.75rem", color: MUTED, whiteSpace: "nowrap" }}>{events(r)}</td>
-                      <td style={{ padding: "0.6rem 0.75rem", color: DIM, fontStyle: "italic", maxWidth: "180px" }}>
-                        {r.message ? `"${r.message.slice(0, 60)}${r.message.length > 60 ? "…" : ""}"` : <span style={{ color: DIM }}>—</span>}
-                      </td>
-                      <td style={{ padding: "0.6rem 0.75rem", color: DIM, whiteSpace: "nowrap" }}>
-                        {new Date(r.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
-                      </td>
-                    </tr>
+        <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+          {/* Edit form */}
+          {editingRsvpId && (
+            <div style={{ background: CARD, border: `1px solid ${GOLD}`, borderRadius: "6px", padding: "1.25rem" }}>
+              <div style={{ fontSize: "0.82rem", color: GOLD, marginBottom: "1rem", fontWeight: 600 }}>Editing RSVP</div>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem" }}>
+                <div><label style={labelStyle}>Name</label><input style={inputStyle} value={rsvpForm.name ?? ""} onChange={e => setRsvpForm(f => ({ ...f, name: e.target.value }))} /></div>
+                <div><label style={labelStyle}>Email</label><input style={inputStyle} type="email" value={rsvpForm.email ?? ""} onChange={e => setRsvpForm(f => ({ ...f, email: e.target.value }))} /></div>
+                <div><label style={labelStyle}>Phone</label><input style={inputStyle} value={rsvpForm.phone ?? ""} onChange={e => setRsvpForm(f => ({ ...f, phone: e.target.value }))} /></div>
+                <div><label style={labelStyle}>Guests</label><input style={inputStyle} value={rsvpForm.guests ?? "1"} onChange={e => setRsvpForm(f => ({ ...f, guests: e.target.value }))} /></div>
+                <div><label style={labelStyle}>Relation</label><input style={inputStyle} value={rsvpForm.relation ?? ""} onChange={e => setRsvpForm(f => ({ ...f, relation: e.target.value }))} /></div>
+                <div style={{ display: "flex", flexDirection: "column", gap: "0.4rem" }}>
+                  <label style={labelStyle}>Events attended</label>
+                  {[
+                    { key: "attend_funeral", label: "Funeral" },
+                    { key: "attend_reception", label: "Reception" },
+                    { key: "attend_thanksgiving", label: "Thanksgiving" },
+                  ].map(({ key, label }) => (
+                    <label key={key} style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontSize: "0.82rem", color: MUTED, cursor: "pointer" }}>
+                      <input type="checkbox" checked={!!(rsvpForm as Record<string, unknown>)[key]} onChange={e => setRsvpForm(f => ({ ...f, [key]: e.target.checked }))} style={{ accentColor: GOLD }} />
+                      {label}
+                    </label>
                   ))}
-                </tbody>
-              </table>
+                </div>
+              </div>
+              <div style={{ marginTop: "0.75rem" }}>
+                <label style={labelStyle}>Message / tribute</label>
+                <textarea style={{ ...inputStyle, minHeight: "80px", resize: "vertical", lineHeight: 1.6 }} value={rsvpForm.message ?? ""} onChange={e => setRsvpForm(f => ({ ...f, message: e.target.value }))} />
+              </div>
+              {rsvpError && <div style={{ color: RED, fontSize: "0.78rem", marginTop: "0.4rem" }}>{rsvpError}</div>}
+              <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.75rem" }}>
+                <button onClick={saveRsvp} disabled={rsvpSaving} style={{ background: GOLD, color: "#0e0b07", border: "none", borderRadius: "4px", padding: "0.5rem 1.25rem", fontSize: "0.85rem", fontWeight: 600, cursor: "pointer" }}>
+                  {rsvpSaving ? "Saving…" : "Save changes"}
+                </button>
+                <button onClick={() => setEditingRsvpId(null)} style={{ background: "none", border: `1px solid ${BORDER}`, borderRadius: "4px", padding: "0.5rem 1rem", fontSize: "0.85rem", color: MUTED, cursor: "pointer" }}>
+                  Cancel
+                </button>
+              </div>
             </div>
           )}
+
+          <div style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: "6px", overflow: "hidden" }}>
+            {loading ? (
+              <div style={{ padding: "2rem", textAlign: "center", color: DIM, fontSize: "0.85rem" }}>Loading…</div>
+            ) : error ? (
+              <div style={{ padding: "1.5rem", color: RED, fontSize: "0.85rem" }}>{error}</div>
+            ) : rsvps.length === 0 ? (
+              <div style={{ padding: "2rem", textAlign: "center", color: DIM, fontSize: "0.85rem", fontStyle: "italic" }}>No RSVPs yet.</div>
+            ) : (
+              <div style={{ overflowX: "auto" }}>
+                <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.82rem" }}>
+                  <thead>
+                    <tr style={{ borderBottom: `1px solid ${BORDER}` }}>
+                      {["Name", "Email", "Phone", "Guests", "Relation", "Events", "Message", "Date", ""].map(h => (
+                        <th key={h} style={{ padding: "0.6rem 0.75rem", textAlign: "left", color: MUTED, fontWeight: 400, fontSize: "0.72rem", textTransform: "uppercase", letterSpacing: "0.06em", whiteSpace: "nowrap" }}>{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {rsvps.map((r, i) => (
+                      <tr key={r.id} style={{ borderBottom: i < rsvps.length - 1 ? `1px solid ${BORDER}` : "none", background: editingRsvpId === r.id ? "#1e1a08" : i % 2 === 0 ? "transparent" : "#1e1408" }}>
+                        <td style={{ padding: "0.6rem 0.75rem", color: TEXT, fontWeight: 500, whiteSpace: "nowrap" }}>{r.name}</td>
+                        <td style={{ padding: "0.6rem 0.75rem", color: MUTED }}>{r.email ?? <span style={{ color: DIM }}>—</span>}</td>
+                        <td style={{ padding: "0.6rem 0.75rem", color: MUTED, whiteSpace: "nowrap" }}>{r.phone ?? <span style={{ color: DIM }}>—</span>}</td>
+                        <td style={{ padding: "0.6rem 0.75rem", color: MUTED, textAlign: "center" }}>{r.guests}</td>
+                        <td style={{ padding: "0.6rem 0.75rem", color: MUTED }}>{r.relation ?? "—"}</td>
+                        <td style={{ padding: "0.6rem 0.75rem", color: MUTED, whiteSpace: "nowrap" }}>{events(r)}</td>
+                        <td style={{ padding: "0.6rem 0.75rem", color: DIM, fontStyle: "italic", maxWidth: "180px" }}>
+                          {r.message ? `"${r.message.slice(0, 60)}${r.message.length > 60 ? "…" : ""}"` : <span style={{ color: DIM }}>—</span>}
+                        </td>
+                        <td style={{ padding: "0.6rem 0.75rem", color: DIM, whiteSpace: "nowrap" }}>
+                          {new Date(r.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                        </td>
+                        <td style={{ padding: "0.6rem 0.75rem" }}>
+                          <button onClick={() => startEditRsvp(r)} style={{ background: "none", border: "none", color: MUTED, cursor: "pointer", fontSize: "0.75rem", textDecoration: "underline", whiteSpace: "nowrap" }}>
+                            Edit
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
         </div>
       )}
 
@@ -518,16 +616,21 @@ export default function RsvpManager({
 
           {/* Merged recipient list */}
           <div style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: "6px", overflow: "hidden" }}>
-            <div style={{ padding: "0.75rem 1rem", borderBottom: `1px solid ${BORDER}`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <div style={{ padding: "0.75rem 1rem", borderBottom: `1px solid ${BORDER}`, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "0.5rem" }}>
               <span style={{ fontSize: "0.82rem", color: MUTED }}>
                 <strong style={{ color: TEXT }}>{readyToSend.length}</strong> ready to send
                 {alreadySentCount > 0 && <span style={{ color: DIM }}> · {alreadySentCount} already sent</span>}
                 {ambiguous.length > 0 && <span style={{ color: "#d4a86a" }}> · {ambiguous.length} flagged</span>}
               </span>
-              <label style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontSize: "0.78rem", color: MUTED, cursor: "pointer" }}>
-                <input type="checkbox" checked={skipAlreadySent} onChange={e => setSkipAlreadySent(e.target.checked)} style={{ accentColor: GOLD }} />
-                Skip already sent
-              </label>
+              <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+                <label style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontSize: "0.78rem", color: MUTED, cursor: "pointer" }}>
+                  <input type="checkbox" checked={skipAlreadySent} onChange={e => setSkipAlreadySent(e.target.checked)} style={{ accentColor: GOLD }} />
+                  Skip already sent
+                </label>
+                <button onClick={exportMergedCsv} disabled={merged.length === 0} style={{ background: "none", border: `1px solid ${BORDER}`, borderRadius: "4px", color: MUTED, padding: "0.3rem 0.75rem", fontSize: "0.75rem", cursor: "pointer" }}>
+                  Export CSV
+                </button>
+              </div>
             </div>
             <div style={{ overflowX: "auto" }}>
               <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.8rem" }}>
