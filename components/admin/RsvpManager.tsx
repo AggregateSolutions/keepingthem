@@ -247,18 +247,30 @@ export default function RsvpManager({
 
   // Merged list CSV export
   function exportMergedCsv() {
+    // Build lookup maps for phone numbers from both RSVPs and donors
+    const rsvpByEmail = new Map(rsvps.filter(r => r.email).map(r => [r.email!.toLowerCase(), r]));
+    const donorByEmail = new Map(donors.filter(d => d.email).map(d => [d.email!.toLowerCase(), d]));
+    const donorByName = new Map(donors.map(d => [d.name.toLowerCase().trim(), d]));
+
     const rows = [
-      ["Name", "Email", "Relation", "Card type", "Events attended", "Contribution", "Status", "Sent date"],
-      ...merged.map(r => [
-        r.name,
-        r.email ?? "",
-        r.relation ?? "",
-        r.cardType,
-        r.events ?? "",
-        r.contribution ?? "",
-        r.alreadySent ? "sent" : r.ambiguous ? "flagged" : "pending",
-        r.alreadySent ? new Date(r.alreadySent.sent_at).toLocaleDateString() : "",
-      ]),
+      ["Name", "Email", "Phone", "Relation", "Card type", "Events attended", "Gift / contribution", "Status", "Sent date"],
+      ...merged.map(r => {
+        const emailKey = r.email?.toLowerCase();
+        const rsvpMatch = emailKey ? rsvpByEmail.get(emailKey) : null;
+        const donorMatch = emailKey ? donorByEmail.get(emailKey) : donorByName.get(r.name.toLowerCase().trim());
+        const phone = rsvpMatch?.phone ?? donorMatch?.phone ?? "";
+        return [
+          r.name,
+          r.email ?? "",
+          phone,
+          r.relation ?? "",
+          r.cardType,
+          r.events ?? "",
+          r.contribution ?? donorMatch?.note ?? "",
+          r.alreadySent ? "sent" : r.ambiguous ? "flagged" : "pending",
+          r.alreadySent ? new Date(r.alreadySent.sent_at).toLocaleDateString() : "",
+        ];
+      }),
     ];
     const csv = rows.map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(",")).join("\n");
     const blob = new Blob([csv], { type: "text/csv" });
