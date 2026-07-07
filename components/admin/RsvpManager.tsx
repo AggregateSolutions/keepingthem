@@ -188,7 +188,7 @@ export default function RsvpManager({
     loadData(); // refresh log
   }
 
-  async function handlePreview(email?: string, overrideTemplate?: "attendance" | "donor" | "combined") {
+  async function handlePreview(email?: string, overrideTemplate?: "attendance" | "donor" | "combined", overrideContribution?: string) {
     const recipient = email
       ? merged.find(r => r.email === email)
       : merged.find(r => r.email && !r.ambiguous);
@@ -207,7 +207,7 @@ export default function RsvpManager({
         message: templateMessage,
         familyName: familyName || deceasedName.split(" ").slice(-1)[0],
         signatureUrl: signatureUrl || undefined,
-        contributionNote: recipient?.contribution ?? contributionNote ?? undefined,
+        contributionNote: overrideContribution ?? recipient?.contribution ?? contributionNote ?? undefined,
         recipientName: recipient?.name,
         recipientRelation: recipient?.relation,
         recipientEvents: recipient?.events,
@@ -597,7 +597,7 @@ export default function RsvpManager({
               <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.82rem" }}>
                 <thead>
                   <tr style={{ borderBottom: `1px solid ${BORDER}` }}>
-                    {["Name", "Email", "Phone", "Gift note", ""].map((h, i) => (
+                    {["Name", "Email", "Phone", "Gift note", "Preview", ""].map((h, i) => (
                       <th key={i} style={{ padding: "0.6rem 0.75rem", textAlign: "left", color: MUTED, fontWeight: 400, fontSize: "0.72rem", textTransform: "uppercase", letterSpacing: "0.06em" }}>{h}</th>
                     ))}
                   </tr>
@@ -609,6 +609,13 @@ export default function RsvpManager({
                       <td style={{ padding: "0.6rem 0.75rem", color: MUTED }}>{d.email ?? <span style={{ color: DIM }}>—</span>}</td>
                       <td style={{ padding: "0.6rem 0.75rem", color: MUTED }}>{d.phone ?? <span style={{ color: DIM }}>—</span>}</td>
                       <td style={{ padding: "0.6rem 0.75rem", color: DIM, fontStyle: "italic" }}>{d.note ?? "—"}</td>
+                      <td style={{ padding: "0.6rem 0.75rem", whiteSpace: "nowrap" }}>
+                        {d.email && (
+                          <button onClick={() => handlePreview(d.email!, "donor", d.note ?? undefined)} style={{ background: "none", border: "none", color: MUTED, cursor: "pointer", fontSize: "0.75rem", textDecoration: "underline" }}>
+                            Preview
+                          </button>
+                        )}
+                      </td>
                       <td style={{ padding: "0.6rem 0.75rem", whiteSpace: "nowrap" }}>
                         <button onClick={() => editDonor(d)} style={{ background: "none", border: "none", color: MUTED, cursor: "pointer", fontSize: "0.78rem", marginRight: "0.5rem" }}>Edit</button>
                         <button onClick={() => deleteDonor(d.id)} style={{ background: "none", border: "none", color: RED, cursor: "pointer", fontSize: "0.78rem" }}>Remove</button>
