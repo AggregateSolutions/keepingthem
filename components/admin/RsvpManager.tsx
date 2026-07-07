@@ -95,7 +95,7 @@ export default function RsvpManager({
   const [merged, setMerged] = useState<MergedRecipient[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [tab, setTab] = useState<"rsvps" | "tributes" | "donors" | "thankyou">("rsvps");
+  const [tab, setTab] = useState<"rsvps" | "tributes" | "donors" | "thankyou" | "sms">("rsvps");
 
   // Donor form state
   const [donorForm, setDonorForm] = useState({ name: "", email: "", phone: "", note: "" });
@@ -120,6 +120,14 @@ export default function RsvpManager({
   const [confirmed, setConfirmed] = useState(false);
   const [previewEmail, setPreviewEmail] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
+
+  // SMS state
+  const [smsRecipients, setSmsRecipients] = useState<{ name: string; phone: string; email: string | null }[]>([]);
+  const [smsLoading, setSmsLoading] = useState(false);
+  const [smsSending, setSmsSending] = useState(false);
+  const [smsConfirmed, setSmsConfirmed] = useState(false);
+  const [smsResult, setSmsResult] = useState<{ sent: number; failed: number; failures: string[] } | null>(null);
+  const [smsSiteUrl, setSmsSiteUrl] = useState("");
 
   function loadData() {
     setLoading(true);
@@ -219,6 +227,43 @@ export default function RsvpManager({
     const win = window.open("", "_blank");
     win?.document.write(html);
     win?.document.close();
+  }
+
+  async function handleSmsSend() {
+    if (!smsConfirmed) { setSmsConfirmed(true); return; }
+    setSmsSending(true); setSmsResult(null);
+    const siteUrl = smsSiteUrl || window.location.origin;
+    const res = await fetch("/api/admin/send-sms", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        slug, deceasedName, years,
+        photoUrl: photoUrl ? (photoUrl.startsWith("http") ? photoUrl : `${window.location.origin}${photoUrl}`) : undefined,
+        message: attendanceMsg,
+        donorMessage: donorMsg,
+        combinedMessage: combinedMsg,
+        familyName: familyName || deceasedName.split(" ").slice(-1)[0],
+        signatureUrl: signatureUrl || undefined,
+        contributionNote: contributionNote || undefined,
+        siteUrl,
+      }),
+    });
+    const data = await res.json();
+    setSmsSending(false); setSmsConfirmed(false);
+    if (!res.ok) { setError(data.error ?? "SMS send failed"); return; }
+    setSmsResult(data);
+    // Re-fetch SMS recipients so already-sent ones are reflected
+    setSmsLoading(true);
+    fetch(`/api/admin/send-sms?slug=${slug}`)
+      .then(r => r.json())
+      .then(d => {
+        const all = [
+          ...(d.rsvps ?? []),
+          ...(d.donors ?? []).filter((don: { phone: string }) => !(d.rsvps ?? []).some((r: { phone: string }) => r.phone === don.phone)),
+        ];
+        setSmsRecipients(all);
+      })
+      .finally(() => setSmsLoading(false));
   }
 
   // RSVP editing
@@ -404,8 +449,23 @@ export default function RsvpManager({
 
       {/* Tabs */}
       <div style={{ display: "flex", gap: "0.25rem", borderBottom: `1px solid ${BORDER}`, marginBottom: "1.25rem" }}>
-        {(["rsvps", "tributes", "donors", "thankyou"] as const).map(t => (
-          <button key={t} onClick={() => setTab(t)} style={{
+        {(["rsvps", "tributes", "donors", "thankyou", "sms"] as const).map(t => (
+          <button key={t} onClick={() => {
+            setTab(t);
+            if (t === "sms" && smsRecipients.length === 0) {
+              setSmsLoading(true);
+              fetch(`/api/admin/send-sms?slug=${slug}`)
+                .then(r => r.json())
+                .then(d => {
+                  const all = [
+                    ...(d.rsvps ?? []),
+                    ...(d.donors ?? []).filter((don: { phone: string }) => !(d.rsvps ?? []).some((r: { phone: string }) => r.phone === don.phone)),
+                  ];
+                  setSmsRecipients(all);
+                })
+                .finally(() => setSmsLoading(false));
+            }
+          }} style={{
             background: tab === t ? CARD : "none",
             border: `1px solid ${tab === t ? BORDER : "transparent"}`,
             borderBottom: tab === t ? `1px solid ${CARD}` : "none",
@@ -417,7 +477,8 @@ export default function RsvpManager({
             {t === "rsvps" ? `RSVPs (${rsvps.length})`
               : t === "tributes" ? `Tributes (${tributes.length})`
               : t === "donors" ? `Donors (${donors.length})`
-              : "Send thank-you"}
+              : t === "thankyou" ? "Send thank-you"
+              : "SMS"}
           </button>
         ))}
       </div>
@@ -829,6 +890,93 @@ export default function RsvpManager({
             opacity: readyToSend.length === 0 ? 0.5 : 1,
           }}>
             {sending ? "Sending…" : confirmed ? `Confirm — send to ${readyToSend.length} people` : `Send thank-you cards (${readyToSend.length})`}
+          </button>
+        </div>
+      )}
+
+      {/* SMS tab */}
+      {tab === "sms" && (
+        <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
+
+          {/* Info banner */}
+          <div style={{ background: "#0d1020", border: "1px solid #2a3060", borderRadius: "6px", padding: "0.75rem 1rem", fontSize: "0.82rem", color: "#7a9aff" }}>
+            SMS recipients are anyone with a phone number — RSVPs and donors. Each message contains a unique link to their personal thank-you card. Messages use the same templates as email.
+          </div>
+
+          {/* Site URL setting */}
+          <div style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: "6px", padding: "1.25rem" }}>
+            <label style={labelStyle}>Site URL <span style={{ color: DIM }}>(base URL for card links — leave blank to use this origin)</span></label>
+            <input
+              type="url"
+              value={smsSiteUrl}
+              onChange={e => setSmsSiteUrl(e.target.value)}
+              placeholder={typeof window !== "undefined" ? window.location.origin : "https://keepingthem.net"}
+              style={inputStyle}
+            />
+          </div>
+
+          {/* Recipient list */}
+          <div style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: "6px", overflow: "hidden" }}>
+            <div style={{ padding: "0.6rem 1rem", borderBottom: `1px solid ${BORDER}`, fontSize: "0.72rem", color: MUTED, textTransform: "uppercase", letterSpacing: "0.08em" }}>
+              {smsLoading ? "Loading recipients…" : `${smsRecipients.length} SMS recipient${smsRecipients.length !== 1 ? "s" : ""}`}
+            </div>
+            {smsLoading ? (
+              <div style={{ padding: "2rem", textAlign: "center", color: DIM, fontSize: "0.85rem" }}>Loading…</div>
+            ) : smsRecipients.length === 0 ? (
+              <div style={{ padding: "2rem", textAlign: "center", color: DIM, fontSize: "0.85rem", fontStyle: "italic" }}>
+                No phone numbers found. Add phone numbers to RSVPs or donors.
+              </div>
+            ) : (
+              <div style={{ overflowX: "auto" }}>
+                <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.82rem" }}>
+                  <thead>
+                    <tr style={{ borderBottom: `1px solid ${BORDER}` }}>
+                      {["Name", "Phone", "Email"].map(h => (
+                        <th key={h} style={{ padding: "0.5rem 0.75rem", textAlign: "left", color: MUTED, fontWeight: 400, fontSize: "0.7rem", textTransform: "uppercase", letterSpacing: "0.06em" }}>{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {smsRecipients.map((r, i) => (
+                      <tr key={i} style={{ borderBottom: i < smsRecipients.length - 1 ? `1px solid ${BORDER}` : "none", background: i % 2 === 0 ? "transparent" : "#1e1408" }}>
+                        <td style={{ padding: "0.5rem 0.75rem", color: TEXT, whiteSpace: "nowrap" }}>{r.name}</td>
+                        <td style={{ padding: "0.5rem 0.75rem", color: MUTED, whiteSpace: "nowrap" }}>{r.phone}</td>
+                        <td style={{ padding: "0.5rem 0.75rem", color: DIM }}>{r.email ?? <span style={{ color: DIM, fontStyle: "italic" }}>SMS only</span>}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+
+          {/* Result */}
+          {smsResult && (
+            <div style={{ background: smsResult.failed > 0 ? "#1f1208" : "#0d1f0d", border: `1px solid ${smsResult.failed > 0 ? "#4a2a0a" : "#1a4a1a"}`, borderRadius: "4px", padding: "0.75rem 1rem", fontSize: "0.85rem", color: smsResult.failed > 0 ? "#d4a86a" : GREEN }}>
+              Sent to {smsResult.sent} recipient{smsResult.sent !== 1 ? "s" : ""}.
+              {smsResult.failed > 0 && ` ${smsResult.failed} failed: ${smsResult.failures.join(", ")}`}
+            </div>
+          )}
+
+          {smsConfirmed && !smsSending && (
+            <div style={{ fontSize: "0.82rem", color: "#d4a86a", background: "#1f1208", border: "1px solid #4a2a0a", borderRadius: "4px", padding: "0.75rem 1rem" }}>
+              Click again to confirm — this will send SMS to {smsRecipients.length} recipient{smsRecipients.length !== 1 ? "s" : ""}. Standard message rates apply.
+            </div>
+          )}
+
+          <button
+            onClick={handleSmsSend}
+            disabled={smsSending || smsRecipients.length === 0 || smsLoading}
+            style={{
+              background: smsConfirmed ? "#8b4a0a" : GOLD,
+              color: "#0e0b07", border: "none", borderRadius: "4px",
+              padding: "0.65rem 2rem", fontSize: "0.9rem", fontWeight: 600,
+              cursor: smsSending || smsRecipients.length === 0 ? "not-allowed" : "pointer",
+              alignSelf: "flex-start", letterSpacing: "0.04em",
+              opacity: smsRecipients.length === 0 ? 0.5 : 1,
+            }}
+          >
+            {smsSending ? "Sending…" : smsConfirmed ? `Confirm — send to ${smsRecipients.length} people` : `Send SMS thank-you (${smsRecipients.length})`}
           </button>
         </div>
       )}
