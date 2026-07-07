@@ -169,7 +169,8 @@ export default function RsvpManager({
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        slug, deceasedName, years, photoUrl,
+        slug, deceasedName, years,
+        photoUrl: photoUrl ? (photoUrl.startsWith("http") ? photoUrl : `${window.location.origin}${photoUrl}`) : undefined,
         message: attendanceMsg,
         donorMessage: donorMsg,
         combinedMessage: combinedMsg,
@@ -203,7 +204,8 @@ export default function RsvpManager({
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        deceasedName, years, photoUrl,
+        deceasedName, years,
+        photoUrl: photoUrl ? (photoUrl.startsWith("http") ? photoUrl : `${window.location.origin}${photoUrl}`) : undefined,
         message: templateMessage,
         familyName: familyName || deceasedName.split(" ").slice(-1)[0],
         signatureUrl: signatureUrl || undefined,
