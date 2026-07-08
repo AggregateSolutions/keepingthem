@@ -170,12 +170,13 @@ function StepBar({ step, steps }: { step: number; steps: string[] }) {
 // ─── Main component ───────────────────────────────────────────────────────────
 
 export default function RsvpManager({
-  slug, deceasedName, years, photoUrl,
+  slug, deceasedName, years, photoUrl, initialSignatureUrl,
 }: {
   slug: string;
   deceasedName: string;
   years?: string;
   photoUrl?: string;
+  initialSignatureUrl?: string;
 }) {
   // Data
   const [rsvps, setRsvps] = useState<Rsvp[]>([]);
@@ -196,7 +197,7 @@ export default function RsvpManager({
   // Step 1 — card design
   const [familyName, setFamilyName] = useState("");
   const [contributionNote, setContributionNote] = useState("");
-  const [signatureUrl, setSignatureUrl] = useState("");
+  const [signatureUrl, setSignatureUrl] = useState(initialSignatureUrl ?? "");
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState("");
   const [showSigPad, setShowSigPad] = useState(false);
@@ -388,6 +389,21 @@ export default function RsvpManager({
     ctx.clearRect(0, 0, canvas.width, canvas.height);
   }
 
+  async function persistSignatureUrl(url: string) {
+    try {
+      const configRes = await fetch(`/api/admin/memorial?slug=${slug}`, { credentials: "include" });
+      const { config } = await configRes.json();
+      if (config) {
+        await fetch("/api/admin/memorial", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ ...config, signatureUrl: url }),
+        });
+      }
+    } catch { /* non-fatal */ }
+  }
+
   async function sigSave() {
     const canvas = sigCanvasRef.current; if (!canvas) return;
     setUploading(true); setUploadError("");
@@ -400,7 +416,7 @@ export default function RsvpManager({
       const data = await res.json();
       setUploading(false);
       if (!res.ok) { setUploadError(data.error ?? "Upload failed"); }
-      else { setSignatureUrl(data.url); setShowSigPad(false); }
+      else { setSignatureUrl(data.url); setShowSigPad(false); persistSignatureUrl(data.url); }
     }, "image/png");
   }
 
@@ -903,7 +919,7 @@ export default function RsvpManager({
                     const data = await res.json();
                     setUploading(false);
                     if (!res.ok) setUploadError(data.error ?? "Upload failed");
-                    else { setSignatureUrl(data.url); setShowSigPad(false); }
+                    else { setSignatureUrl(data.url); setShowSigPad(false); persistSignatureUrl(data.url); }
                     e.target.value = "";
                   }} style={{ display: "none" }} />
                 </label>

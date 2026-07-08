@@ -73,6 +73,7 @@ export interface MemorialConfig {
   };
   culture: string;
   dressCode: "black-and-white" | "red-and-black";
+  signatureUrl?: string;
 }
 
 export interface MemorialListing {

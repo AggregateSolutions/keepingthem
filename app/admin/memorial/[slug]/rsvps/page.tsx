@@ -22,6 +22,7 @@ export default async function RsvpsPage({ params }: { params: Promise<{ slug: st
         deceasedName={config.name}
         years={config.years}
         photoUrl={config.photos?.[0]?.src}
+        initialSignatureUrl={config.signatureUrl}
       />
     </AdminShell>
   );
