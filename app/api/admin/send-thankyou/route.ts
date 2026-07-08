@@ -93,6 +93,7 @@ export async function POST(req: NextRequest) {
   }
 
   const safePhotoUrl = photoUrl?.startsWith("https://keepingthem.net/") ? photoUrl : undefined;
+  const safeSignatureUrl = signatureUrl?.startsWith("https://keepingthem.net/") || signatureUrl?.startsWith("https://pub-") ? signatureUrl : undefined;
 
   // Test send — fire directly to provided email using real recipient data, no log write
   if (isTest && recipientEmails?.length === 1) {
@@ -101,7 +102,7 @@ export async function POST(req: NextRequest) {
     const html = buildEcardHtml({
       deceasedName, years: years ?? "",
       photoUrl: safePhotoUrl, familyName: familyName ?? "the",
-      signatureUrl,
+      signatureUrl: safeSignatureUrl,
       contributionNote: testRecipientContribution ?? contributionNote,
       recipientFirstName: recipientName.split(" ")[0],
       recipientFullName: recipientName,
@@ -189,7 +190,7 @@ export async function POST(req: NextRequest) {
       events: recipient.events,
       message: templateMessage,
       familyName: familyName ?? "the",
-      signatureUrl,
+      signatureUrl: safeSignatureUrl,
       contributionNote: recipient.contribution ?? contributionNote,
     });
 

@@ -389,7 +389,7 @@ export default function RsvpManager({
       const form = new FormData();
       form.append("file", new File([blob], "signature.png", { type: "image/png" }));
       form.append("slug", slug);
-      const res = await fetch("/api/admin/signature", { method: "POST", body: form });
+      const res = await fetch("/api/admin/signature", { method: "POST", body: form, credentials: "include" });
       const data = await res.json();
       setUploading(false);
       if (!res.ok) { setUploadError(data.error ?? "Upload failed"); }
@@ -889,7 +889,7 @@ export default function RsvpManager({
                     setUploading(true); setUploadError("");
                     const form = new FormData();
                     form.append("file", file); form.append("slug", slug);
-                    const res = await fetch("/api/admin/signature", { method: "POST", body: form });
+                    const res = await fetch("/api/admin/signature", { method: "POST", body: form, credentials: "include" });
                     const data = await res.json();
                     setUploading(false);
                     if (!res.ok) setUploadError(data.error ?? "Upload failed");

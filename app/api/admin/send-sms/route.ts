@@ -67,6 +67,7 @@ export async function POST(req: NextRequest) {
   }
 
   const safePhotoUrl = photoUrl?.startsWith("https://keepingthem.net/") ? photoUrl : undefined;
+  const safeSignatureUrl = signatureUrl?.startsWith("https://keepingthem.net/") || signatureUrl?.startsWith("https://pub-") ? signatureUrl : undefined;
 
   // Test send — fire directly to the given number, no log write, no dedup check
   if (testPhone) {
@@ -94,7 +95,7 @@ export async function POST(req: NextRequest) {
           events: testRecipientEvents ?? null,
           contribution: testRecipientContribution ?? contributionNote ?? null,
           message, deceased_name: deceasedName, years: years ?? "",
-          family_name: resolvedFamily, photo_url: safePhotoUrl ?? null, signature_url: signatureUrl ?? null,
+          family_name: resolvedFamily, photo_url: safePhotoUrl ?? null, signature_url: safeSignatureUrl ?? null,
         }]),
       });
       if (!tokenRes.ok) {
@@ -189,7 +190,7 @@ export async function POST(req: NextRequest) {
       years: years ?? "",
       family_name: familyName ?? deceasedName.split(" ").slice(-1)[0],
       photo_url: safePhotoUrl ?? null,
-      signature_url: signatureUrl ?? null,
+      signature_url: safeSignatureUrl ?? null,
     };
 
     const token = generateToken();

@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
     recipientEvents,
   } = await req.json();
 
-  const firstName = recipientName ? recipientName.split(" ")[0] : "Friend";
+const firstName = recipientName ? recipientName.split(" ")[0] : "Friend";
 
   const html = buildEcardHtml({
     deceasedName: deceasedName || "Your Loved One",
