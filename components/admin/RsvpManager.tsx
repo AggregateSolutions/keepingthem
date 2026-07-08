@@ -786,7 +786,7 @@ export default function RsvpManager({
                   <div><label style={labelStyle}>Name *</label><input style={inputStyle} value={donorForm.name} onChange={e => setDonorForm(f => ({ ...f, name: e.target.value }))} placeholder="Full name" /></div>
                   <div><label style={labelStyle}>Email</label><input style={inputStyle} value={donorForm.email} onChange={e => setDonorForm(f => ({ ...f, email: e.target.value }))} placeholder="email@example.com" type="email" /></div>
                   <div><label style={labelStyle}>Phone</label><input style={inputStyle} value={donorForm.phone} onChange={e => setDonorForm(f => ({ ...f, phone: e.target.value }))} placeholder="(555) 000-0000" /></div>
-                  <div><label style={labelStyle}>What they gave</label><input style={inputStyle} value={donorForm.note} onChange={e => setDonorForm(f => ({ ...f, note: e.target.value }))} placeholder="e.g. $300.00 donation or beautiful floral arrangement" /></div>
+                  <div><label style={labelStyle}>What they gave</label><input style={inputStyle} value={donorForm.note} onChange={e => setDonorForm(f => ({ ...f, note: e.target.value }))} placeholder="e.g. generous monetary gift, beautiful floral arrangement, or time and service" /></div>
                 </div>
                 <label style={{ display: "flex", alignItems: "center", gap: "0.6rem", cursor: "pointer", fontSize: "0.82rem", color: MUTED, marginTop: "0.5rem" }}>
                   <input type="checkbox" checked={donorForm.attended} onChange={e => setDonorForm(f => ({ ...f, attended: e.target.checked }))} style={{ accentColor: GOLD }} />
