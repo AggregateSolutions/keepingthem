@@ -79,11 +79,19 @@ export function buildEcardHtml(data: EcardData): string {
     contributionNote,
   } = data;
 
+  const contributionSentence = contributionNote
+    ? `Your gift of ${contributionNote} touched our hearts deeply.`
+    : "";
+
   const personalizedMessage = message
     .replace(/\{name\}/g, recipientFirstName)
     .replace(/\{fullname\}/g, recipientFullName)
-    .replace(/\{relation\}/g, relation || "friend")
-    .replace(/\{events\}/g, events || "the service");
+    .replace(/\{relation\}/g, (relation || "friend").toLowerCase())
+    .replace(/\{events\}/g, events || "the service")
+    .replace(/\{contribution\}/g, contributionNote || "your generous contribution")
+    .replace(/\{contribution_sentence\}/g, contributionSentence)
+    .replace(/ {2,}/g, " ")
+    .trim();
 
   const photoSection = photoUrl ? `
     <tr>
@@ -116,9 +124,9 @@ export function buildEcardHtml(data: EcardData): string {
   <title>In Loving Memory of ${deceasedName}</title>
   <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
 </head>
-<body style="margin:0;padding:0;background:#e8dcc8;font-family:Georgia,'Cormorant Garamond',serif;">
+<body style="margin:0;padding:0;background:#e8d8b8;font-family:Georgia,'Cormorant Garamond',serif;">
 
-  <table width="100%" cellpadding="0" cellspacing="0" border="0" role="presentation" style="background:#e8dcc8;">
+  <table width="100%" cellpadding="0" cellspacing="0" border="0" role="presentation" style="background:#e8d8b8;">
     <tr>
       <td align="center" style="padding:24px 16px;">
 
@@ -192,7 +200,7 @@ export function buildEcardHtml(data: EcardData): string {
           <!-- Footer -->
           <tr>
             <td align="center" style="padding:0.6rem 2rem;">
-              <div style="font-size:0.72rem;color:#b0a090;font-style:italic;">
+              <div style="font-size:0.72rem;color:#9a7a52;font-style:italic;">
                 keepingthem.net — honoring lives in the tradition of their people
               </div>
             </td>

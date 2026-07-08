@@ -37,6 +37,11 @@ export async function POST(req: NextRequest) {
     contributionNote,
     siteUrl,
     testPhone,
+    testRecipientName,
+    testRecipientRelation,
+    testRecipientEvents,
+    testRecipientContribution,
+    testCardType,
   }: {
     slug: string;
     message: string;
@@ -50,11 +55,18 @@ export async function POST(req: NextRequest) {
     contributionNote?: string;
     siteUrl: string;
     testPhone?: string;
+    testRecipientName?: string;
+    testRecipientRelation?: string;
+    testRecipientEvents?: string;
+    testRecipientContribution?: string;
+    testCardType?: string;
   } = await req.json();
 
   if (!slug || !message) {
     return NextResponse.json({ error: "slug and message are required" }, { status: 400 });
   }
+
+  const safePhotoUrl = photoUrl?.startsWith("https://keepingthem.net/") ? photoUrl : undefined;
 
   // Test send — fire directly to the given number, no log write, no dedup check
   if (testPhone) {
@@ -65,22 +77,35 @@ export async function POST(req: NextRequest) {
 
     try {
       await getTwilio().messages.create({ body: smsBody, from: process.env.TWILIO_FROM_NUMBER!, to: testPhone });
-      await fetch(ktUrl("thank_you_tokens"), {
+    } catch (twilioErr) {
+      console.error("[send-sms test] Twilio error:", twilioErr);
+      return NextResponse.json({ sent: 0, failed: 1, failures: [testPhone], error: String(twilioErr) });
+    }
+
+    try {
+      const tokenRes = await fetch(ktUrl("thank_you_tokens"), {
         method: "POST",
         headers: { ...ktHeaders(true), "Prefer": "return=minimal" },
         body: JSON.stringify([{
           token, memorial_slug: slug,
-          recipient_name: "Test Recipient", recipient_phone: testPhone,
-          card_type: "attendance",
-          relation: null, events: null, contribution: contributionNote ?? null,
+          recipient_name: testRecipientName ?? "Test Recipient", recipient_phone: testPhone,
+          card_type: (testCardType ?? "attendance") as "attendance" | "donor" | "combined",
+          relation: testRecipientRelation ?? null,
+          events: testRecipientEvents ?? null,
+          contribution: testRecipientContribution ?? contributionNote ?? null,
           message, deceased_name: deceasedName, years: years ?? "",
-          family_name: resolvedFamily, photo_url: photoUrl ?? null, signature_url: signatureUrl ?? null,
+          family_name: resolvedFamily, photo_url: safePhotoUrl ?? null, signature_url: signatureUrl ?? null,
         }]),
       });
-      return NextResponse.json({ sent: 1, failed: 0, failures: [] });
-    } catch {
-      return NextResponse.json({ sent: 0, failed: 1, failures: [testPhone] });
+      if (!tokenRes.ok) {
+        const body = await tokenRes.text();
+        console.error("[send-sms test] Token write failed:", tokenRes.status, body);
+      }
+    } catch (tokenErr) {
+      console.error("[send-sms test] Token write error:", tokenErr);
     }
+
+    return NextResponse.json({ sent: 1, failed: 0, failures: [] });
   }
 
   const [rsvpRes, donorRes, logRes] = await Promise.all([
@@ -163,7 +188,7 @@ export async function POST(req: NextRequest) {
       deceased_name: deceasedName,
       years: years ?? "",
       family_name: familyName ?? deceasedName.split(" ").slice(-1)[0],
-      photo_url: photoUrl ?? null,
+      photo_url: safePhotoUrl ?? null,
       signature_url: signatureUrl ?? null,
     };
 

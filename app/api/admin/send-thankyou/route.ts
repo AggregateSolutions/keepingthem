@@ -63,6 +63,10 @@ export async function POST(req: NextRequest) {
     skipAlreadySent,
     recipientEmails,
     isTest,
+    testRecipientName,
+    testRecipientRelation,
+    testRecipientEvents,
+    testRecipientContribution,
   }: {
     slug: string;
     message: string;
@@ -78,23 +82,31 @@ export async function POST(req: NextRequest) {
     skipAlreadySent?: boolean;
     recipientEmails?: string[];
     isTest?: boolean;
+    testRecipientName?: string;
+    testRecipientRelation?: string;
+    testRecipientEvents?: string;
+    testRecipientContribution?: string;
   } = await req.json();
 
   if (!slug || !message) {
     return NextResponse.json({ error: "slug and message are required" }, { status: 400 });
   }
 
-  // Test send — fire directly to provided email with a generic recipient, no log write
+  const safePhotoUrl = photoUrl?.startsWith("https://keepingthem.net/") ? photoUrl : undefined;
+
+  // Test send — fire directly to provided email using real recipient data, no log write
   if (isTest && recipientEmails?.length === 1) {
     const testAddr = recipientEmails[0];
+    const recipientName = testRecipientName ?? "Friend";
     const html = buildEcardHtml({
       deceasedName, years: years ?? "",
-      photoUrl, familyName: familyName ?? "the",
-      signatureUrl, contributionNote,
-      recipientFirstName: "Friend",
-      recipientFullName: "Friend",
-      relation: "friend",
-      events: "the service",
+      photoUrl: safePhotoUrl, familyName: familyName ?? "the",
+      signatureUrl,
+      contributionNote: testRecipientContribution ?? contributionNote,
+      recipientFirstName: recipientName.split(" ")[0],
+      recipientFullName: recipientName,
+      relation: testRecipientRelation,
+      events: testRecipientEvents,
       message,
     });
     const subject = `[TEST] A message from the family of ${deceasedName}`;
@@ -170,7 +182,7 @@ export async function POST(req: NextRequest) {
     const html = buildEcardHtml({
       deceasedName,
       years: years ?? "",
-      photoUrl,
+      photoUrl: safePhotoUrl,
       recipientFirstName: firstName,
       recipientFullName: recipient.name,
       relation: recipient.relation,

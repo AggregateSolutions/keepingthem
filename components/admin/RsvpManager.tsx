@@ -62,7 +62,7 @@ type SmsRecipient = {
 
 const ATTENDANCE_MESSAGE = `Dear {name},
 
-On behalf of our family, we want to express our deepest gratitude for your love, your presence, and your support during this time. As {relation}, your being there meant more than words can say.
+On behalf of our family, we want to express our deepest gratitude for your love, your presence, and your support during this time. As a {relation}, your being there meant more than words can say.
 
 We are comforted knowing that so many hearts carry the memory of our beloved with us.
 
@@ -70,17 +70,15 @@ With love and gratitude,`;
 
 const DONOR_MESSAGE = `Dear {name},
 
-On behalf of our family, we are deeply moved by your generosity and thoughtfulness during this difficult time. {contribution}
+On behalf of our family, we are deeply moved by your generosity and thoughtfulness during this difficult time. {contribution_sentence}
 
-Your kindness has meant more than words can express, and we are grateful beyond measure.
+We are grateful beyond measure for your kindness.
 
 With love and gratitude,`;
 
 const COMBINED_MESSAGE = `Dear {name},
 
-On behalf of our family, we want to express our heartfelt gratitude for both your presence and your generosity. As {relation}, your being with us at {events} meant the world to us.
-
-{contribution}
+On behalf of our family, we want to express our heartfelt gratitude for both your presence and your generosity. As a {relation}, your being with us at {events} meant the world to us. {contribution_sentence}
 
 We are comforted knowing that so many hearts carry the memory of our beloved with us.
 
@@ -211,6 +209,7 @@ export default function RsvpManager({
   const [testEmail, setTestEmail] = useState("");
   const [testPhone, setTestPhone] = useState("");
   const [testTemplate, setTestTemplate] = useState<"attendance" | "donor" | "combined">("attendance");
+  const [testPreviewEmail, setTestPreviewEmail] = useState(""); // whose card data to use as the model
   const [testSending, setTestSending] = useState(false);
   const [testResult, setTestResult] = useState<string | null>(null);
 
@@ -372,44 +371,62 @@ export default function RsvpManager({
     if (!hasEmail && !hasPhone) { setTestResult("Enter an email or phone number above."); return; }
     setTestSending(true); setTestResult(null);
 
+    // Use a real recipient's data as the model so variables render authentically
+    const modelRecipient = testPreviewEmail
+      ? merged.find(r => r.email === testPreviewEmail)
+      : merged.find(r => r.cardType === testTemplate && r.email && !r.ambiguous);
+
     const templateMessage = testTemplate === "combined" ? combinedMsg : testTemplate === "donor" ? donorMsg : attendanceMsg;
+    const resolvedFamily = familyName || deceasedName.split(" ").slice(-1)[0];
+
     const sharedPayload = {
       slug, deceasedName, years, photoUrl: absPhotoUrl,
       message: templateMessage, donorMessage: donorMsg, combinedMessage: combinedMsg,
-      familyName: familyName || deceasedName.split(" ").slice(-1)[0],
+      familyName: resolvedFamily,
       signatureUrl: signatureUrl || undefined,
       contributionNote: contributionNote || undefined,
     };
 
     const results: string[] = [];
 
+    async function safePost(url: string, body: object) {
+      try {
+        const r = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+        if (!r.ok) return { sent: 0, failed: 1, failures: [], error: `HTTP ${r.status}` };
+        return await r.json();
+      } catch {
+        return { sent: 0, failed: 1, failures: [], error: "network error" };
+      }
+    }
+
     if (hasEmail) {
-      const res = await fetch("/api/admin/send-thankyou", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...sharedPayload,
-          message: templateMessage,
-          recipientEmails: [testEmail.trim()],
-          skipAlreadySent: false,
-          isTest: true,
-        }),
-      }).then(r => r.json());
-      results.push(res.sent > 0 ? `Email sent to ${testEmail.trim()}` : `Email failed: ${res.failures?.join(", ") ?? "unknown error"}`);
+      const res = await safePost("/api/admin/send-thankyou", {
+        ...sharedPayload,
+        message: templateMessage,
+        recipientEmails: [testEmail.trim()],
+        skipAlreadySent: false,
+        isTest: true,
+        testRecipientName: modelRecipient?.name,
+        testRecipientRelation: modelRecipient?.relation,
+        testRecipientEvents: modelRecipient?.events,
+        testRecipientContribution: modelRecipient?.contribution ?? contributionNote,
+      });
+      results.push(res.sent > 0 ? `Email sent to ${testEmail.trim()}` : `Email failed: ${res.error ?? res.failures?.join(", ") ?? "unknown error"}`);
     }
 
     if (hasPhone) {
-      const res = await fetch("/api/admin/send-sms", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...sharedPayload,
-          message: templateMessage,
-          siteUrl: window.location.origin,
-          testPhone: testPhone.trim(),
-        }),
-      }).then(r => r.json());
-      results.push(res.sent > 0 ? `Text sent to ${testPhone.trim()}` : `Text failed: ${res.failures?.join(", ") ?? "unknown error"}`);
+      const res = await safePost("/api/admin/send-sms", {
+        ...sharedPayload,
+        message: templateMessage,
+        siteUrl: window.location.origin,
+        testPhone: testPhone.trim(),
+        testRecipientName: modelRecipient?.name,
+        testRecipientRelation: modelRecipient?.relation,
+        testRecipientEvents: modelRecipient?.events,
+        testRecipientContribution: modelRecipient?.contribution ?? contributionNote,
+        testCardType: testTemplate,
+      });
+      results.push(res.sent > 0 ? `Text sent to ${testPhone.trim()}` : `Text failed: ${res.error ?? res.failures?.join(", ") ?? "unknown error"}`);
     }
 
     setTestSending(false);
@@ -871,7 +888,7 @@ export default function RsvpManager({
               <p style={{ margin: "0 0 1rem", fontSize: "0.82rem", color: DIM, lineHeight: 1.6 }}>
                 Enter your own email or phone number to see exactly what a recipient will receive before sending to anyone else.
               </p>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem", marginBottom: "0.75rem" }}>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "0.75rem", marginBottom: "0.75rem" }}>
                 <div>
                   <label style={labelStyle}>Your email</label>
                   <input type="email" value={testEmail} onChange={e => { setTestEmail(e.target.value); setTestResult(null); }}
@@ -881,6 +898,21 @@ export default function RsvpManager({
                   <label style={labelStyle}>Your phone</label>
                   <input type="tel" value={testPhone} onChange={e => { setTestPhone(e.target.value); setTestResult(null); }}
                     placeholder="+1 (555) 000-0000" style={inputStyle} />
+                </div>
+                <div>
+                  <label style={labelStyle}>Render as <span style={{ color: DIM }}>(whose data fills the card)</span></label>
+                  <select
+                    value={testPreviewEmail}
+                    onChange={e => { setTestPreviewEmail(e.target.value); setTestResult(null); }}
+                    style={{ ...inputStyle, appearance: "none" as const }}
+                  >
+                    <option value="">— first matching recipient —</option>
+                    {merged.filter(r => r.email && !r.ambiguous).map((r, i) => (
+                      <option key={i} value={r.email!}>
+                        {r.name} ({r.cardType === "combined" ? "attended + gift" : r.cardType === "donor" ? "gift" : "attended"})
+                      </option>
+                    ))}
+                  </select>
                 </div>
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: "1rem", flexWrap: "wrap" }}>
