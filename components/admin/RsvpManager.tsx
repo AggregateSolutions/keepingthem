@@ -329,11 +329,17 @@ export default function RsvpManager({
     a.click();
   }
 
-  async function handlePreview(overrideTemplate?: "attendance" | "donor" | "combined", recipientEmail?: string, overrideContribution?: string) {
+  async function handlePreview(
+    overrideTemplate?: "attendance" | "donor" | "combined",
+    recipientEmail?: string,
+    overrideContribution?: string,
+    recipientOverride?: { name: string; relation?: string | null; events?: string },
+  ) {
     const template = overrideTemplate ?? activeTemplate;
-    const recipient = recipientEmail
+    const mergedMatch = recipientEmail
       ? merged.find(r => r.email === recipientEmail)
       : merged.find(r => r.email && !r.ambiguous);
+    const recipient = recipientOverride ?? mergedMatch;
     const templateMessage = template === "combined" ? combinedMsg : template === "donor" ? donorMsg : attendanceMsg;
     const res = await fetch("/api/admin/preview-ecard", {
       method: "POST",
@@ -343,7 +349,7 @@ export default function RsvpManager({
         message: templateMessage,
         familyName: familyName || deceasedName.split(" ").slice(-1)[0],
         signatureUrl: signatureUrl || undefined,
-        contributionNote: overrideContribution ?? recipient?.contribution ?? contributionNote ?? undefined,
+        contributionNote: overrideContribution ?? (recipient as MergedRecipient)?.contribution ?? contributionNote ?? undefined,
         recipientName: recipient?.name,
         recipientRelation: recipient?.relation,
         recipientEvents: recipient?.events,
@@ -800,9 +806,7 @@ export default function RsvpManager({
                           <td style={{ padding: "0.6rem 0.75rem", color: DIM, fontStyle: "italic" }}>{d.note ?? "—"}</td>
                           <td style={{ padding: "0.6rem 0.75rem" }}>{cardTypeBadge(d.attended ? "combined" : "donor")}</td>
                           <td style={{ padding: "0.6rem 0.75rem" }}>
-                            {d.email && (
-                              <button onClick={() => handlePreview(d.attended ? "combined" : "donor", d.email!, d.note ?? undefined)} style={btnGhost}>Preview card</button>
-                            )}
+                            <button onClick={() => handlePreview(d.attended ? "combined" : "donor", undefined, d.note ?? undefined, { name: d.name })} style={btnGhost}>Preview card</button>
                           </td>
                           <td style={{ padding: "0.6rem 0.75rem", whiteSpace: "nowrap" }}>
                             <button onClick={() => { setEditingDonorId(d.id); setDonorForm({ name: d.name, email: d.email ?? "", phone: d.phone ?? "", note: d.note ?? "", attended: d.attended }); }} style={{ ...btnGhost, marginRight: "0.75rem" }}>Edit</button>
