@@ -247,7 +247,7 @@ export default function RsvpManager({
       .then(r => r.json())
       .then(d => {
         if (d.error) { setError(d.error); return; }
-        setRsvps(d.rsvps ?? []);
+        setRsvps((d.rsvps ?? []).slice().sort((a: Rsvp, b: Rsvp) => a.name.localeCompare(b.name)));
         setTributes(d.tributes ?? []);
         setDonors(d.donors ?? []);
         setLog(d.log ?? []);
