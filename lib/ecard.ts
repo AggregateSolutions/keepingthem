@@ -23,18 +23,18 @@ const BORDER = "#d4a84a";
 const KENTE_STRIPE = `
 <table width="100%" cellpadding="0" cellspacing="0" border="0" role="presentation">
   <tr>
-    <td style="height:8px;background:#c8962e;"></td>
-    <td style="height:8px;background:#1a5c1a;"></td>
-    <td style="height:8px;background:#8b1a1a;"></td>
-    <td style="height:8px;background:#c8962e;"></td>
-    <td style="height:8px;background:#1a5c1a;"></td>
-    <td style="height:8px;background:#8b1a1a;"></td>
-    <td style="height:8px;background:#c8962e;"></td>
-    <td style="height:8px;background:#1a5c1a;"></td>
-    <td style="height:8px;background:#8b1a1a;"></td>
-    <td style="height:8px;background:#c8962e;"></td>
-    <td style="height:8px;background:#1a5c1a;"></td>
-    <td style="height:8px;background:#8b1a1a;"></td>
+    <td style="height:8px;background-color:#c8962e;" bgcolor="#c8962e"></td>
+    <td style="height:8px;background-color:#1a5c1a;" bgcolor="#1a5c1a"></td>
+    <td style="height:8px;background-color:#8b1a1a;" bgcolor="#8b1a1a"></td>
+    <td style="height:8px;background-color:#c8962e;" bgcolor="#c8962e"></td>
+    <td style="height:8px;background-color:#1a5c1a;" bgcolor="#1a5c1a"></td>
+    <td style="height:8px;background-color:#8b1a1a;" bgcolor="#8b1a1a"></td>
+    <td style="height:8px;background-color:#c8962e;" bgcolor="#c8962e"></td>
+    <td style="height:8px;background-color:#1a5c1a;" bgcolor="#1a5c1a"></td>
+    <td style="height:8px;background-color:#8b1a1a;" bgcolor="#8b1a1a"></td>
+    <td style="height:8px;background-color:#c8962e;" bgcolor="#c8962e"></td>
+    <td style="height:8px;background-color:#1a5c1a;" bgcolor="#1a5c1a"></td>
+    <td style="height:8px;background-color:#8b1a1a;" bgcolor="#8b1a1a"></td>
   </tr>
 </table>`;
 
@@ -106,7 +106,7 @@ export function buildEcardHtml(data: EcardData): string {
   const contributionSection = contributionNote ? `
     <tr>
       <td style="padding:0 2rem 0.75rem;">
-        <p style="font-family:Georgia,'Cormorant Garamond',serif;font-size:0.95rem;color:${FAINT_TEXT};font-style:italic;text-align:center;margin:0;line-height:1.7;">
+        <p class="kt-faint" style="font-family:Georgia,'Cormorant Garamond',serif;font-size:0.95rem;color:${FAINT_TEXT};font-style:italic;text-align:center;margin:0;line-height:1.7;">
           ${contributionNote}
         </p>
       </td>
@@ -114,25 +114,28 @@ export function buildEcardHtml(data: EcardData): string {
 
   const signatureSection = signatureUrl
     ? `<img src="${signatureUrl}" alt="Family signature" style="max-width:200px;max-height:72px;display:block;margin-top:1rem;" />`
-    : `<div style="font-family:Georgia,'Cormorant Garamond',serif;font-size:1.1rem;color:${GOLD};font-style:italic;margin-top:0.75rem;">The ${familyName} Family</div>`;
+    : `<div class="kt-gold" style="font-family:Georgia,'Cormorant Garamond',serif;font-size:1.1rem;color:${GOLD};font-style:italic;margin-top:0.75rem;">The ${familyName} Family</div>`;
 
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>In Loving Memory of ${deceasedName}</title>
+<title>In Loving Memory of ${deceasedName}</title>
   <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <style>
+    :root { color-scheme: light; }
+  </style>
 </head>
-<body style="margin:0;padding:0;background:#e8d8b8;font-family:Georgia,'Cormorant Garamond',serif;">
+<body class="kt-outer" style="margin:0;padding:0;background-color:#e8d8b8;font-family:Georgia,'Cormorant Garamond',serif;" bgcolor="#e8d8b8">
 
-  <table width="100%" cellpadding="0" cellspacing="0" border="0" role="presentation" style="background:#e8d8b8;">
+  <table width="100%" cellpadding="0" cellspacing="0" border="0" role="presentation" class="kt-outer" style="background-color:#e8d8b8;" bgcolor="#e8d8b8">
     <tr>
-      <td align="center" style="padding:24px 16px;">
+      <td align="center" class="kt-outer" style="padding:24px 16px;background-color:#e8d8b8;" bgcolor="#e8d8b8">
 
         <!-- Card outer border -->
         <table width="580" cellpadding="0" cellspacing="0" border="0" role="presentation"
-          style="max-width:580px;width:100%;background:${PAGE_BG};border:2px solid ${BORDER};">
+          class="kt-card" style="max-width:580px;width:100%;background-color:${PAGE_BG};border:2px solid ${BORDER};" bgcolor="${PAGE_BG}">
 
           <!-- Kente top -->
           <tr><td>${KENTE_STRIPE}</td></tr>
@@ -149,14 +152,14 @@ export function buildEcardHtml(data: EcardData): string {
           <!-- Header: In Loving Memory -->
           <tr>
             <td align="center" style="padding:1.5rem 2rem 0;">
-              <div style="font-family:Georgia,serif;font-size:0.7rem;color:${FAINT_TEXT};letter-spacing:0.2em;text-transform:uppercase;margin-bottom:0.15rem;">
+              <div class="kt-faint" style="font-family:Georgia,serif;font-size:0.7rem;color:${FAINT_TEXT};letter-spacing:0.2em;text-transform:uppercase;margin-bottom:0.15rem;">
                 In Loving Memory
               </div>
               ${FLORAL_DIVIDER}
-              <div style="font-family:Georgia,'Cormorant Garamond',serif;font-size:2rem;color:${DARK_TEXT};letter-spacing:0.04em;line-height:1.2;margin:0.25rem 0 0.1rem;">
+              <div class="kt-dark" style="font-family:Georgia,'Cormorant Garamond',serif;font-size:2rem;color:${DARK_TEXT};letter-spacing:0.04em;line-height:1.2;margin:0.25rem 0 0.1rem;">
                 ${deceasedName}
               </div>
-              <div style="font-family:Georgia,serif;font-size:1rem;color:${GOLD};letter-spacing:0.14em;margin-bottom:0.5rem;">
+              <div class="kt-gold" style="font-family:Georgia,serif;font-size:1rem;color:${GOLD};letter-spacing:0.14em;margin-bottom:0.5rem;">
                 ${years}
               </div>
               ${GOLD_RULE}
@@ -176,7 +179,7 @@ export function buildEcardHtml(data: EcardData): string {
           <tr>
             <td style="padding:0 2rem 0.5rem;">
               ${personalizedMessage.split("\n\n").map(para => para.trim()).filter(Boolean).map(para =>
-                `<p style="font-family:Georgia,'Cormorant Garamond',serif;font-size:1.05rem;color:${DARK_TEXT};line-height:1.9;margin:0 0 0.9rem;">${para.replace(/\n/g, "<br/>")}</p>`
+                `<p class="kt-dark" style="font-family:Georgia,'Cormorant Garamond',serif;font-size:1.05rem;color:${DARK_TEXT};line-height:1.9;margin:0 0 0.9rem;">${para.replace(/\n/g, "<br/>")}</p>`
               ).join("")}
               ${signatureSection}
             </td>
@@ -200,7 +203,7 @@ export function buildEcardHtml(data: EcardData): string {
           <!-- Footer -->
           <tr>
             <td align="center" style="padding:0.6rem 2rem;">
-              <div style="font-size:0.72rem;color:#9a7a52;font-style:italic;">
+              <div class="kt-faint" style="font-size:0.72rem;color:#9a7a52;font-style:italic;">
                 keepingthem.net — honoring lives in the tradition of their people
               </div>
             </td>
