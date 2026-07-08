@@ -35,6 +35,7 @@ export type Donor = {
   email: string | null;
   phone: string | null;
   note: string | null;
+  attended: boolean;
   created_at?: string;
 };
 
@@ -91,18 +92,17 @@ export function buildRecipientList(rsvps: Rsvp[], donors: Donor[], log: LogEntry
     const matchedDonor = donorByEmail.get(emailKey);
     let cardType: MergedRecipient["cardType"] = "attendance";
     let contribution: string | undefined;
-    let ambiguous = false;
-    let ambiguousMatch: MergedRecipient["ambiguousMatch"];
 
     if (matchedDonor) {
       cardType = "combined";
       contribution = matchedDonor.note ?? undefined;
       usedDonorIds.add(matchedDonor.id);
     } else {
-      const nameMatch = donorByName.get(r.name.toLowerCase().trim());
-      if (nameMatch && !nameMatch.email) {
-        ambiguous = true;
-        ambiguousMatch = { rsvpName: r.name, donorName: nameMatch.name };
+      const nameKey = r.name.toLowerCase().trim();
+      const nameMatch = donorByName.get(nameKey);
+      if (nameMatch) {
+        cardType = "combined";
+        contribution = nameMatch.note ?? undefined;
         usedDonorIds.add(nameMatch.id);
       }
     }
@@ -114,8 +114,6 @@ export function buildRecipientList(rsvps: Rsvp[], donors: Donor[], log: LogEntry
       events: events || undefined,
       contribution,
       cardType,
-      ambiguous,
-      ambiguousMatch,
       alreadySent: logByEmail.get(emailKey),
     });
   }
@@ -127,7 +125,7 @@ export function buildRecipientList(rsvps: Rsvp[], donors: Donor[], log: LogEntry
       name: d.name,
       email: d.email,
       contribution: d.note ?? undefined,
-      cardType: "donor",
+      cardType: d.attended ? "combined" : "donor",
       alreadySent: emailKey ? logByEmail.get(emailKey) : undefined,
     });
   }

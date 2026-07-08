@@ -44,7 +44,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   const body = await req.json();
-  const { memorial_slug, name, email, phone, note } = body;
+  const { memorial_slug, name, email, phone, note, attended } = body;
   if (!memorial_slug || !name) {
     return NextResponse.json({ error: "memorial_slug and name are required" }, { status: 400 });
   }
@@ -52,7 +52,7 @@ export async function POST(req: NextRequest) {
   const res = await fetch(ktUrl("donors"), {
     method: "POST",
     headers: { ...ktHeaders(true), "Prefer": "return=representation" },
-    body: JSON.stringify({ memorial_slug, name, email: email || null, phone: phone || null, note: note || null }),
+    body: JSON.stringify({ memorial_slug, name, email: email || null, phone: phone || null, note: note || null, attended: !!attended }),
   });
   if (!res.ok) return NextResponse.json({ error: await res.text() }, { status: 500 });
   const rows = await res.json();

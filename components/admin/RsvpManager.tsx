@@ -43,6 +43,7 @@ type Donor = {
   email: string | null;
   phone: string | null;
   note: string | null;
+  attended: boolean;
 };
 
 type LogEntry = {
@@ -232,7 +233,7 @@ export default function RsvpManager({
   const [sendResult, setSendResult] = useState<{ email: { sent: number; failed: number; failures: string[] } | null; sms: { sent: number; failed: number; failures: string[] } | null } | null>(null);
 
   // Donor form
-  const [donorForm, setDonorForm] = useState({ name: "", email: "", phone: "", note: "" });
+  const [donorForm, setDonorForm] = useState({ name: "", email: "", phone: "", note: "", attended: false });
   const [donorSaving, setDonorSaving] = useState(false);
   const [donorError, setDonorError] = useState("");
   const [editingDonorId, setEditingDonorId] = useState<string | null>(null);
@@ -531,7 +532,7 @@ export default function RsvpManager({
       });
       if (!res.ok) { setDonorError("Save failed"); setDonorSaving(false); return; }
     }
-    setDonorForm({ name: "", email: "", phone: "", note: "" });
+    setDonorForm({ name: "", email: "", phone: "", note: "", attended: false });
     setDonorSaving(false);
     loadData();
   }
@@ -765,13 +766,17 @@ export default function RsvpManager({
                   <div><label style={labelStyle}>Phone</label><input style={inputStyle} value={donorForm.phone} onChange={e => setDonorForm(f => ({ ...f, phone: e.target.value }))} placeholder="(555) 000-0000" /></div>
                   <div><label style={labelStyle}>What they gave</label><input style={inputStyle} value={donorForm.note} onChange={e => setDonorForm(f => ({ ...f, note: e.target.value }))} placeholder="e.g. $300.00 donation or beautiful floral arrangement" /></div>
                 </div>
+                <label style={{ display: "flex", alignItems: "center", gap: "0.6rem", cursor: "pointer", fontSize: "0.82rem", color: MUTED, marginTop: "0.5rem" }}>
+                  <input type="checkbox" checked={donorForm.attended} onChange={e => setDonorForm(f => ({ ...f, attended: e.target.checked }))} style={{ accentColor: GOLD }} />
+                  They attended the service (will receive an "Attended + gift" card instead of "Gift only")
+                </label>
                 {donorError && <div style={{ color: RED, fontSize: "0.78rem", marginTop: "0.5rem" }}>{donorError}</div>}
                 <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.75rem" }}>
                   <button onClick={saveDonor} disabled={donorSaving} style={btnPrimary(donorSaving)}>
                     {donorSaving ? "Saving…" : editingDonorId ? "Save changes" : "Add gift"}
                   </button>
                   {editingDonorId && (
-                    <button onClick={() => { setEditingDonorId(null); setDonorForm({ name: "", email: "", phone: "", note: "" }); }} style={btnSecondary}>Cancel</button>
+                    <button onClick={() => { setEditingDonorId(null); setDonorForm({ name: "", email: "", phone: "", note: "", attended: false }); }} style={btnSecondary}>Cancel</button>
                   )}
                 </div>
               </div>
@@ -781,7 +786,7 @@ export default function RsvpManager({
                   <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.82rem" }}>
                     <thead>
                       <tr style={{ borderBottom: `1px solid ${BORDER}` }}>
-                        {["Name", "Email", "Phone", "What they gave", "Preview", ""].map((h, i) => (
+                        {["Name", "Email", "Phone", "What they gave", "Card type", "Preview", ""].map((h, i) => (
                           <th key={i} style={{ padding: "0.6rem 0.75rem", textAlign: "left", color: MUTED, fontWeight: 400, fontSize: "0.7rem", textTransform: "uppercase", letterSpacing: "0.06em" }}>{h}</th>
                         ))}
                       </tr>
@@ -793,13 +798,14 @@ export default function RsvpManager({
                           <td style={{ padding: "0.6rem 0.75rem", color: MUTED }}>{d.email ?? <span style={{ color: DIM }}>—</span>}</td>
                           <td style={{ padding: "0.6rem 0.75rem", color: MUTED }}>{d.phone ?? <span style={{ color: DIM }}>—</span>}</td>
                           <td style={{ padding: "0.6rem 0.75rem", color: DIM, fontStyle: "italic" }}>{d.note ?? "—"}</td>
+                          <td style={{ padding: "0.6rem 0.75rem" }}>{cardTypeBadge(d.attended ? "combined" : "donor")}</td>
                           <td style={{ padding: "0.6rem 0.75rem" }}>
                             {d.email && (
-                              <button onClick={() => handlePreview("donor", d.email!, d.note ?? undefined)} style={btnGhost}>Preview card</button>
+                              <button onClick={() => handlePreview(d.attended ? "combined" : "donor", d.email!, d.note ?? undefined)} style={btnGhost}>Preview card</button>
                             )}
                           </td>
                           <td style={{ padding: "0.6rem 0.75rem", whiteSpace: "nowrap" }}>
-                            <button onClick={() => { setEditingDonorId(d.id); setDonorForm({ name: d.name, email: d.email ?? "", phone: d.phone ?? "", note: d.note ?? "" }); }} style={{ ...btnGhost, marginRight: "0.75rem" }}>Edit</button>
+                            <button onClick={() => { setEditingDonorId(d.id); setDonorForm({ name: d.name, email: d.email ?? "", phone: d.phone ?? "", note: d.note ?? "", attended: d.attended }); }} style={{ ...btnGhost, marginRight: "0.75rem" }}>Edit</button>
                             <button onClick={() => deleteDonor(d.id)} style={{ ...btnGhost, color: RED }}>Remove</button>
                           </td>
                         </tr>
