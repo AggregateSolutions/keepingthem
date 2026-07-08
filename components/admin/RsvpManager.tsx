@@ -290,7 +290,8 @@ export default function RsvpManager({
   const ambiguous = merged.filter(r => r.ambiguous);
   const emailRecipients = merged.filter(r => r.email && !r.ambiguous);
   const alreadySentCount = merged.filter(r => r.alreadySent).length;
-  const tributesWithEmail = tributes.filter(t => t.email);
+  const mergedEmails = new Set(merged.map(r => r.email?.toLowerCase()).filter(Boolean));
+  const tributesWithEmail = tributes.filter(t => t.email && !mergedEmails.has(t.email.toLowerCase()));
 
   const effectiveEmailRecipients = skipAlreadySent
     ? emailRecipients.filter(r => !r.alreadySent)
