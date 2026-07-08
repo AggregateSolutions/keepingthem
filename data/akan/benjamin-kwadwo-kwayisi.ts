@@ -126,7 +126,7 @@ const config: MemorialConfig = {
 
   biography: `**Early Life, Education, and Early Aviation Career:**
 
-Benjamin Kwadwo Kwayisi was born on January the 16th, 1936 in Otwitri, a suburb of Akropong in the Eastern Region of Ghana. He was born to Comfort Afua Afi and Kwaku Atiemo. Both are now deceased. Benjamin has three siblings, his sisters Lydia Yaboaa Atiemo, Margaret Amene Darko, and Victoria Obenewa Darko. As a young boy, Benjamin lived with his aunt and attended Akropong Presbyterian Primary and J.H.S., followed by attending Secondary school at Accra High School in Accra, Ghana’s capital city. After graduating high school, Benjamin did not have to perform his National Service and was able to go straight to Civil aviation. Usually, all who graduate from Ghanaian tertiary institutions must complete one-year of mandatory service in a professional post for the country.  
+Benjamin Kwadwo Kwayisi was born on January the 16th, 1936 in Otwitri, a suburb of Akropong in the Eastern Region of Ghana. He was born to Comfort Afua Afi and Kwaku Atiemo. Both are now deceased. Benjamin has three siblings, his sisters Lydia Yaboaa Atiemo, Margaret Amene Darko, and Victoria Obenewa Darko. As a young boy, Benjamin lived with his aunt and attended Akropong Presbyterian Primary and J.H.S., followed by attending Secondary school at Accra Academy in Accra, Ghana’s capital city. After graduating high school, Benjamin did not have to perform his National Service and was able to go straight to Civil aviation. Usually, all who graduate from Ghanaian tertiary institutions must complete one-year of mandatory service in a professional post for the country.  
 
 **First Marriage & Family:**
 
