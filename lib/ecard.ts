@@ -80,7 +80,7 @@ export function buildEcardHtml(data: EcardData): string {
   } = data;
 
   const contributionSentence = contributionNote
-    ? `Your gift of ${contributionNote} touched our hearts deeply.`
+    ? `Your ${contributionNote} touched our hearts deeply.`
     : "";
 
   const personalizedMessage = message

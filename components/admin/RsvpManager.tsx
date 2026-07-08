@@ -763,7 +763,7 @@ export default function RsvpManager({
                   <div><label style={labelStyle}>Name *</label><input style={inputStyle} value={donorForm.name} onChange={e => setDonorForm(f => ({ ...f, name: e.target.value }))} placeholder="Full name" /></div>
                   <div><label style={labelStyle}>Email</label><input style={inputStyle} value={donorForm.email} onChange={e => setDonorForm(f => ({ ...f, email: e.target.value }))} placeholder="email@example.com" type="email" /></div>
                   <div><label style={labelStyle}>Phone</label><input style={inputStyle} value={donorForm.phone} onChange={e => setDonorForm(f => ({ ...f, phone: e.target.value }))} placeholder="(555) 000-0000" /></div>
-                  <div><label style={labelStyle}>What they gave</label><input style={inputStyle} value={donorForm.note} onChange={e => setDonorForm(f => ({ ...f, note: e.target.value }))} placeholder="e.g. The beautiful floral arrangement you sent brought warmth to the room." /></div>
+                  <div><label style={labelStyle}>What they gave</label><input style={inputStyle} value={donorForm.note} onChange={e => setDonorForm(f => ({ ...f, note: e.target.value }))} placeholder="e.g. $300.00 donation or beautiful floral arrangement" /></div>
                 </div>
                 {donorError && <div style={{ color: RED, fontSize: "0.78rem", marginTop: "0.5rem" }}>{donorError}</div>}
                 <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.75rem" }}>
@@ -845,7 +845,7 @@ export default function RsvpManager({
               <div style={{ display: "flex", flexDirection: "column" }}>
                 <label style={labelStyle}>Default gift note <span style={{ color: DIM }}>(fallback when no specific note is on file)</span></label>
                 <input type="text" value={contributionNote} onChange={e => setContributionNote(e.target.value)}
-                  placeholder="e.g. Your generous gift touched our hearts deeply." style={inputStyle} />
+                  placeholder="e.g. generous gift" style={inputStyle} />
               </div>
             </div>
 
