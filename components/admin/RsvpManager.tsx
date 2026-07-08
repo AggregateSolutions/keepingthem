@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import type { MergedRecipient } from "@/app/api/admin/send-thankyou/route";
 
 const GOLD = "#c8962e";
@@ -88,7 +88,7 @@ With love and gratitude,`;
 
 const labelStyle = {
   fontSize: "0.72rem", color: MUTED, textTransform: "uppercase" as const,
-  letterSpacing: "0.08em", display: "block", marginBottom: "0.4rem",
+  letterSpacing: "0.08em", display: "block", marginBottom: "0.4rem", minHeight: "2em",
 };
 const inputStyle = {
   width: "100%", padding: "0.55rem 0.75rem", background: BG,
@@ -198,12 +198,14 @@ export default function RsvpManager({
   const [signatureUrl, setSignatureUrl] = useState("");
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState("");
+  const [showSigPad, setShowSigPad] = useState(false);
   const [attendanceMsg, setAttendanceMsg] = useState(ATTENDANCE_MESSAGE);
   const [donorMsg, setDonorMsg] = useState(DONOR_MESSAGE);
   const [combinedMsg, setCombinedMsg] = useState(COMBINED_MESSAGE);
   const [activeTemplate, setActiveTemplate] = useState<"attendance" | "donor" | "combined">("attendance");
   const [includeTributes, setIncludeTributes] = useState(false);
-  const fileRef = useRef<HTMLInputElement>(null);
+  const sigCanvasRef = useRef<HTMLCanvasElement>(null);
+  const sigDrawing = useRef(false);
 
   // Step 1 — test send
   const [testEmail, setTestEmail] = useState("");
@@ -352,19 +354,58 @@ export default function RsvpManager({
     win?.document.close();
   }
 
-  async function handleSignatureUpload(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setUploading(true); setUploadError("");
-    const form = new FormData();
-    form.append("file", file);
-    form.append("slug", slug);
-    const res = await fetch("/api/admin/signature", { method: "POST", body: form });
-    const data = await res.json();
-    setUploading(false);
-    if (!res.ok) setUploadError(data.error ?? "Upload failed");
-    else setSignatureUrl(data.url);
+  const sigStart = useCallback((e: React.PointerEvent) => {
+    const canvas = sigCanvasRef.current; if (!canvas) return;
+    canvas.setPointerCapture(e.pointerId);
+    sigDrawing.current = true;
+    const ctx = canvas.getContext("2d")!;
+    const rect = canvas.getBoundingClientRect();
+    ctx.beginPath();
+    ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+  }, []);
+
+  const sigMove = useCallback((e: React.PointerEvent) => {
+    if (!sigDrawing.current) return;
+    const canvas = sigCanvasRef.current; if (!canvas) return;
+    const ctx = canvas.getContext("2d")!;
+    const rect = canvas.getBoundingClientRect();
+    ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
+    ctx.stroke();
+  }, []);
+
+  const sigEnd = useCallback(() => { sigDrawing.current = false; }, []);
+
+  function sigClear() {
+    const canvas = sigCanvasRef.current; if (!canvas) return;
+    const ctx = canvas.getContext("2d")!;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
   }
+
+  async function sigSave() {
+    const canvas = sigCanvasRef.current; if (!canvas) return;
+    setUploading(true); setUploadError("");
+    canvas.toBlob(async (blob) => {
+      if (!blob) { setUploadError("Could not capture signature."); setUploading(false); return; }
+      const form = new FormData();
+      form.append("file", new File([blob], "signature.png", { type: "image/png" }));
+      form.append("slug", slug);
+      const res = await fetch("/api/admin/signature", { method: "POST", body: form });
+      const data = await res.json();
+      setUploading(false);
+      if (!res.ok) { setUploadError(data.error ?? "Upload failed"); }
+      else { setSignatureUrl(data.url); setShowSigPad(false); }
+    }, "image/png");
+  }
+
+  useEffect(() => {
+    if (!showSigPad) return;
+    const canvas = sigCanvasRef.current; if (!canvas) return;
+    const ctx = canvas.getContext("2d")!;
+    ctx.strokeStyle = GOLD;
+    ctx.lineWidth = 2.5;
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+  }, [showSigPad]);
 
   async function handleTestSend() {
     const hasEmail = testEmail.trim();
@@ -795,14 +836,14 @@ export default function RsvpManager({
               This card will be personalised for each person — their name, what they attended, and any gift they gave will be filled in automatically.
             </p>
 
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem" }}>
-              <div>
-                <label style={labelStyle}>Family name <span style={{ color: DIM }}>(used in the signature)</span></label>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem", alignItems: "end" }}>
+              <div style={{ display: "flex", flexDirection: "column" }}>
+                <label style={labelStyle}>Family name <span style={{ color: DIM }}>(appears as "The [name] Family" in the card signature)</span></label>
                 <input type="text" value={familyName} onChange={e => setFamilyName(e.target.value)}
                   placeholder={`e.g. ${deceasedName.split(" ").slice(-1)[0]}`} style={inputStyle} />
               </div>
-              <div>
-                <label style={labelStyle}>Default gift note <span style={{ color: DIM }}>(used if no specific note was entered — write a complete sentence)</span></label>
+              <div style={{ display: "flex", flexDirection: "column" }}>
+                <label style={labelStyle}>Default gift note <span style={{ color: DIM }}>(fallback when no specific note is on file)</span></label>
                 <input type="text" value={contributionNote} onChange={e => setContributionNote(e.target.value)}
                   placeholder="e.g. Your generous gift touched our hearts deeply." style={inputStyle} />
               </div>
@@ -810,17 +851,53 @@ export default function RsvpManager({
 
             {/* Signature */}
             <div>
-              <label style={labelStyle}>Family signature image <span style={{ color: DIM }}>(optional — PNG with transparent background works best)</span></label>
-              <div style={{ display: "flex", alignItems: "center", gap: "1rem", flexWrap: "wrap" }}>
-                <button onClick={() => fileRef.current?.click()} disabled={uploading} style={btnSecondary}>
-                  {uploading ? "Uploading…" : signatureUrl ? "Replace signature" : "Upload signature image"}
-                </button>
-                {signatureUrl && <img src={signatureUrl} alt="Signature" style={{ maxHeight: "48px", maxWidth: "180px", objectFit: "contain" }} />}
+              <label style={labelStyle}>Family signature <span style={{ color: DIM }}>(optional)</span></label>
+              <div style={{ display: "flex", alignItems: "center", gap: "1rem", flexWrap: "wrap", marginBottom: "0.5rem", marginTop: "0.35rem" }}>
+                {signatureUrl && <img src={signatureUrl} alt="Signature" style={{ maxHeight: "48px", maxWidth: "200px", objectFit: "contain" }} />}
                 {!signatureUrl && familyName && (
                   <span style={{ color: DIM, fontSize: "0.8rem", fontStyle: "italic" }}>Will show "The {familyName} Family" in gold text</span>
                 )}
+                <button onClick={() => setShowSigPad(p => !p)} style={btnSecondary}>
+                  {showSigPad ? "Cancel" : signatureUrl ? "Redo signature" : "Draw signature"}
+                </button>
               </div>
-              <input ref={fileRef} type="file" accept="image/*" onChange={handleSignatureUpload} style={{ display: "none" }} />
+              {showSigPad && (
+                <div style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: "6px", padding: "1rem", display: "inline-block" }}>
+                  <div style={{ fontSize: "0.78rem", color: MUTED, marginBottom: "0.5rem" }}>
+                    Sign below using your mouse, trackpad, or a connected signature pad
+                  </div>
+                  <canvas
+                    ref={sigCanvasRef}
+                    width={400} height={120}
+                    onPointerDown={sigStart} onPointerMove={sigMove} onPointerUp={sigEnd} onPointerLeave={sigEnd}
+                    style={{ display: "block", background: "transparent", border: `1px solid ${BORDER}`, borderRadius: "4px", cursor: "crosshair", touchAction: "none", userSelect: "none" }}
+                  />
+                  <div style={{ display: "flex", gap: "0.75rem", marginTop: "0.75rem" }}>
+                    <button onClick={sigClear} style={{ ...btnSecondary, fontSize: "0.78rem" }}>Clear</button>
+                    <button onClick={sigSave} disabled={uploading} style={{ ...btnPrimary(), fontSize: "0.78rem" }}>
+                      {uploading ? "Saving…" : "Save signature"}
+                    </button>
+                  </div>
+                </div>
+              )}
+              <div style={{ marginTop: "0.75rem", fontSize: "0.78rem", color: DIM, lineHeight: 1.6 }}>
+                Prefer to upload? On Mac: open Preview → Tools → Annotate → Signature, add your signature to a blank white page, then File → Export as PNG.{" "}
+                <label style={{ color: GOLD, cursor: "pointer", textDecoration: "underline" }}>
+                  Upload PNG
+                  <input type="file" accept="image/png,image/jpeg,image/webp" onChange={async (e) => {
+                    const file = e.target.files?.[0]; if (!file) return;
+                    setUploading(true); setUploadError("");
+                    const form = new FormData();
+                    form.append("file", file); form.append("slug", slug);
+                    const res = await fetch("/api/admin/signature", { method: "POST", body: form });
+                    const data = await res.json();
+                    setUploading(false);
+                    if (!res.ok) setUploadError(data.error ?? "Upload failed");
+                    else { setSignatureUrl(data.url); setShowSigPad(false); }
+                    e.target.value = "";
+                  }} style={{ display: "none" }} />
+                </label>
+              </div>
               {uploadError && <div style={{ color: RED, fontSize: "0.78rem", marginTop: "0.4rem" }}>{uploadError}</div>}
             </div>
 
