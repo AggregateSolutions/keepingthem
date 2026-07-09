@@ -266,13 +266,42 @@ export async function GET(req: NextRequest) {
   const slug = req.nextUrl.searchParams.get("slug");
   if (!slug) return NextResponse.json({ error: "slug required" }, { status: 400 });
 
-  const [rsvpRes, donorRes] = await Promise.all([
-    fetch(ktUrl(`rsvps?memorial_slug=eq.${encodeURIComponent(slug)}&phone=not.is.null&phone=neq.&select=name,email,phone,relation`), { headers: ktHeaders() }),
-    fetch(ktUrl(`donors?memorial_slug=eq.${encodeURIComponent(slug)}&phone=not.is.null&phone=neq.&select=name,email,phone,note`), { headers: ktHeaders() }),
+  const [rsvpRes, donorRes, logRes] = await Promise.all([
+    fetch(ktUrl(`rsvps?memorial_slug=eq.${encodeURIComponent(slug)}&phone=not.is.null&phone=neq.&select=name,email,phone,relation,attend_funeral,attend_reception,attend_thanksgiving`), { headers: ktHeaders() }),
+    fetch(ktUrl(`donors?memorial_slug=eq.${encodeURIComponent(slug)}&phone=not.is.null&phone=neq.`), { headers: ktHeaders() }),
+    fetch(ktUrl(`thank_you_log?memorial_slug=eq.${encodeURIComponent(slug)}`), { headers: ktHeaders() }),
   ]);
 
-  const rsvps = rsvpRes.ok ? await rsvpRes.json() : [];
-  const donors = donorRes.ok ? await donorRes.json() : [];
+  const rsvps: Rsvp[] = rsvpRes.ok ? await rsvpRes.json() : [];
+  const donors: Donor[] = donorRes.ok ? await donorRes.json() : [];
+  const log: LogEntry[] = logRes.ok ? await logRes.json() : [];
 
-  return NextResponse.json({ rsvps, donors });
+  // Use the same merge logic as email so card types are consistent
+  const merged = buildRecipientList(rsvps, donors, log);
+
+  // Only return recipients who have a phone number
+  const phoneSet = new Set([
+    ...rsvps.map(r => r.phone).filter(Boolean),
+    ...donors.map(d => d.phone).filter(Boolean),
+  ]);
+
+  // Map back to include phone numbers
+  const rsvpByEmail = new Map(rsvps.filter(r => r.email).map(r => [r.email!.toLowerCase(), r]));
+  const rsvpByName = new Map(rsvps.map(r => [r.name.toLowerCase().trim(), r]));
+  const donorByEmail = new Map(donors.filter(d => d.email).map(d => [d.email!.toLowerCase(), d]));
+  const donorByName = new Map(donors.map(d => [d.name.toLowerCase().trim(), d]));
+
+  const recipients = merged
+    .map(m => {
+      const emailKey = m.email?.toLowerCase();
+      const nameKey = m.name.toLowerCase().trim();
+      const rsvp = emailKey ? rsvpByEmail.get(emailKey) : rsvpByName.get(nameKey);
+      const donor = emailKey ? donorByEmail.get(emailKey) : donorByName.get(nameKey);
+      const phone = rsvp?.phone ?? donor?.phone ?? null;
+      if (!phone) return null;
+      return { name: m.name, email: m.email, phone, cardType: m.cardType, relation: m.relation };
+    })
+    .filter((r): r is NonNullable<typeof r> => r !== null);
+
+  return NextResponse.json({ recipients });
 }

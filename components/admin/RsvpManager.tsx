@@ -60,6 +60,8 @@ type SmsRecipient = {
   name: string;
   phone: string;
   email: string | null;
+  cardType: "attendance" | "donor" | "combined";
+  relation?: string | null;
 };
 
 const ATTENDANCE_MESSAGE = `Dear {name},
@@ -275,14 +277,8 @@ export default function RsvpManager({
     fetch(`/api/admin/send-sms?slug=${slug}`)
       .then(r => r.json())
       .then(d => {
-        const all: SmsRecipient[] = [
-          ...(d.rsvps ?? []),
-          ...(d.donors ?? []).filter((don: SmsRecipient) =>
-            !(d.rsvps ?? []).some((r: SmsRecipient) => r.phone === don.phone)
-          ),
-        ];
+        const all: SmsRecipient[] = d.recipients ?? [];
         setSmsRecipients(all);
-        // Default: select all who haven't been sent to yet
         const unsent = all.filter(r => !smsSentPhones.has(r.phone));
         setSelectedPhones(new Set(unsent.map(r => r.phone)));
       })
@@ -1255,6 +1251,7 @@ export default function RsvpManager({
                           <td style={{ padding: "0.65rem 0.5rem", color: DIM }}>
                             {r.email ? r.email : <span style={{ fontStyle: "italic" }}>text only</span>}
                           </td>
+                          <td style={{ padding: "0.65rem 0.5rem" }}>{cardTypeBadge(r.cardType)}</td>
                           <td style={{ padding: "0.65rem 1rem", textAlign: "right" }}>
                             {alreadySent ? <span style={{ color: DIM, fontSize: "0.72rem" }}>✓ Sent</span> : <span style={{ color: GREEN, fontSize: "0.72rem" }}>Ready</span>}
                           </td>
@@ -1295,7 +1292,10 @@ export default function RsvpManager({
                     {emailRecipients.filter(r => r.email && selectedEmails.has(r.email)).map((r, i) => (
                       <div key={i} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "0.5rem" }}>
                         <span style={{ fontSize: "0.82rem", color: TEXT }}>{r.name}</span>
-                        {cardTypeBadge(r.cardType)}
+                        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                          {cardTypeBadge(r.cardType)}
+                          <button onClick={() => handlePreview(r.cardType, r.email!)} style={btnGhost}>Preview</button>
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -1312,7 +1312,12 @@ export default function RsvpManager({
                     {smsRecipients.filter(r => selectedPhones.has(r.phone)).map((r, i) => (
                       <div key={i} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "0.5rem" }}>
                         <span style={{ fontSize: "0.82rem", color: TEXT }}>{r.name}</span>
-                        <span style={{ fontSize: "0.7rem", color: DIM }}>{r.phone}</span>
+                        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                          <span style={{ fontSize: "0.7rem", color: DIM }}>{r.phone}</span>
+                          <button onClick={() => handlePreview(
+                            r.cardType, undefined, undefined, { name: r.name, relation: r.relation }
+                          )} style={btnGhost}>Preview</button>
+                        </div>
                       </div>
                     ))}
                   </div>
