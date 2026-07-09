@@ -771,7 +771,7 @@ export default function RsvpManager({
 
         {/* Gifts received */}
         {recordsTab === "gifts" && (
-          <div style={{ padding: "1.25rem", display: "flex", flexDirection: "column", gap: "1rem", maxHeight: "620px", overflowY: "auto" }}>
+          <div style={{ padding: "1.25rem", display: "flex", flexDirection: "column", gap: "1rem" }}>
             <div style={{ background: BG, border: `1px solid ${BORDER}`, borderRadius: "6px", padding: "1rem" }}>
               <div style={{ fontSize: "0.8rem", color: MUTED, marginBottom: "0.75rem" }}>
                 {editingDonorId ? "Edit gift record" : "Add a gift — flowers, donations, or any other contribution"}
@@ -809,7 +809,7 @@ export default function RsvpManager({
             </div>
 
             {donors.length > 0 && (
-              <div style={{ overflowX: "auto" }}>
+              <div style={{ maxHeight: "420px", overflowY: "auto", overflowX: "auto" }}>
                 <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.82rem" }}>
                   <thead>
                     <tr style={{ borderBottom: `1px solid ${BORDER}` }}>
