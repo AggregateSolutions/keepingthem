@@ -227,9 +227,10 @@ export async function POST(req: NextRequest) {
         card_type: recipient.cardType,
         subject: "SMS thank-you",
       });
-    } catch {
+    } catch (err) {
+      console.error("[send-sms] Twilio error for", recipient.phone, err);
       failed++;
-      failures.push(recipient.phone);
+      failures.push(`${recipient.phone}: ${String(err)}`);
     }
   }
 
