@@ -229,6 +229,7 @@ export default function RsvpManager({
   // Send state
   const [sending, setSending] = useState(false);
   const [sendResult, setSendResult] = useState<{ email: { sent: number; failed: number; failures: string[] } | null; sms: { sent: number; failed: number; failures: string[] } | null } | null>(null);
+  const [crossChannelWarning, setCrossChannelWarning] = useState<{ name: string; alreadyChannel: string; pendingChannel: string }[]>([]);
 
   // Donor form
   const emptyDonorForm = { name: "", email: "", phone: "", note: "", amount: "", relation: "", attended: false };
@@ -507,12 +508,29 @@ export default function RsvpManager({
     setTestResult(results.join(" · "));
   }
 
-  async function handleSend() {
-    setSending(true);
+  async function handleSend(force = false) {
+    setSending(false);
     setSendResult(null);
 
     const emailsToSend = unified.filter(r => r.emailChecked && r.email).map(r => r.email!);
     const phonesToSend = unified.filter(r => r.smsChecked && r.phone).map(r => r.phone!);
+
+    if (!force) {
+      const warnings: typeof crossChannelWarning = [];
+      for (const r of unified) {
+        if (r.emailChecked && r.email && r.alreadySentSms)
+          warnings.push({ name: r.name, alreadyChannel: "text", pendingChannel: "email" });
+        else if (r.smsChecked && r.phone && r.alreadySentEmail)
+          warnings.push({ name: r.name, alreadyChannel: "email", pendingChannel: "text" });
+      }
+      if (warnings.length > 0) {
+        setCrossChannelWarning(warnings);
+        return;
+      }
+    }
+
+    setCrossChannelWarning([]);
+    setSending(true);
 
     const sharedPayload = {
       slug, deceasedName, years, photoUrl: absPhotoUrl,
@@ -1283,9 +1301,30 @@ export default function RsvpManager({
               Once you click Send, cards will go out immediately and cannot be recalled. Please take a moment to preview a card above if you haven't already.
             </div>
 
+            {crossChannelWarning.length > 0 && (
+              <div style={{ background: "#1e1008", border: "1px solid #8b4a0a", borderRadius: "6px", padding: "1.25rem", display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+                <div style={{ fontSize: "0.88rem", color: "#d4a86a", fontWeight: 600 }}>
+                  Heads up — {crossChannelWarning.length === 1 ? "this person has" : "these people have"} already received a card through another channel:
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: "0.4rem" }}>
+                  {crossChannelWarning.map((w, i) => (
+                    <div key={i} style={{ fontSize: "0.82rem", color: MUTED }}>
+                      <span style={{ color: TEXT, fontWeight: 500 }}>{w.name}</span>
+                      {" — already received a "}<span style={{ color: GOLD }}>{w.alreadyChannel}</span>
+                      {", you are about to send an "}<span style={{ color: GOLD }}>{w.pendingChannel}</span>
+                    </div>
+                  ))}
+                </div>
+                <div style={{ display: "flex", gap: "0.75rem", marginTop: "0.25rem" }}>
+                  <button onClick={() => setCrossChannelWarning([])} style={btnSecondary}>Go back and review</button>
+                  <button onClick={() => handleSend(true)} style={{ ...btnPrimary(), background: "#8b4a0a" }}>Send anyway</button>
+                </div>
+              </div>
+            )}
+
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               <button onClick={() => setStep(2)} style={btnSecondary} disabled={sending}>← Back</button>
-              <button onClick={handleSend} disabled={sending || (emailCount === 0 && smsCount === 0)} style={{
+              <button onClick={() => handleSend()} disabled={sending || (emailCount === 0 && smsCount === 0)} style={{
                 ...btnPrimary(sending || (emailCount === 0 && smsCount === 0)),
                 background: sending ? DIM : "#8b4a0a",
                 minWidth: "200px",
