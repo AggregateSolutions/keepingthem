@@ -1287,16 +1287,36 @@ export default function RsvpManager({
               <div style={{ background: BG, border: `1px solid ${BORDER}`, borderRadius: "6px", padding: "1rem" }}>
                 <div style={{ fontSize: "0.7rem", color: MUTED, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "0.4rem" }}>Email cards</div>
                 <div style={{ fontSize: "1.5rem", fontFamily: "Garamond, Georgia, serif", color: selectedEmails.size > 0 ? GOLD : DIM }}>{selectedEmails.size}</div>
-                <div style={{ fontSize: "0.78rem", color: DIM }}>
+                <div style={{ fontSize: "0.78rem", color: DIM, marginBottom: selectedEmails.size > 0 ? "0.75rem" : 0 }}>
                   {selectedEmails.size === 0 ? "None selected" : `${selectedEmails.size} ${selectedEmails.size === 1 ? "person" : "people"} will receive an email`}
                 </div>
+                {selectedEmails.size > 0 && (
+                  <div style={{ display: "flex", flexDirection: "column", gap: "0.3rem" }}>
+                    {emailRecipients.filter(r => r.email && selectedEmails.has(r.email)).map((r, i) => (
+                      <div key={i} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "0.5rem" }}>
+                        <span style={{ fontSize: "0.82rem", color: TEXT }}>{r.name}</span>
+                        {cardTypeBadge(r.cardType)}
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
               <div style={{ background: BG, border: `1px solid ${BORDER}`, borderRadius: "6px", padding: "1rem" }}>
                 <div style={{ fontSize: "0.7rem", color: MUTED, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "0.4rem" }}>Text messages</div>
                 <div style={{ fontSize: "1.5rem", fontFamily: "Garamond, Georgia, serif", color: selectedPhones.size > 0 ? GOLD : DIM }}>{selectedPhones.size}</div>
-                <div style={{ fontSize: "0.78rem", color: DIM }}>
+                <div style={{ fontSize: "0.78rem", color: DIM, marginBottom: selectedPhones.size > 0 ? "0.75rem" : 0 }}>
                   {selectedPhones.size === 0 ? "None selected" : `${selectedPhones.size} ${selectedPhones.size === 1 ? "person" : "people"} will receive a text`}
                 </div>
+                {selectedPhones.size > 0 && (
+                  <div style={{ display: "flex", flexDirection: "column", gap: "0.3rem" }}>
+                    {smsRecipients.filter(r => selectedPhones.has(r.phone)).map((r, i) => (
+                      <div key={i} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "0.5rem" }}>
+                        <span style={{ fontSize: "0.82rem", color: TEXT }}>{r.name}</span>
+                        <span style={{ fontSize: "0.7rem", color: DIM }}>{r.phone}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
 
