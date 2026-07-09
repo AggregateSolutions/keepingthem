@@ -13,6 +13,8 @@ const DIM = "#7a6a52";
 const RED = "#d68f8f";
 const GREEN = "#6aaa6a";
 
+const RELATION_OPTIONS = ["Immediate family", "Extended family", "Close friend", "Community member", "Other"];
+
 type Rsvp = {
   id: string;
   name: string;
@@ -45,6 +47,7 @@ type Donor = {
   note: string | null;
   amount: string | null;
   attended: boolean;
+  relation: string | null;
 };
 
 type LogEntry = {
@@ -56,17 +59,24 @@ type LogEntry = {
   card_type: string;
 };
 
-type SmsRecipient = {
+// Unified recipient — one row per person, tracks both email and SMS selection
+type UnifiedRecipient = {
   name: string;
-  phone: string;
   email: string | null;
+  phone: string | null;
   cardType: "attendance" | "donor" | "combined";
   relation?: string | null;
+  contribution?: string;
+  events?: string;
+  alreadySentEmail: boolean;
+  alreadySentSms: boolean;
+  emailChecked: boolean;
+  smsChecked: boolean;
 };
 
 const ATTENDANCE_MESSAGE = `Dear {name},
 
-On behalf of our family, we want to express our deepest gratitude for your love, your presence, and your support during this time. As a {relation}, your being there meant more than words can say.
+On behalf of our family, we want to express our deepest gratitude for your love, your presence, and your support during this time. As {relation}, your being there meant more than words can say.
 
 We are comforted knowing that so many hearts carry the memory of our beloved with us.
 
@@ -82,7 +92,7 @@ With love and gratitude,`;
 
 const COMBINED_MESSAGE = `Dear {name},
 
-On behalf of our family, we want to express our heartfelt gratitude for both your presence and your generosity. As a {relation}, your being with us at {events} meant the world to us. {contribution_sentence}
+On behalf of our family, we want to express our heartfelt gratitude for both your presence and your generosity. As {relation}, your being with us at {events} meant the world to us. {contribution_sentence}
 
 We are comforted knowing that so many hearts carry the memory of our beloved with us.
 
@@ -127,14 +137,6 @@ function cardTypeBadge(type: string) {
     </span>
   );
 }
-
-function StatusDot({ sent, ambiguous }: { sent?: boolean; ambiguous?: boolean }) {
-  if (ambiguous) return <span style={{ color: "#d4a86a", fontSize: "0.72rem" }}>Needs review</span>;
-  if (sent) return <span style={{ color: DIM, fontSize: "0.72rem" }}>✓ Sent</span>;
-  return <span style={{ color: GREEN, fontSize: "0.72rem" }}>Ready</span>;
-}
-
-// ─── Step indicator ───────────────────────────────────────────────────────────
 
 function StepBar({ step, steps }: { step: number; steps: string[] }) {
   return (
@@ -181,21 +183,21 @@ export default function RsvpManager({
   photoUrl?: string;
   initialSignatureUrl?: string;
 }) {
-  // Data
+  // Raw data
   const [rsvps, setRsvps] = useState<Rsvp[]>([]);
   const [tributes, setTributes] = useState<Tribute[]>([]);
   const [donors, setDonors] = useState<Donor[]>([]);
   const [log, setLog] = useState<LogEntry[]>([]);
   const [merged, setMerged] = useState<MergedRecipient[]>([]);
+  const [unified, setUnified] = useState<UnifiedRecipient[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  // Records view
-  const [showRecords, setShowRecords] = useState(false);
+  // Records panel
   const [recordsTab, setRecordsTab] = useState<"attendees" | "messages" | "gifts">("attendees");
 
-  // Wizard step (1–4) or "done"
-  const [step, setStep] = useState<1 | 2 | 3 | 4 | "done">(1);
+  // Wizard step
+  const [step, setStep] = useState<1 | 2 | 3 | "done">(1);
 
   // Step 1 — card design
   const [familyName, setFamilyName] = useState("");
@@ -212,32 +214,25 @@ export default function RsvpManager({
   const sigCanvasRef = useRef<HTMLCanvasElement>(null);
   const sigDrawing = useRef(false);
 
-  // Step 1 — test send
+  // Test send
   const [testEmail, setTestEmail] = useState("");
   const [testPhone, setTestPhone] = useState("");
   const [testTemplate, setTestTemplate] = useState<"attendance" | "donor" | "combined">("attendance");
-  const [testPreviewEmail, setTestPreviewEmail] = useState(""); // whose card data to use as the model
+  const [testPreviewEmail, setTestPreviewEmail] = useState("");
   const [testSending, setTestSending] = useState(false);
   const [testResult, setTestResult] = useState<string | null>(null);
 
-  // Step 2 — email recipients (checkboxes + filter)
-  const [selectedEmails, setSelectedEmails] = useState<Set<string>>(new Set());
+  // Step 2 — unified recipient filter
+  const [recipientFilter, setRecipientFilter] = useState<"all" | "unsent" | "attendance" | "donor" | "combined">("unsent");
   const [skipAlreadySent, setSkipAlreadySent] = useState(true);
-  const [emailFilter, setEmailFilter] = useState<"all" | "unsent" | "attendance" | "donor" | "combined">("unsent");
 
-  // Step 3 — SMS recipients (checkboxes + filter)
-  const [smsRecipients, setSmsRecipients] = useState<SmsRecipient[]>([]);
-  const [smsLoading, setSmsLoading] = useState(false);
-  const [selectedPhones, setSelectedPhones] = useState<Set<string>>(new Set());
-  const [smsSentPhones, setSmsSentPhones] = useState<Set<string>>(new Set());
-  const [smsFilter, setSmsFilter] = useState<"all" | "unsent" | "email-too" | "sms-only">("unsent");
-
-  // Step 4 — send
+  // Send state
   const [sending, setSending] = useState(false);
   const [sendResult, setSendResult] = useState<{ email: { sent: number; failed: number; failures: string[] } | null; sms: { sent: number; failed: number; failures: string[] } | null } | null>(null);
 
   // Donor form
-  const [donorForm, setDonorForm] = useState({ name: "", email: "", phone: "", note: "", amount: "", attended: false });
+  const emptyDonorForm = { name: "", email: "", phone: "", note: "", amount: "", relation: "", attended: false };
+  const [donorForm, setDonorForm] = useState(emptyDonorForm);
   const [donorSaving, setDonorSaving] = useState(false);
   const [donorError, setDonorError] = useState("");
   const [editingDonorId, setEditingDonorId] = useState<string | null>(null);
@@ -248,22 +243,65 @@ export default function RsvpManager({
   const [rsvpSaving, setRsvpSaving] = useState(false);
   const [rsvpError, setRsvpError] = useState("");
 
+  function buildUnified(mergedList: MergedRecipient[], smsList: { name: string; phone: string; email: string | null; cardType: "attendance" | "donor" | "combined"; relation?: string | null }[], sentPhones: Set<string>): UnifiedRecipient[] {
+    const result: UnifiedRecipient[] = [];
+    const smsMap = new Map<string, typeof smsList[0]>();
+    for (const r of smsList) smsMap.set(r.name.toLowerCase().trim(), r);
+
+    for (const m of mergedList) {
+      if (m.ambiguous) continue;
+      const sms = smsMap.get(m.name.toLowerCase().trim());
+      result.push({
+        name: m.name,
+        email: m.email,
+        phone: sms?.phone ?? null,
+        cardType: m.cardType,
+        relation: m.relation ?? null,
+        contribution: m.contribution,
+        events: m.events,
+        alreadySentEmail: !!m.alreadySent,
+        alreadySentSms: sms ? sentPhones.has(sms.phone) : false,
+        emailChecked: !!m.email && !m.alreadySent,
+        smsChecked: !!sms?.phone && !sentPhones.has(sms.phone),
+      });
+      if (sms) smsMap.delete(m.name.toLowerCase().trim());
+    }
+
+    // Add SMS-only people not in merged (donors/attendees with phone but no email in merged)
+    for (const r of smsList) {
+      const key = r.name.toLowerCase().trim();
+      if (!smsMap.has(key)) continue;
+      result.push({
+        name: r.name,
+        email: r.email,
+        phone: r.phone,
+        cardType: r.cardType,
+        relation: r.relation ?? null,
+        alreadySentEmail: false,
+        alreadySentSms: sentPhones.has(r.phone),
+        emailChecked: false,
+        smsChecked: !sentPhones.has(r.phone),
+      });
+    }
+
+    return result;
+  }
+
   function loadData() {
     setLoading(true);
-    fetch(`/api/admin/send-thankyou?slug=${slug}`)
-      .then(r => r.json())
-      .then(d => {
+    Promise.all([
+      fetch(`/api/admin/send-thankyou?slug=${slug}`).then(r => r.json()),
+      fetch(`/api/admin/send-sms?slug=${slug}`).then(r => r.json()),
+    ])
+      .then(([d, smsData]) => {
         if (d.error) { setError(d.error); return; }
+        const sentPhones = new Set<string>((d.log ?? []).map((l: LogEntry) => l.recipient_phone).filter(Boolean));
         setRsvps((d.rsvps ?? []).slice().sort((a: Rsvp, b: Rsvp) => a.name.localeCompare(b.name)));
         setTributes(d.tributes ?? []);
         setDonors(d.donors ?? []);
         setLog(d.log ?? []);
         setMerged(d.merged ?? []);
-        // Default: select all sendable email recipients
-        const sendable = (d.merged ?? []).filter((r: MergedRecipient) => r.email && !r.ambiguous && !r.alreadySent);
-        setSelectedEmails(new Set(sendable.map((r: MergedRecipient) => r.email!)));
-        // Track already-sent phones from log
-        setSmsSentPhones(new Set((d.log ?? []).map((l: LogEntry) => l.recipient_phone).filter(Boolean)));
+        setUnified(buildUnified(d.merged ?? [], smsData.recipients ?? [], sentPhones));
       })
       .catch(() => setError("Failed to load data"))
       .finally(() => setLoading(false));
@@ -271,46 +309,24 @@ export default function RsvpManager({
 
   useEffect(() => { loadData(); }, [slug]);
 
-  // Load SMS recipients when entering step 3
-  function loadSmsRecipients() {
-    setSmsLoading(true);
-    fetch(`/api/admin/send-sms?slug=${slug}`)
-      .then(r => r.json())
-      .then(d => {
-        const all: SmsRecipient[] = d.recipients ?? [];
-        setSmsRecipients(all);
-        const unsent = all.filter(r => !smsSentPhones.has(r.phone));
-        setSelectedPhones(new Set(unsent.map(r => r.phone)));
-      })
-      .finally(() => setSmsLoading(false));
-  }
-
   // ── Derived ────────────────────────────────────────────────────────────────
 
   const totalGuests = rsvps.reduce((sum, r) => sum + (parseInt(r.guests) || 1), 0);
-  const ambiguous = merged.filter(r => r.ambiguous);
-  const emailRecipients = merged.filter(r => r.email && !r.ambiguous);
-  const alreadySentCount = merged.filter(r => r.alreadySent).length;
   const mergedEmails = new Set(merged.map(r => r.email?.toLowerCase()).filter(Boolean));
   const tributesWithEmail = tributes.filter(t => t.email && !mergedEmails.has(t.email.toLowerCase()));
 
-  const effectiveEmailRecipients = skipAlreadySent
-    ? emailRecipients.filter(r => !r.alreadySent)
-    : emailRecipients;
+  const emailCount = unified.filter(r => r.emailChecked && r.email).length;
+  const smsCount = unified.filter(r => r.smsChecked && r.phone).length;
 
-  const filteredEmailRecipients = effectiveEmailRecipients.filter(r => {
-    if (emailFilter === "unsent") return !r.alreadySent;
-    if (emailFilter === "attendance") return r.cardType === "attendance";
-    if (emailFilter === "donor") return r.cardType === "donor";
-    if (emailFilter === "combined") return r.cardType === "combined";
-    return true; // "all"
-  });
-
-  const filteredSmsRecipients = smsRecipients.filter(r => {
-    if (smsFilter === "unsent") return !smsSentPhones.has(r.phone);
-    if (smsFilter === "email-too") return !!r.email;
-    if (smsFilter === "sms-only") return !r.email;
-    return true; // "all"
+  const filteredUnified = unified.filter(r => {
+    const hasChannel = r.email || r.phone;
+    if (!hasChannel) return false;
+    if (skipAlreadySent && r.alreadySentEmail && r.alreadySentSms) return false;
+    if (recipientFilter === "unsent") return !r.alreadySentEmail || !r.alreadySentSms;
+    if (recipientFilter === "attendance") return r.cardType === "attendance";
+    if (recipientFilter === "donor") return r.cardType === "donor";
+    if (recipientFilter === "combined") return r.cardType === "combined";
+    return true;
   });
 
   const absPhotoUrl = photoUrl
@@ -331,7 +347,7 @@ export default function RsvpManager({
     overrideTemplate?: "attendance" | "donor" | "combined",
     recipientEmail?: string,
     overrideContribution?: string,
-    recipientOverride?: { name: string; relation?: string | null; events?: string },
+    recipientOverride?: { name: string; relation?: string | null; events?: string; contribution?: string },
   ) {
     const template = overrideTemplate ?? activeTemplate;
     const mergedMatch = recipientEmail
@@ -347,7 +363,7 @@ export default function RsvpManager({
         message: templateMessage,
         familyName: familyName || deceasedName.split(" ").slice(-1)[0],
         signatureUrl: signatureUrl || undefined,
-        contributionNote: overrideContribution ?? (recipient as MergedRecipient)?.contribution ?? contributionNote ?? undefined,
+        contributionNote: overrideContribution ?? recipientOverride?.contribution ?? (recipient as MergedRecipient)?.contribution ?? contributionNote ?? undefined,
         recipientName: recipient?.name,
         recipientRelation: recipient?.relation,
         recipientEvents: recipient?.events,
@@ -382,8 +398,7 @@ export default function RsvpManager({
 
   function sigClear() {
     const canvas = sigCanvasRef.current; if (!canvas) return;
-    const ctx = canvas.getContext("2d")!;
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    canvas.getContext("2d")!.clearRect(0, 0, canvas.width, canvas.height);
   }
 
   async function persistSignatureUrl(url: string) {
@@ -433,7 +448,6 @@ export default function RsvpManager({
     if (!hasEmail && !hasPhone) { setTestResult("Enter an email or phone number above."); return; }
     setTestSending(true); setTestResult(null);
 
-    // Use a real recipient's data as the model so variables render authentically
     const modelRecipient = testPreviewEmail
       ? merged.find(r => r.email === testPreviewEmail)
       : merged.find(r => r.cardType === testTemplate && r.email && !r.ambiguous);
@@ -464,7 +478,6 @@ export default function RsvpManager({
     if (hasEmail) {
       const res = await safePost("/api/admin/send-thankyou", {
         ...sharedPayload,
-        message: templateMessage,
         recipientEmails: [testEmail.trim()],
         skipAlreadySent: false,
         isTest: true,
@@ -479,7 +492,6 @@ export default function RsvpManager({
     if (hasPhone) {
       const res = await safePost("/api/admin/send-sms", {
         ...sharedPayload,
-        message: templateMessage,
         siteUrl: window.location.origin,
         testPhone: testPhone.trim(),
         testRecipientName: modelRecipient?.name,
@@ -499,8 +511,8 @@ export default function RsvpManager({
     setSending(true);
     setSendResult(null);
 
-    const emailsToSend = [...selectedEmails];
-    const phonesToSend = [...selectedPhones];
+    const emailsToSend = unified.filter(r => r.emailChecked && r.email).map(r => r.email!);
+    const phonesToSend = unified.filter(r => r.smsChecked && r.phone).map(r => r.phone!);
 
     const sharedPayload = {
       slug, deceasedName, years, photoUrl: absPhotoUrl,
@@ -522,7 +534,7 @@ export default function RsvpManager({
         ? fetch("/api/admin/send-sms", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ ...sharedPayload, siteUrl: window.location.origin }),
+            body: JSON.stringify({ ...sharedPayload, siteUrl: window.location.origin, recipientPhones: phonesToSend }),
           }).then(r => r.json())
         : Promise.resolve(null),
     ]);
@@ -551,7 +563,7 @@ export default function RsvpManager({
       });
       if (!res.ok) { setDonorError("Save failed"); setDonorSaving(false); return; }
     }
-    setDonorForm({ name: "", email: "", phone: "", note: "", amount: "", attended: false });
+    setDonorForm(emptyDonorForm);
     setDonorSaving(false);
     loadData();
   }
@@ -581,12 +593,8 @@ export default function RsvpManager({
 
   // ── Render ─────────────────────────────────────────────────────────────────
 
-  if (loading) {
-    return <div style={{ padding: "3rem", textAlign: "center", color: DIM }}>Loading…</div>;
-  }
-  if (error) {
-    return <div style={{ padding: "1.5rem", color: RED }}>{error}</div>;
-  }
+  if (loading) return <div style={{ padding: "3rem", textAlign: "center", color: DIM }}>Loading…</div>;
+  if (error) return <div style={{ padding: "1.5rem", color: RED }}>{error}</div>;
 
   return (
     <div>
@@ -606,107 +614,93 @@ export default function RsvpManager({
         ))}
       </div>
 
-      {/* ── Ambiguous warnings ── */}
-      {ambiguous.length > 0 && (
-        <div style={{ background: "#1f1208", border: "1px solid #8b4a0a", borderRadius: "6px", padding: "0.75rem 1rem", marginBottom: "1.25rem", fontSize: "0.82rem", color: "#d4a86a" }}>
-          <strong>Action needed — {ambiguous.length} possible duplicate{ambiguous.length !== 1 ? "s" : ""}</strong>
-          {" "}— someone on the gift list may already be on the attendance list but we couldn't confirm it automatically.
-          Open <button onClick={() => { setShowRecords(true); setRecordsTab("gifts"); }} style={{ ...btnGhost, color: "#d4a86a" }}>Gifts received</button> to resolve.
-          <ul style={{ margin: "0.4rem 0 0", paddingLeft: "1.2rem" }}>
-            {ambiguous.map((r, i) => (
-              <li key={i}>{r.ambiguousMatch?.rsvpName} (attendee) ↔ {r.ambiguousMatch?.donorName} (gift)</li>
-            ))}
-          </ul>
+      {/* ── Records panel — always visible ── */}
+      <div style={{ marginBottom: "2rem", background: CARD, border: `1px solid ${BORDER}`, borderRadius: "8px", overflow: "hidden" }}>
+        <div style={{ padding: "0.75rem 1.25rem", borderBottom: `1px solid ${BORDER}`, fontSize: "0.72rem", color: MUTED, textTransform: "uppercase", letterSpacing: "0.1em" }}>
+          Records
         </div>
-      )}
-
-      {/* ── Records toggle ── */}
-      <div style={{ marginBottom: "1.5rem" }}>
-        <button onClick={() => setShowRecords(v => !v)} style={{ ...btnSecondary, fontSize: "0.82rem" }}>
-          {showRecords ? "Hide records ↑" : "View records (attendance, gifts, messages) ↓"}
-        </button>
-      </div>
-
-      {/* ── Records panel ── */}
-      {showRecords && (
-        <div style={{ marginBottom: "2rem", background: CARD, border: `1px solid ${BORDER}`, borderRadius: "8px", overflow: "hidden" }}>
-          {/* Records tabs */}
-          <div style={{ display: "flex", borderBottom: `1px solid ${BORDER}` }}>
-            {([
-              { key: "attendees", label: `Who attended (${rsvps.length})` },
-              { key: "messages", label: `Messages left (${tributes.length})` },
-              { key: "gifts", label: `Gifts received (${donors.length})` },
-            ] as const).map(t => (
-              <button key={t.key} onClick={() => setRecordsTab(t.key)} style={{
-                background: recordsTab === t.key ? BG : "none",
-                border: "none", borderBottom: recordsTab === t.key ? `2px solid ${GOLD}` : "2px solid transparent",
-                color: recordsTab === t.key ? GOLD : DIM,
-                padding: "0.65rem 1.1rem", fontSize: "0.82rem", cursor: "pointer",
-              }}>
-                {t.label}
-              </button>
-            ))}
-            <div style={{ flex: 1 }} />
-            <div style={{ display: "flex", alignItems: "center", paddingRight: "1rem", gap: "0.5rem" }}>
-              {recordsTab === "attendees" && rsvps.length > 0 && (
-                <button onClick={() => downloadCsv([
-                  ["Name", "Email", "Phone", "Guests", "Relation", "Funeral", "Reception", "Thanksgiving", "Message", "Date"],
-                  ...rsvps.map(r => [r.name, r.email ?? "", r.phone ?? "", r.guests, r.relation ?? "",
-                    r.attend_funeral ? "Yes" : "No", r.attend_reception ? "Yes" : "No", r.attend_thanksgiving ? "Yes" : "No",
-                    r.message ?? "", new Date(r.created_at).toLocaleDateString()]),
-                ], "attendees")} style={{ ...btnGhost, fontSize: "0.75rem" }}>Export CSV</button>
-              )}
-              {recordsTab === "messages" && tributes.length > 0 && (
-                <button onClick={() => downloadCsv([
-                  ["Name", "Email", "Relation", "Message", "Date"],
-                  ...tributes.map(t => [t.name, t.email ?? "", t.relation ?? "", t.message, new Date(t.created_at).toLocaleDateString()]),
-                ], "messages")} style={{ ...btnGhost, fontSize: "0.75rem" }}>Export CSV</button>
-              )}
-              {recordsTab === "gifts" && donors.length > 0 && (
-                <button onClick={() => downloadCsv([
-                  ["Name", "Email", "Phone", "Amount", "Gift note", "Added"],
-                  ...donors.map(d => [d.name, d.email ?? "", d.phone ?? "", d.amount ?? "", d.note ?? "", new Date(d.created_at).toLocaleDateString()]),
-                ], "gifts")} style={{ ...btnGhost, fontSize: "0.75rem" }}>Export CSV</button>
-              )}
-            </div>
+        <div style={{ display: "flex", borderBottom: `1px solid ${BORDER}` }}>
+          {([
+            { key: "attendees", label: `Who attended (${rsvps.length})` },
+            { key: "messages", label: `Messages left (${tributes.length})` },
+            { key: "gifts", label: `Gifts received (${donors.length})` },
+          ] as const).map(t => (
+            <button key={t.key} onClick={() => setRecordsTab(t.key)} style={{
+              background: recordsTab === t.key ? BG : "none",
+              border: "none", borderBottom: recordsTab === t.key ? `2px solid ${GOLD}` : "2px solid transparent",
+              color: recordsTab === t.key ? GOLD : DIM,
+              padding: "0.65rem 1.1rem", fontSize: "0.82rem", cursor: "pointer",
+            }}>
+              {t.label}
+            </button>
+          ))}
+          <div style={{ flex: 1 }} />
+          <div style={{ display: "flex", alignItems: "center", paddingRight: "1rem", gap: "0.5rem" }}>
+            {recordsTab === "attendees" && rsvps.length > 0 && (
+              <button onClick={() => downloadCsv([
+                ["Name", "Email", "Phone", "Guests", "Relation", "Funeral", "Reception", "Thanksgiving", "Message", "Date"],
+                ...rsvps.map(r => [r.name, r.email ?? "", r.phone ?? "", r.guests, r.relation ?? "",
+                  r.attend_funeral ? "Yes" : "No", r.attend_reception ? "Yes" : "No", r.attend_thanksgiving ? "Yes" : "No",
+                  r.message ?? "", new Date(r.created_at).toLocaleDateString()]),
+              ], "attendees")} style={{ ...btnGhost, fontSize: "0.75rem" }}>Export CSV</button>
+            )}
+            {recordsTab === "messages" && tributes.length > 0 && (
+              <button onClick={() => downloadCsv([
+                ["Name", "Email", "Relation", "Message", "Date"],
+                ...tributes.map(t => [t.name, t.email ?? "", t.relation ?? "", t.message, new Date(t.created_at).toLocaleDateString()]),
+              ], "messages")} style={{ ...btnGhost, fontSize: "0.75rem" }}>Export CSV</button>
+            )}
+            {recordsTab === "gifts" && donors.length > 0 && (
+              <button onClick={() => downloadCsv([
+                ["Name", "Email", "Phone", "Amount", "Relation", "Gift note", "Added"],
+                ...donors.map(d => [d.name, d.email ?? "", d.phone ?? "", d.amount ?? "", d.relation ?? "", d.note ?? "", new Date(d.created_at).toLocaleDateString()]),
+              ], "gifts")} style={{ ...btnGhost, fontSize: "0.75rem" }}>Export CSV</button>
+            )}
           </div>
+        </div>
 
-          {/* Who attended */}
-          {recordsTab === "attendees" && (
-            <>
-              {editingRsvpId && (
-                <div style={{ padding: "1.25rem", borderBottom: `1px solid ${BORDER}`, background: "#1e1a08" }}>
-                  <div style={{ fontSize: "0.82rem", color: GOLD, marginBottom: "1rem", fontWeight: 600 }}>Editing record</div>
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem" }}>
-                    <div><label style={labelStyle}>Name</label><input style={inputStyle} value={rsvpForm.name ?? ""} onChange={e => setRsvpForm(f => ({ ...f, name: e.target.value }))} /></div>
-                    <div><label style={labelStyle}>Email</label><input style={inputStyle} type="email" value={rsvpForm.email ?? ""} onChange={e => setRsvpForm(f => ({ ...f, email: e.target.value }))} /></div>
-                    <div><label style={labelStyle}>Phone</label><input style={inputStyle} value={rsvpForm.phone ?? ""} onChange={e => setRsvpForm(f => ({ ...f, phone: e.target.value }))} /></div>
-                    <div><label style={labelStyle}>Guests</label><input style={inputStyle} value={rsvpForm.guests ?? "1"} onChange={e => setRsvpForm(f => ({ ...f, guests: e.target.value }))} /></div>
-                    <div><label style={labelStyle}>Relation</label><input style={inputStyle} value={rsvpForm.relation ?? ""} onChange={e => setRsvpForm(f => ({ ...f, relation: e.target.value }))} /></div>
-                    <div style={{ display: "flex", flexDirection: "column", gap: "0.4rem" }}>
-                      <label style={labelStyle}>Events attended</label>
-                      {[{ key: "attend_funeral", label: "Funeral" }, { key: "attend_reception", label: "Reception" }, { key: "attend_thanksgiving", label: "Thanksgiving" }].map(({ key, label }) => (
-                        <label key={key} style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontSize: "0.82rem", color: MUTED, cursor: "pointer" }}>
-                          <input type="checkbox" checked={!!(rsvpForm as Record<string, unknown>)[key]} onChange={e => setRsvpForm(f => ({ ...f, [key]: e.target.checked }))} style={{ accentColor: GOLD }} />
-                          {label}
-                        </label>
-                      ))}
-                    </div>
+        {/* Who attended */}
+        {recordsTab === "attendees" && (
+          <div style={{ maxHeight: "420px", overflowY: "auto" }}>
+            {editingRsvpId && (
+              <div style={{ padding: "1.25rem", borderBottom: `1px solid ${BORDER}`, background: "#1e1a08" }}>
+                <div style={{ fontSize: "0.82rem", color: GOLD, marginBottom: "1rem", fontWeight: 600 }}>Editing record</div>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem" }}>
+                  <div><label style={labelStyle}>Name</label><input style={inputStyle} value={rsvpForm.name ?? ""} onChange={e => setRsvpForm(f => ({ ...f, name: e.target.value }))} /></div>
+                  <div><label style={labelStyle}>Email</label><input style={inputStyle} type="email" value={rsvpForm.email ?? ""} onChange={e => setRsvpForm(f => ({ ...f, email: e.target.value }))} /></div>
+                  <div><label style={labelStyle}>Phone</label><input style={inputStyle} value={rsvpForm.phone ?? ""} onChange={e => setRsvpForm(f => ({ ...f, phone: e.target.value }))} /></div>
+                  <div><label style={labelStyle}>Guests</label><input style={inputStyle} value={rsvpForm.guests ?? "1"} onChange={e => setRsvpForm(f => ({ ...f, guests: e.target.value }))} /></div>
+                  <div>
+                    <label style={labelStyle}>Relationship to the deceased</label>
+                    <select style={{ ...inputStyle, appearance: "none" as const }} value={rsvpForm.relation ?? ""} onChange={e => setRsvpForm(f => ({ ...f, relation: e.target.value }))}>
+                      <option value="">Please select</option>
+                      {RELATION_OPTIONS.map(o => <option key={o}>{o}</option>)}
+                    </select>
                   </div>
-                  <div style={{ marginTop: "0.75rem" }}>
-                    <label style={labelStyle}>Message</label>
-                    <textarea style={{ ...inputStyle, minHeight: "70px", resize: "vertical", lineHeight: 1.6 }} value={rsvpForm.message ?? ""} onChange={e => setRsvpForm(f => ({ ...f, message: e.target.value }))} />
-                  </div>
-                  {rsvpError && <div style={{ color: RED, fontSize: "0.78rem", marginTop: "0.4rem" }}>{rsvpError}</div>}
-                  <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.75rem" }}>
-                    <button onClick={saveRsvp} disabled={rsvpSaving} style={btnPrimary(rsvpSaving)}>{rsvpSaving ? "Saving…" : "Save"}</button>
-                    <button onClick={() => setEditingRsvpId(null)} style={btnSecondary}>Cancel</button>
+                  <div style={{ display: "flex", flexDirection: "column", gap: "0.4rem" }}>
+                    <label style={labelStyle}>Events attended</label>
+                    {[{ key: "attend_funeral", label: "Funeral" }, { key: "attend_reception", label: "Reception" }, { key: "attend_thanksgiving", label: "Thanksgiving" }].map(({ key, label }) => (
+                      <label key={key} style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontSize: "0.82rem", color: MUTED, cursor: "pointer" }}>
+                        <input type="checkbox" checked={!!(rsvpForm as Record<string, unknown>)[key]} onChange={e => setRsvpForm(f => ({ ...f, [key]: e.target.checked }))} style={{ accentColor: GOLD }} />
+                        {label}
+                      </label>
+                    ))}
                   </div>
                 </div>
-              )}
-              {rsvps.length === 0 ? (
-                <div style={{ padding: "2rem", textAlign: "center", color: DIM, fontSize: "0.85rem", fontStyle: "italic" }}>No attendance records yet.</div>
-              ) : (
+                <div style={{ marginTop: "0.75rem" }}>
+                  <label style={labelStyle}>Message</label>
+                  <textarea style={{ ...inputStyle, minHeight: "70px", resize: "vertical", lineHeight: 1.6 }} value={rsvpForm.message ?? ""} onChange={e => setRsvpForm(f => ({ ...f, message: e.target.value }))} />
+                </div>
+                {rsvpError && <div style={{ color: RED, fontSize: "0.78rem", marginTop: "0.4rem" }}>{rsvpError}</div>}
+                <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.75rem" }}>
+                  <button onClick={saveRsvp} disabled={rsvpSaving} style={btnPrimary(rsvpSaving)}>{rsvpSaving ? "Saving…" : "Save"}</button>
+                  <button onClick={() => setEditingRsvpId(null)} style={btnSecondary}>Cancel</button>
+                </div>
+              </div>
+            )}
+            {rsvps.length === 0
+              ? <div style={{ padding: "2rem", textAlign: "center", color: DIM, fontSize: "0.85rem", fontStyle: "italic" }}>No attendance records yet.</div>
+              : (
                 <div style={{ overflowX: "auto" }}>
                   <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.82rem" }}>
                     <thead>
@@ -738,14 +732,16 @@ export default function RsvpManager({
                   </table>
                 </div>
               )}
-            </>
-          )}
+          </div>
+        )}
 
-          {/* Messages left */}
-          {recordsTab === "messages" && (
-            tributes.length === 0
+        {/* Messages left */}
+        {recordsTab === "messages" && (
+          <div style={{ maxHeight: "420px", overflowY: "auto" }}>
+            {tributes.length === 0
               ? <div style={{ padding: "2rem", textAlign: "center", color: DIM, fontSize: "0.85rem", fontStyle: "italic" }}>No messages yet.</div>
-              : <div style={{ overflowX: "auto" }}>
+              : (
+                <div style={{ overflowX: "auto" }}>
                   <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.82rem" }}>
                     <thead>
                       <tr style={{ borderBottom: `1px solid ${BORDER}` }}>
@@ -769,74 +765,85 @@ export default function RsvpManager({
                     </tbody>
                   </table>
                 </div>
-          )}
+              )}
+          </div>
+        )}
 
-          {/* Gifts received */}
-          {recordsTab === "gifts" && (
-            <div style={{ padding: "1.25rem", display: "flex", flexDirection: "column", gap: "1rem" }}>
-              {/* Add/edit form */}
-              <div style={{ background: BG, border: `1px solid ${BORDER}`, borderRadius: "6px", padding: "1rem" }}>
-                <div style={{ fontSize: "0.8rem", color: MUTED, marginBottom: "0.75rem" }}>
-                  {editingDonorId ? "Edit gift record" : "Add a gift — flowers, donations, or any other contribution"}
+        {/* Gifts received */}
+        {recordsTab === "gifts" && (
+          <div style={{ padding: "1.25rem", display: "flex", flexDirection: "column", gap: "1rem", maxHeight: "620px", overflowY: "auto" }}>
+            <div style={{ background: BG, border: `1px solid ${BORDER}`, borderRadius: "6px", padding: "1rem" }}>
+              <div style={{ fontSize: "0.8rem", color: MUTED, marginBottom: "0.75rem" }}>
+                {editingDonorId ? "Edit gift record" : "Add a gift — flowers, donations, or any other contribution"}
+              </div>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem" }}>
+                <div><label style={labelStyle}>Name *</label><input style={inputStyle} value={donorForm.name} onChange={e => setDonorForm(f => ({ ...f, name: e.target.value }))} placeholder="Full name" /></div>
+                <div><label style={labelStyle}>Email</label><input style={inputStyle} value={donorForm.email} onChange={e => setDonorForm(f => ({ ...f, email: e.target.value }))} placeholder="email@example.com" type="email" /></div>
+                <div><label style={labelStyle}>Phone</label><input style={inputStyle} value={donorForm.phone} onChange={e => setDonorForm(f => ({ ...f, phone: e.target.value }))} placeholder="(555) 000-0000" /></div>
+                <div><label style={labelStyle}>Amount <span style={{ color: DIM }}>(internal only — never shown in card)</span></label><input style={inputStyle} value={donorForm.amount} onChange={e => setDonorForm(f => ({ ...f, amount: e.target.value }))} placeholder="e.g. $300.00" /></div>
+                <div>
+                  <label style={labelStyle}>Relationship to the deceased</label>
+                  <select style={{ ...inputStyle, appearance: "none" as const }} value={donorForm.relation} onChange={e => setDonorForm(f => ({ ...f, relation: e.target.value }))}>
+                    <option value="">Please select</option>
+                    {RELATION_OPTIONS.map(o => <option key={o}>{o}</option>)}
+                  </select>
                 </div>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem" }}>
-                  <div><label style={labelStyle}>Name *</label><input style={inputStyle} value={donorForm.name} onChange={e => setDonorForm(f => ({ ...f, name: e.target.value }))} placeholder="Full name" /></div>
-                  <div><label style={labelStyle}>Email</label><input style={inputStyle} value={donorForm.email} onChange={e => setDonorForm(f => ({ ...f, email: e.target.value }))} placeholder="email@example.com" type="email" /></div>
-                  <div><label style={labelStyle}>Phone</label><input style={inputStyle} value={donorForm.phone} onChange={e => setDonorForm(f => ({ ...f, phone: e.target.value }))} placeholder="(555) 000-0000" /></div>
-                  <div><label style={labelStyle}>Amount <span style={{ color: DIM }}>(internal only — never shown in card)</span></label><input style={inputStyle} value={donorForm.amount} onChange={e => setDonorForm(f => ({ ...f, amount: e.target.value }))} placeholder="e.g. $300.00" /></div>
-                  <div style={{ gridColumn: "1 / -1" }}><label style={labelStyle}>What they gave <span style={{ color: DIM }}>(appears in thank-you card)</span></label><input style={inputStyle} value={donorForm.note} onChange={e => setDonorForm(f => ({ ...f, note: e.target.value }))} placeholder="e.g. generous monetary gift, beautiful floral arrangement, or time and service" /></div>
-                </div>
-                <label style={{ display: "flex", alignItems: "center", gap: "0.6rem", cursor: "pointer", fontSize: "0.82rem", color: MUTED, marginTop: "0.5rem" }}>
-                  <input type="checkbox" checked={donorForm.attended} onChange={e => setDonorForm(f => ({ ...f, attended: e.target.checked }))} style={{ accentColor: GOLD }} />
-                  They attended the service (will receive an "Attended + gift" card instead of "Gift only")
-                </label>
-                {donorError && <div style={{ color: RED, fontSize: "0.78rem", marginTop: "0.5rem" }}>{donorError}</div>}
-                <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.75rem" }}>
-                  <button onClick={saveDonor} disabled={donorSaving} style={btnPrimary(donorSaving)}>
-                    {donorSaving ? "Saving…" : editingDonorId ? "Save changes" : "Add gift"}
-                  </button>
-                  {editingDonorId && (
-                    <button onClick={() => { setEditingDonorId(null); setDonorForm({ name: "", email: "", phone: "", note: "", amount: "", attended: false }); }} style={btnSecondary}>Cancel</button>
-                  )}
+                <div style={{ gridColumn: "1 / -1" }}>
+                  <label style={labelStyle}>What they gave <span style={{ color: DIM }}>(appears in thank-you card)</span></label>
+                  <input style={inputStyle} value={donorForm.note} onChange={e => setDonorForm(f => ({ ...f, note: e.target.value }))} placeholder="e.g. generous monetary gift, beautiful floral arrangement, or time and service" />
                 </div>
               </div>
-
-              {donors.length > 0 && (
-                <div style={{ overflowX: "auto" }}>
-                  <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.82rem" }}>
-                    <thead>
-                      <tr style={{ borderBottom: `1px solid ${BORDER}` }}>
-                        {["Name", "Email", "Phone", "Amount", "What they gave", "Card type", "Preview", ""].map((h, i) => (
-                          <th key={i} style={{ padding: "0.6rem 0.75rem", textAlign: "left", color: MUTED, fontWeight: 400, fontSize: "0.7rem", textTransform: "uppercase", letterSpacing: "0.06em" }}>{h}</th>
-                        ))}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {donors.map((d, i) => (
-                        <tr key={d.id} style={{ borderBottom: i < donors.length - 1 ? `1px solid ${BORDER}` : "none", background: i % 2 === 0 ? "transparent" : "#1e1408" }}>
-                          <td style={{ padding: "0.6rem 0.75rem", color: TEXT, fontWeight: 500 }}>{d.name}</td>
-                          <td style={{ padding: "0.6rem 0.75rem", color: MUTED }}>{d.email ?? <span style={{ color: DIM }}>—</span>}</td>
-                          <td style={{ padding: "0.6rem 0.75rem", color: MUTED }}>{d.phone ?? <span style={{ color: DIM }}>—</span>}</td>
-                          <td style={{ padding: "0.6rem 0.75rem", color: MUTED }}>{d.amount ?? <span style={{ color: DIM }}>—</span>}</td>
-                          <td style={{ padding: "0.6rem 0.75rem", color: DIM, fontStyle: "italic" }}>{d.note ?? "—"}</td>
-                          <td style={{ padding: "0.6rem 0.75rem" }}>{cardTypeBadge(d.attended ? "combined" : "donor")}</td>
-                          <td style={{ padding: "0.6rem 0.75rem" }}>
-                            <button onClick={() => handlePreview(d.attended ? "combined" : "donor", undefined, d.note ?? undefined, { name: d.name })} style={btnGhost}>Preview card</button>
-                          </td>
-                          <td style={{ padding: "0.6rem 0.75rem", whiteSpace: "nowrap" }}>
-                            <button onClick={() => { setEditingDonorId(d.id); setDonorForm({ name: d.name, email: d.email ?? "", phone: d.phone ?? "", note: d.note ?? "", amount: d.amount ?? "", attended: d.attended }); }} style={{ ...btnGhost, marginRight: "0.75rem" }}>Edit</button>
-                            <button onClick={() => deleteDonor(d.id)} style={{ ...btnGhost, color: RED }}>Remove</button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
+              <label style={{ display: "flex", alignItems: "center", gap: "0.6rem", cursor: "pointer", fontSize: "0.82rem", color: MUTED, marginTop: "0.75rem" }}>
+                <input type="checkbox" checked={donorForm.attended} onChange={e => setDonorForm(f => ({ ...f, attended: e.target.checked }))} style={{ accentColor: GOLD }} />
+                They attended the service (will receive an "Attended + gift" card instead of "Gift only")
+              </label>
+              {donorError && <div style={{ color: RED, fontSize: "0.78rem", marginTop: "0.5rem" }}>{donorError}</div>}
+              <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.75rem" }}>
+                <button onClick={saveDonor} disabled={donorSaving} style={btnPrimary(donorSaving)}>
+                  {donorSaving ? "Saving…" : editingDonorId ? "Save changes" : "Add gift"}
+                </button>
+                {editingDonorId && (
+                  <button onClick={() => { setEditingDonorId(null); setDonorForm(emptyDonorForm); }} style={btnSecondary}>Cancel</button>
+                )}
+              </div>
             </div>
-          )}
-        </div>
-      )}
+
+            {donors.length > 0 && (
+              <div style={{ overflowX: "auto" }}>
+                <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.82rem" }}>
+                  <thead>
+                    <tr style={{ borderBottom: `1px solid ${BORDER}` }}>
+                      {["Name", "Email", "Phone", "Amount", "Relation", "What they gave", "Card type", "Preview", ""].map((h, i) => (
+                        <th key={i} style={{ padding: "0.6rem 0.75rem", textAlign: "left", color: MUTED, fontWeight: 400, fontSize: "0.7rem", textTransform: "uppercase", letterSpacing: "0.06em", whiteSpace: "nowrap" }}>{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {donors.map((d, i) => (
+                      <tr key={d.id} style={{ borderBottom: i < donors.length - 1 ? `1px solid ${BORDER}` : "none", background: i % 2 === 0 ? "transparent" : "#1e1408" }}>
+                        <td style={{ padding: "0.6rem 0.75rem", color: TEXT, fontWeight: 500, whiteSpace: "nowrap" }}>{d.name}</td>
+                        <td style={{ padding: "0.6rem 0.75rem", color: MUTED }}>{d.email ?? <span style={{ color: DIM }}>—</span>}</td>
+                        <td style={{ padding: "0.6rem 0.75rem", color: MUTED, whiteSpace: "nowrap" }}>{d.phone ?? <span style={{ color: DIM }}>—</span>}</td>
+                        <td style={{ padding: "0.6rem 0.75rem", color: MUTED }}>{d.amount ?? <span style={{ color: DIM }}>—</span>}</td>
+                        <td style={{ padding: "0.6rem 0.75rem", color: MUTED }}>{d.relation ?? <span style={{ color: DIM }}>—</span>}</td>
+                        <td style={{ padding: "0.6rem 0.75rem", color: DIM, fontStyle: "italic" }}>{d.note ?? "—"}</td>
+                        <td style={{ padding: "0.6rem 0.75rem" }}>{cardTypeBadge(d.attended ? "combined" : "donor")}</td>
+                        <td style={{ padding: "0.6rem 0.75rem" }}>
+                          <button onClick={() => handlePreview(d.attended ? "combined" : "donor", undefined, d.note ?? undefined, { name: d.name, relation: d.relation })} style={btnGhost}>Preview card</button>
+                        </td>
+                        <td style={{ padding: "0.6rem 0.75rem", whiteSpace: "nowrap" }}>
+                          <button onClick={() => { setEditingDonorId(d.id); setDonorForm({ name: d.name, email: d.email ?? "", phone: d.phone ?? "", note: d.note ?? "", amount: d.amount ?? "", relation: d.relation ?? "", attended: d.attended }); }} style={{ ...btnGhost, marginRight: "0.75rem" }}>Edit</button>
+                          <button onClick={() => deleteDonor(d.id)} style={{ ...btnGhost, color: RED }}>Remove</button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
 
       {/* ══════════════════════════════════════════════════════
           SEND THANK-YOU WIZARD
@@ -848,18 +855,25 @@ export default function RsvpManager({
         </div>
 
         {step !== "done" && (
-          <StepBar step={step} steps={["Design card", "Email recipients", "Text recipients", "Send"]} />
+          <StepBar step={step} steps={["Design card", "Who gets a card?", "Review & Send"]} />
         )}
 
         {/* ── Step 1: Card design ── */}
         {step === 1 && (
           <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
-            <div style={{ fontSize: "1.1rem", fontFamily: "Garamond, Georgia, serif", color: TEXT, marginBottom: "0.25rem" }}>
-              Design the thank-you card
+            <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "1rem" }}>
+              <div>
+                <div style={{ fontSize: "1.1rem", fontFamily: "Garamond, Georgia, serif", color: TEXT, marginBottom: "0.4rem" }}>
+                  Design the thank-you card
+                </div>
+                <p style={{ margin: 0, fontSize: "0.85rem", color: MUTED, lineHeight: 1.6 }}>
+                  Each card is personalised automatically — name, relationship, events attended, and any gift will be filled in for each person.
+                </p>
+              </div>
+              <button onClick={() => handlePreview(activeTemplate)} style={{ ...btnSecondary, fontSize: "0.82rem", whiteSpace: "nowrap" as const }}>
+                Preview card →
+              </button>
             </div>
-            <p style={{ margin: 0, fontSize: "0.85rem", color: MUTED, lineHeight: 1.6 }}>
-              This card will be personalised for each person — their name, what they attended, and any gift they gave will be filled in automatically.
-            </p>
 
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem", alignItems: "end" }}>
               <div style={{ display: "flex", flexDirection: "column" }}>
@@ -952,10 +966,10 @@ export default function RsvpManager({
               </div>
 
               <div style={{ fontSize: "0.72rem", color: DIM, marginBottom: "0.6rem", lineHeight: 1.6 }}>
-                You can use: <code style={{ color: GOLD }}>{"{name}"}</code> first name ·{" "}
-                <code style={{ color: GOLD }}>{"{relation}"}</code> how they knew the deceased ·{" "}
-                <code style={{ color: GOLD }}>{"{events}"}</code> which services they attended ·{" "}
-                <code style={{ color: GOLD }}>{"{contribution}"}</code> their gift
+                Variables: <code style={{ color: GOLD }}>{"{name}"}</code> first name ·{" "}
+                <code style={{ color: GOLD }}>{"{relation}"}</code> relationship ·{" "}
+                <code style={{ color: GOLD }}>{"{events}"}</code> services attended ·{" "}
+                <code style={{ color: GOLD }}>{"{contribution_sentence}"}</code> their gift as a sentence
               </div>
 
               {activeTemplate === "attendance" && (
@@ -970,10 +984,6 @@ export default function RsvpManager({
                 <textarea value={combinedMsg} onChange={e => setCombinedMsg(e.target.value)}
                   style={{ ...inputStyle, minHeight: "200px", lineHeight: 1.8, resize: "vertical", fontFamily: "Garamond, Georgia, serif", fontSize: "0.9rem" }} />
               )}
-
-              <button onClick={() => handlePreview(activeTemplate)} style={{ ...btnSecondary, marginTop: "0.75rem", fontSize: "0.82rem" }}>
-                Preview how this card will look →
-              </button>
             </div>
 
             {tributesWithEmail.length > 0 && (
@@ -1004,11 +1014,8 @@ export default function RsvpManager({
                 </div>
                 <div>
                   <label style={labelStyle}>Render as <span style={{ color: DIM }}>(whose data fills the card)</span></label>
-                  <select
-                    value={testPreviewEmail}
-                    onChange={e => { setTestPreviewEmail(e.target.value); setTestResult(null); }}
-                    style={{ ...inputStyle, appearance: "none" as const }}
-                  >
+                  <select value={testPreviewEmail} onChange={e => { setTestPreviewEmail(e.target.value); setTestResult(null); }}
+                    style={{ ...inputStyle, appearance: "none" as const }}>
                     <option value="">— first matching recipient —</option>
                     {merged.filter(r => r.email && !r.ambiguous).map((r, i) => (
                       <option key={i} value={r.email!}>
@@ -1050,24 +1057,24 @@ export default function RsvpManager({
             </div>
 
             <div style={{ display: "flex", justifyContent: "flex-end" }}>
-              <button onClick={() => setStep(2)} style={btnPrimary()}>Next: Choose who receives by email →</button>
+              <button onClick={() => setStep(2)} style={btnPrimary()}>Next: Who gets a card? →</button>
             </div>
           </div>
         )}
 
-        {/* ── Step 2: Email recipients ── */}
+        {/* ── Step 2: Unified recipients ── */}
         {step === 2 && (
           <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
             <div style={{ fontSize: "1.1rem", fontFamily: "Garamond, Georgia, serif", color: TEXT }}>
-              Who should receive a card by email?
+              Who gets a card?
             </div>
             <p style={{ margin: 0, fontSize: "0.85rem", color: MUTED, lineHeight: 1.6 }}>
-              Everyone below has an email address on file. All are selected by default — uncheck anyone you'd like to skip.
+              Select who should receive a thank-you card and how — by email, by text, or both. Uncheck any channel you'd like to skip for a specific person.
             </p>
 
             {/* Filter row */}
             <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", flexWrap: "wrap" }}>
-              <span style={{ fontSize: "0.75rem", color: DIM, marginRight: "0.25rem" }}>Show:</span>
+              <span style={{ fontSize: "0.75rem", color: DIM, marginRight: "0.25rem" }}>Filter:</span>
               {([
                 { key: "unsent", label: "Not yet sent" },
                 { key: "all", label: "Everyone" },
@@ -1075,11 +1082,11 @@ export default function RsvpManager({
                 { key: "donor", label: "Gift only" },
                 { key: "combined", label: "Attended + gift" },
               ] as const).map(f => (
-                <button key={f.key} onClick={() => setEmailFilter(f.key)} style={{
-                  background: emailFilter === f.key ? GOLD : "none",
-                  border: `1px solid ${emailFilter === f.key ? GOLD : BORDER}`,
-                  borderRadius: "20px", color: emailFilter === f.key ? "#0e0b07" : DIM,
-                  padding: "0.25rem 0.75rem", fontSize: "0.75rem", cursor: "pointer", fontWeight: emailFilter === f.key ? 600 : 400,
+                <button key={f.key} onClick={() => setRecipientFilter(f.key)} style={{
+                  background: recipientFilter === f.key ? GOLD : "none",
+                  border: `1px solid ${recipientFilter === f.key ? GOLD : BORDER}`,
+                  borderRadius: "20px", color: recipientFilter === f.key ? "#0e0b07" : DIM,
+                  padding: "0.25rem 0.75rem", fontSize: "0.75rem", cursor: "pointer", fontWeight: recipientFilter === f.key ? 600 : 400,
                 }}>
                   {f.label}
                 </button>
@@ -1089,212 +1096,122 @@ export default function RsvpManager({
                 Hide already sent
               </label>
               <button onClick={() => downloadCsv([
-                ["Name", "Email", "Card type", "Status"],
-                ...emailRecipients.map(r => [r.name, r.email ?? "", r.cardType, r.alreadySent ? "sent" : "pending"]),
-              ], "email-recipients")} style={btnGhost}>Export CSV</button>
+                ["Name", "Email", "Phone", "Card type", "Relation", "Email selected", "SMS selected"],
+                ...unified.map(r => [r.name, r.email ?? "", r.phone ?? "", r.cardType, r.relation ?? "", r.emailChecked ? "Yes" : "No", r.smsChecked ? "Yes" : "No"]),
+              ], "recipients")} style={btnGhost}>Export CSV</button>
             </div>
 
-            {filteredEmailRecipients.length === 0 ? (
+            {filteredUnified.length === 0 ? (
               <div style={{ padding: "2rem", textAlign: "center", color: DIM, fontSize: "0.85rem", fontStyle: "italic", background: BG, borderRadius: "6px" }}>
-                {emailRecipients.length === 0
-                  ? "No email addresses found in attendance or gift records."
+                {unified.length === 0
+                  ? "No recipients found. Add email addresses or phone numbers in the records above."
                   : "No one matches this filter. Try a different group or uncheck 'Hide already sent'."}
               </div>
             ) : (
               <div style={{ background: BG, border: `1px solid ${BORDER}`, borderRadius: "6px", overflow: "hidden" }}>
-                {/* Select all filtered */}
-                <div style={{ padding: "0.65rem 1rem", borderBottom: `1px solid ${BORDER}`, display: "flex", alignItems: "center", gap: "0.75rem" }}>
-                  <input
-                    type="checkbox"
-                    style={{ accentColor: GOLD, width: "16px", height: "16px" }}
-                    checked={filteredEmailRecipients.length > 0 && filteredEmailRecipients.every(r => selectedEmails.has(r.email!))}
-                    onChange={e => {
-                      const s = new Set(selectedEmails);
-                      if (e.target.checked) filteredEmailRecipients.forEach(r => s.add(r.email!));
-                      else filteredEmailRecipients.forEach(r => s.delete(r.email!));
-                      setSelectedEmails(s);
-                    }}
-                  />
-                  <span style={{ fontSize: "0.78rem", color: MUTED }}>
-                    Select all in view · <strong style={{ color: TEXT }}>{selectedEmails.size}</strong> selected total
-                    {alreadySentCount > 0 && <span style={{ color: DIM }}> · {alreadySentCount} already sent</span>}
-                  </span>
-                </div>
                 <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.82rem" }}>
-                  <tbody>
-                    {filteredEmailRecipients.map((r, i) => (
-                      <tr key={i} style={{ borderBottom: i < filteredEmailRecipients.length - 1 ? `1px solid ${BORDER}` : "none", background: selectedEmails.has(r.email!) ? "#1e1a08" : "transparent" }}>
-                        <td style={{ padding: "0.65rem 1rem", width: "36px" }}>
-                          <input
-                            type="checkbox"
-                            style={{ accentColor: GOLD, width: "16px", height: "16px" }}
-                            checked={selectedEmails.has(r.email!)}
-                            onChange={e => {
-                              const s = new Set(selectedEmails);
-                              if (e.target.checked) s.add(r.email!); else s.delete(r.email!);
-                              setSelectedEmails(s);
-                            }}
+                  <thead>
+                    <tr style={{ borderBottom: `1px solid ${BORDER}`, background: "#1e1a08" }}>
+                      <th style={{ padding: "0.6rem 1rem", textAlign: "left", color: MUTED, fontWeight: 400, fontSize: "0.7rem", textTransform: "uppercase", letterSpacing: "0.06em" }}>Name</th>
+                      <th style={{ padding: "0.6rem 0.5rem", textAlign: "left", color: MUTED, fontWeight: 400, fontSize: "0.7rem", textTransform: "uppercase", letterSpacing: "0.06em" }}>Card type</th>
+                      <th style={{ padding: "0.6rem 0.5rem", textAlign: "left", color: MUTED, fontWeight: 400, fontSize: "0.7rem", textTransform: "uppercase", letterSpacing: "0.06em" }}>Relation</th>
+                      <th style={{ padding: "0.6rem 0.5rem", textAlign: "center", color: MUTED, fontWeight: 400, fontSize: "0.7rem", textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.2rem" }}>
+                          <input type="checkbox" style={{ accentColor: GOLD }}
+                            checked={filteredUnified.filter(r => r.email).every(r => r.emailChecked)}
+                            onChange={e => setUnified(prev => prev.map(r =>
+                              filteredUnified.some(f => f.name === r.name) && r.email ? { ...r, emailChecked: e.target.checked } : r
+                            ))}
                           />
+                          <span>Email</span>
+                        </div>
+                      </th>
+                      <th style={{ padding: "0.6rem 0.5rem", textAlign: "center", color: MUTED, fontWeight: 400, fontSize: "0.7rem", textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.2rem" }}>
+                          <input type="checkbox" style={{ accentColor: GOLD }}
+                            checked={filteredUnified.filter(r => r.phone).every(r => r.smsChecked)}
+                            onChange={e => setUnified(prev => prev.map(r =>
+                              filteredUnified.some(f => f.name === r.name) && r.phone ? { ...r, smsChecked: e.target.checked } : r
+                            ))}
+                          />
+                          <span>Text</span>
+                        </div>
+                      </th>
+                      <th style={{ padding: "0.6rem 1rem", textAlign: "left", color: MUTED, fontWeight: 400, fontSize: "0.7rem", textTransform: "uppercase", letterSpacing: "0.06em" }}>Preview</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredUnified.map((r, i) => (
+                      <tr key={i} style={{ borderBottom: i < filteredUnified.length - 1 ? `1px solid ${BORDER}` : "none", background: (r.emailChecked || r.smsChecked) ? "#1e1a08" : "transparent" }}>
+                        <td style={{ padding: "0.65rem 1rem", color: TEXT, fontWeight: 500, whiteSpace: "nowrap" }}>
+                          {r.name}
+                          {r.alreadySentEmail && r.email && <span style={{ color: DIM, fontSize: "0.7rem", marginLeft: "0.4rem" }}>✓ email sent</span>}
+                          {r.alreadySentSms && r.phone && <span style={{ color: DIM, fontSize: "0.7rem", marginLeft: "0.4rem" }}>✓ text sent</span>}
                         </td>
-                        <td style={{ padding: "0.65rem 0.5rem", color: TEXT, fontWeight: 500, whiteSpace: "nowrap" }}>{r.name}</td>
-                        <td style={{ padding: "0.65rem 0.5rem", color: MUTED }}>{r.email}</td>
                         <td style={{ padding: "0.65rem 0.5rem" }}>{cardTypeBadge(r.cardType)}</td>
-                        <td style={{ padding: "0.65rem 1rem", textAlign: "right" }}>
-                          <StatusDot sent={!!r.alreadySent} ambiguous={r.ambiguous} />
+                        <td style={{ padding: "0.65rem 0.5rem", color: MUTED, fontSize: "0.78rem" }}>{r.relation ?? <span style={{ color: DIM }}>—</span>}</td>
+                        <td style={{ padding: "0.65rem 0.5rem", textAlign: "center" }}>
+                          {r.email
+                            ? <input type="checkbox" style={{ accentColor: GOLD, width: "16px", height: "16px" }}
+                                checked={r.emailChecked}
+                                onChange={e => setUnified(prev => prev.map(u => u.name === r.name ? { ...u, emailChecked: e.target.checked } : u))}
+                              />
+                            : <span style={{ color: DIM, fontSize: "0.7rem" }}>—</span>
+                          }
+                        </td>
+                        <td style={{ padding: "0.65rem 0.5rem", textAlign: "center" }}>
+                          {r.phone
+                            ? <input type="checkbox" style={{ accentColor: GOLD, width: "16px", height: "16px" }}
+                                checked={r.smsChecked}
+                                onChange={e => setUnified(prev => prev.map(u => u.name === r.name ? { ...u, smsChecked: e.target.checked } : u))}
+                              />
+                            : <span style={{ color: DIM, fontSize: "0.7rem" }}>—</span>
+                          }
                         </td>
                         <td style={{ padding: "0.65rem 1rem" }}>
-                          <button onClick={() => handlePreview(r.cardType, r.email!)} style={btnGhost}>Preview</button>
+                          <button onClick={() => handlePreview(r.cardType, r.email ?? undefined, r.contribution, { name: r.name, relation: r.relation, events: r.events, contribution: r.contribution })} style={btnGhost}>Preview</button>
                         </td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
+                <div style={{ padding: "0.65rem 1rem", borderTop: `1px solid ${BORDER}`, fontSize: "0.78rem", color: MUTED }}>
+                  <strong style={{ color: TEXT }}>{emailCount}</strong> email{emailCount !== 1 ? "s" : ""} · <strong style={{ color: TEXT }}>{smsCount}</strong> text{smsCount !== 1 ? "s" : ""} selected
+                </div>
               </div>
             )}
 
             <div style={{ display: "flex", justifyContent: "space-between" }}>
               <button onClick={() => setStep(1)} style={btnSecondary}>← Back</button>
-              <button onClick={() => { setStep(3); loadSmsRecipients(); }} style={btnPrimary()}>
-                Next: Choose who receives by text →
+              <button onClick={() => setStep(3)} style={btnPrimary(emailCount === 0 && smsCount === 0)} disabled={emailCount === 0 && smsCount === 0}>
+                Next: Review & Send →
               </button>
             </div>
           </div>
         )}
 
-        {/* ── Step 3: SMS recipients ── */}
+        {/* ── Step 3: Review & Send ── */}
         {step === 3 && (
           <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
             <div style={{ fontSize: "1.1rem", fontFamily: "Garamond, Georgia, serif", color: TEXT }}>
-              Who should receive a card by text message?
-            </div>
-            <p style={{ margin: 0, fontSize: "0.85rem", color: MUTED, lineHeight: 1.6 }}>
-              These people have a phone number on file. Each text message will include a personal link to their own thank-you card.
-              {smsRecipients.some(r => !smsSentPhones.has(r.phone)) === false && smsRecipients.length > 0 &&
-                " Everyone has already been sent a text."}
-            </p>
-
-            {/* Filter row */}
-            {!smsLoading && smsRecipients.length > 0 && (
-              <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", flexWrap: "wrap" }}>
-                <span style={{ fontSize: "0.75rem", color: DIM, marginRight: "0.25rem" }}>Show:</span>
-                {([
-                  { key: "unsent", label: "Not yet sent" },
-                  { key: "all", label: "Everyone" },
-                  { key: "email-too", label: "Also has email" },
-                  { key: "sms-only", label: "Text only" },
-                ] as const).map(f => (
-                  <button key={f.key} onClick={() => setSmsFilter(f.key)} style={{
-                    background: smsFilter === f.key ? GOLD : "none",
-                    border: `1px solid ${smsFilter === f.key ? GOLD : BORDER}`,
-                    borderRadius: "20px", color: smsFilter === f.key ? "#0e0b07" : DIM,
-                    padding: "0.25rem 0.75rem", fontSize: "0.75rem", cursor: "pointer", fontWeight: smsFilter === f.key ? 600 : 400,
-                  }}>
-                    {f.label}
-                  </button>
-                ))}
-                <button onClick={() => downloadCsv([
-                  ["Name", "Phone", "Email"],
-                  ...smsRecipients.map(r => [r.name, r.phone, r.email ?? ""]),
-                ], "sms-recipients")} style={{ ...btnGhost, marginLeft: "auto" }}>Export CSV</button>
-              </div>
-            )}
-
-            {smsLoading ? (
-              <div style={{ padding: "2rem", textAlign: "center", color: DIM }}>Loading…</div>
-            ) : smsRecipients.length === 0 ? (
-              <div style={{ padding: "2rem", textAlign: "center", color: DIM, fontSize: "0.85rem", fontStyle: "italic", background: BG, borderRadius: "6px" }}>
-                No phone numbers found. You can add them in the attendance or gift records above.
-              </div>
-            ) : filteredSmsRecipients.length === 0 ? (
-              <div style={{ padding: "2rem", textAlign: "center", color: DIM, fontSize: "0.85rem", fontStyle: "italic", background: BG, borderRadius: "6px" }}>
-                No one matches this filter. Try a different group.
-              </div>
-            ) : (
-              <div style={{ background: BG, border: `1px solid ${BORDER}`, borderRadius: "6px", overflow: "hidden" }}>
-                {/* Select all filtered */}
-                <div style={{ padding: "0.65rem 1rem", borderBottom: `1px solid ${BORDER}`, display: "flex", alignItems: "center", gap: "0.75rem" }}>
-                  <input
-                    type="checkbox"
-                    style={{ accentColor: GOLD, width: "16px", height: "16px" }}
-                    checked={filteredSmsRecipients.length > 0 && filteredSmsRecipients.every(r => selectedPhones.has(r.phone))}
-                    onChange={e => {
-                      const s = new Set(selectedPhones);
-                      if (e.target.checked) filteredSmsRecipients.forEach(r => s.add(r.phone));
-                      else filteredSmsRecipients.forEach(r => s.delete(r.phone));
-                      setSelectedPhones(s);
-                    }}
-                  />
-                  <span style={{ fontSize: "0.78rem", color: MUTED }}>
-                    Select all in view · <strong style={{ color: TEXT }}>{selectedPhones.size}</strong> selected total
-                  </span>
-                </div>
-                <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.82rem" }}>
-                  <tbody>
-                    {filteredSmsRecipients.map((r, i) => {
-                      const alreadySent = smsSentPhones.has(r.phone);
-                      return (
-                        <tr key={i} style={{ borderBottom: i < filteredSmsRecipients.length - 1 ? `1px solid ${BORDER}` : "none", background: selectedPhones.has(r.phone) ? "#1e1a08" : "transparent" }}>
-                          <td style={{ padding: "0.65rem 1rem", width: "36px" }}>
-                            <input
-                              type="checkbox"
-                              style={{ accentColor: GOLD, width: "16px", height: "16px" }}
-                              checked={selectedPhones.has(r.phone)}
-                              onChange={e => {
-                                const s = new Set(selectedPhones);
-                                if (e.target.checked) s.add(r.phone); else s.delete(r.phone);
-                                setSelectedPhones(s);
-                              }}
-                            />
-                          </td>
-                          <td style={{ padding: "0.65rem 0.5rem", color: TEXT, fontWeight: 500, whiteSpace: "nowrap" }}>{r.name}</td>
-                          <td style={{ padding: "0.65rem 0.5rem", color: MUTED, whiteSpace: "nowrap" }}>{r.phone}</td>
-                          <td style={{ padding: "0.65rem 0.5rem", color: DIM }}>
-                            {r.email ? r.email : <span style={{ fontStyle: "italic" }}>text only</span>}
-                          </td>
-                          <td style={{ padding: "0.65rem 0.5rem" }}>{cardTypeBadge(r.cardType)}</td>
-                          <td style={{ padding: "0.65rem 1rem", textAlign: "right" }}>
-                            {alreadySent ? <span style={{ color: DIM, fontSize: "0.72rem" }}>✓ Sent</span> : <span style={{ color: GREEN, fontSize: "0.72rem" }}>Ready</span>}
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            )}
-
-            <div style={{ display: "flex", justifyContent: "space-between" }}>
-              <button onClick={() => setStep(2)} style={btnSecondary}>← Back</button>
-              <button onClick={() => setStep(4)} style={btnPrimary(selectedEmails.size === 0 && selectedPhones.size === 0)} disabled={selectedEmails.size === 0 && selectedPhones.size === 0}>
-                Next: Review and send →
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* ── Step 4: Review and send ── */}
-        {step === 4 && (
-          <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
-            <div style={{ fontSize: "1.1rem", fontFamily: "Garamond, Georgia, serif", color: TEXT }}>
-              Ready to send
+              Review & Send
             </div>
 
-            {/* Summary */}
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
               <div style={{ background: BG, border: `1px solid ${BORDER}`, borderRadius: "6px", padding: "1rem" }}>
                 <div style={{ fontSize: "0.7rem", color: MUTED, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "0.4rem" }}>Email cards</div>
-                <div style={{ fontSize: "1.5rem", fontFamily: "Garamond, Georgia, serif", color: selectedEmails.size > 0 ? GOLD : DIM }}>{selectedEmails.size}</div>
-                <div style={{ fontSize: "0.78rem", color: DIM, marginBottom: selectedEmails.size > 0 ? "0.75rem" : 0 }}>
-                  {selectedEmails.size === 0 ? "None selected" : `${selectedEmails.size} ${selectedEmails.size === 1 ? "person" : "people"} will receive an email`}
+                <div style={{ fontSize: "1.5rem", fontFamily: "Garamond, Georgia, serif", color: emailCount > 0 ? GOLD : DIM }}>{emailCount}</div>
+                <div style={{ fontSize: "0.78rem", color: DIM, marginBottom: emailCount > 0 ? "0.75rem" : 0 }}>
+                  {emailCount === 0 ? "None selected" : `${emailCount} ${emailCount === 1 ? "person" : "people"} will receive an email`}
                 </div>
-                {selectedEmails.size > 0 && (
+                {emailCount > 0 && (
                   <div style={{ display: "flex", flexDirection: "column", gap: "0.3rem" }}>
-                    {emailRecipients.filter(r => r.email && selectedEmails.has(r.email)).map((r, i) => (
+                    {unified.filter(r => r.emailChecked && r.email).map((r, i) => (
                       <div key={i} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "0.5rem" }}>
                         <span style={{ fontSize: "0.82rem", color: TEXT }}>{r.name}</span>
                         <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
                           {cardTypeBadge(r.cardType)}
-                          <button onClick={() => handlePreview(r.cardType, r.email!)} style={btnGhost}>Preview</button>
+                          <button onClick={() => handlePreview(r.cardType, r.email!, r.contribution, { name: r.name, relation: r.relation, events: r.events, contribution: r.contribution })} style={btnGhost}>Preview</button>
                         </div>
                       </div>
                     ))}
@@ -1303,20 +1220,19 @@ export default function RsvpManager({
               </div>
               <div style={{ background: BG, border: `1px solid ${BORDER}`, borderRadius: "6px", padding: "1rem" }}>
                 <div style={{ fontSize: "0.7rem", color: MUTED, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "0.4rem" }}>Text messages</div>
-                <div style={{ fontSize: "1.5rem", fontFamily: "Garamond, Georgia, serif", color: selectedPhones.size > 0 ? GOLD : DIM }}>{selectedPhones.size}</div>
-                <div style={{ fontSize: "0.78rem", color: DIM, marginBottom: selectedPhones.size > 0 ? "0.75rem" : 0 }}>
-                  {selectedPhones.size === 0 ? "None selected" : `${selectedPhones.size} ${selectedPhones.size === 1 ? "person" : "people"} will receive a text`}
+                <div style={{ fontSize: "1.5rem", fontFamily: "Garamond, Georgia, serif", color: smsCount > 0 ? GOLD : DIM }}>{smsCount}</div>
+                <div style={{ fontSize: "0.78rem", color: DIM, marginBottom: smsCount > 0 ? "0.75rem" : 0 }}>
+                  {smsCount === 0 ? "None selected" : `${smsCount} ${smsCount === 1 ? "person" : "people"} will receive a text`}
                 </div>
-                {selectedPhones.size > 0 && (
+                {smsCount > 0 && (
                   <div style={{ display: "flex", flexDirection: "column", gap: "0.3rem" }}>
-                    {smsRecipients.filter(r => selectedPhones.has(r.phone)).map((r, i) => (
+                    {unified.filter(r => r.smsChecked && r.phone).map((r, i) => (
                       <div key={i} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "0.5rem" }}>
                         <span style={{ fontSize: "0.82rem", color: TEXT }}>{r.name}</span>
                         <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
                           <span style={{ fontSize: "0.7rem", color: DIM }}>{r.phone}</span>
-                          <button onClick={() => handlePreview(
-                            r.cardType, undefined, undefined, { name: r.name, relation: r.relation }
-                          )} style={btnGhost}>Preview</button>
+                          {cardTypeBadge(r.cardType)}
+                          <button onClick={() => handlePreview(r.cardType, undefined, r.contribution, { name: r.name, relation: r.relation, events: r.events, contribution: r.contribution })} style={btnGhost}>Preview</button>
                         </div>
                       </div>
                     ))}
@@ -1330,13 +1246,13 @@ export default function RsvpManager({
             </div>
 
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <button onClick={() => setStep(3)} style={btnSecondary} disabled={sending}>← Back</button>
-              <button onClick={handleSend} disabled={sending || (selectedEmails.size === 0 && selectedPhones.size === 0)} style={{
-                ...btnPrimary(sending || (selectedEmails.size === 0 && selectedPhones.size === 0)),
+              <button onClick={() => setStep(2)} style={btnSecondary} disabled={sending}>← Back</button>
+              <button onClick={handleSend} disabled={sending || (emailCount === 0 && smsCount === 0)} style={{
+                ...btnPrimary(sending || (emailCount === 0 && smsCount === 0)),
                 background: sending ? DIM : "#8b4a0a",
                 minWidth: "200px",
               }}>
-                {sending ? "Sending…" : `Send to ${selectedEmails.size + selectedPhones.size} ${selectedEmails.size + selectedPhones.size === 1 ? "person" : "people"}`}
+                {sending ? "Sending…" : `Send to ${emailCount + smsCount} ${emailCount + smsCount === 1 ? "person" : "people"}`}
               </button>
             </div>
           </div>
@@ -1375,7 +1291,6 @@ export default function RsvpManager({
               )}
             </div>
 
-            {/* Send history */}
             {log.length > 0 && (
               <div style={{ width: "100%", background: BG, border: `1px solid ${BORDER}`, borderRadius: "6px", overflow: "hidden", textAlign: "left" }}>
                 <div style={{ padding: "0.6rem 1rem", borderBottom: `1px solid ${BORDER}`, fontSize: "0.72rem", color: MUTED, textTransform: "uppercase", letterSpacing: "0.08em" }}>

@@ -1,3 +1,16 @@
+const RELATION_PHRASES: Record<string, string> = {
+  "immediate family": "a member of our immediate family",
+  "extended family":  "a member of our extended family",
+  "close friend":     "a close friend",
+  "community member": "a member of our community",
+  "other":            "a friend",
+};
+
+function relationPhrase(relation: string | undefined | null): string {
+  if (!relation) return "a friend";
+  return RELATION_PHRASES[relation.toLowerCase().trim()] ?? `a ${relation.toLowerCase().trim()}`;
+}
+
 export type EcardData = {
   deceasedName: string;
   years: string;
@@ -86,7 +99,7 @@ export function buildEcardHtml(data: EcardData): string {
   const personalizedMessage = message
     .replace(/\{name\}/g, recipientFirstName)
     .replace(/\{fullname\}/g, recipientFullName)
-    .replace(/\{relation\}/g, (relation || "friend").toLowerCase())
+    .replace(/\{relation\}/g, relationPhrase(relation))
     .replace(/\{events\}/g, events || "the service")
     .replace(/\{contribution\}/g, contributionNote || "your generous contribution")
     .replace(/\{contribution_sentence\}/g, contributionSentence)

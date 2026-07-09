@@ -35,7 +35,9 @@ export type Donor = {
   email: string | null;
   phone: string | null;
   note: string | null;
+  amount?: string | null;
   attended: boolean;
+  relation: string | null;
   created_at?: string;
 };
 
@@ -124,6 +126,8 @@ export function buildRecipientList(rsvps: Rsvp[], donors: Donor[], log: LogEntry
     recipients.push({
       name: d.name,
       email: d.email,
+      relation: d.relation ?? undefined,
+      events: d.attended ? "the service" : undefined,
       contribution: d.note ?? undefined,
       cardType: d.attended ? "combined" : "donor",
       alreadySent: emailKey ? logByEmail.get(emailKey) : undefined,

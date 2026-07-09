@@ -42,6 +42,7 @@ export async function POST(req: NextRequest) {
     testRecipientEvents,
     testRecipientContribution,
     testCardType,
+    recipientPhones,
   }: {
     slug: string;
     message: string;
@@ -60,6 +61,7 @@ export async function POST(req: NextRequest) {
     testRecipientEvents?: string;
     testRecipientContribution?: string;
     testCardType?: string;
+    recipientPhones?: string[];
   } = await req.json();
 
   if (!slug || !message) {
@@ -158,10 +160,21 @@ export async function POST(req: NextRequest) {
       name: d.name,
       phone: d.phone,
       email: d.email,
+      relation: d.relation ?? undefined,
+      events: d.attended ? "the service" : undefined,
       contribution: d.note ?? undefined,
-      cardType: "donor",
+      cardType: d.attended ? "combined" : "donor",
     });
   }
+
+  // Filter to selected phones if provided
+  const targetPhones = recipientPhones?.length
+    ? new Set(recipientPhones)
+    : null;
+
+  const filteredRecipients = targetPhones
+    ? smsRecipients.filter(r => targetPhones.has(r.phone))
+    : smsRecipients;
 
   let sent = 0;
   let failed = 0;
@@ -170,7 +183,7 @@ export async function POST(req: NextRequest) {
   const tokenMap: { token: string; data: TokenRecipientData }[] = [];
   const logEntries: object[] = [];
 
-  for (const recipient of smsRecipients) {
+  for (const recipient of filteredRecipients) {
     if (sentPhones.has(recipient.phone)) continue;
 
     const templateMessage =
