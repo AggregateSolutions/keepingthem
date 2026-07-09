@@ -71,6 +71,18 @@ Same variables as above for local development.
 - Target: `https://keepingthem.net/.netlify/functions/rsvp-notify`
 - Header: `x-webhook-secret: <RSVP_WEBHOOK_SECRET value>`
 
+## Remote DB Access (when working off-network)
+
+When you're remote and need to reach Supabase Studio or run migrations, tunnel through the app server via Tailscale:
+
+```bash
+ssh -N -L 8000:172.16.20.11:8000 ben@<appserver-tailscale-ip>
+```
+
+- Run on your **local Mac** — leave it running (looks like it hangs, that's normal)
+- Then browse to **http://localhost:8000** to reach Supabase Studio
+- Press `Ctrl+C` to close the tunnel when done
+
 ## Deploy Strategy
 
 - **No auto-deploy** — Netlify GitHub sync is intentionally disabled during development
