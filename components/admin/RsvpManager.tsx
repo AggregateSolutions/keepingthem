@@ -587,6 +587,22 @@ export default function RsvpManager({
     loadData();
   }
 
+  async function patchRsvpRelation(id: string, relation: string) {
+    setRsvps(prev => prev.map(r => r.id === id ? { ...r, relation: relation || null } : r));
+    await fetch(`/api/admin/rsvps?id=${id}`, {
+      method: "PATCH", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ relation: relation || null }),
+    });
+  }
+
+  async function patchDonorRelation(id: string, relation: string) {
+    setDonors(prev => prev.map(d => d.id === id ? { ...d, relation: relation || null } : d));
+    await fetch(`/api/admin/donors?id=${id}`, {
+      method: "PATCH", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ relation: relation || null }),
+    });
+  }
+
   const rsvpEvents = (r: Rsvp) =>
     [r.attend_funeral && "Funeral", r.attend_reception && "Reception", r.attend_thanksgiving && "Thanksgiving"]
       .filter(Boolean).join(" · ") || "—";
@@ -717,7 +733,18 @@ export default function RsvpManager({
                           <td style={{ padding: "0.6rem 0.75rem", color: MUTED }}>{r.email ?? <span style={{ color: DIM }}>—</span>}</td>
                           <td style={{ padding: "0.6rem 0.75rem", color: MUTED, whiteSpace: "nowrap" }}>{r.phone ?? <span style={{ color: DIM }}>—</span>}</td>
                           <td style={{ padding: "0.6rem 0.75rem", color: MUTED, textAlign: "center" }}>{r.guests}</td>
-                          <td style={{ padding: "0.6rem 0.75rem", color: MUTED }}>{r.relation ?? "—"}</td>
+                          <td style={{ padding: "0.3rem 0.75rem" }}>
+                            <select
+                              value={r.relation ?? ""}
+                              onChange={e => patchRsvpRelation(r.id, e.target.value)}
+                              style={{ background: "transparent", border: `1px solid transparent`, borderRadius: "4px", color: r.relation ? MUTED : DIM, fontSize: "0.82rem", cursor: "pointer", padding: "0.25rem 0.4rem", appearance: "none" as const }}
+                              onMouseEnter={e => (e.currentTarget.style.borderColor = BORDER)}
+                              onMouseLeave={e => (e.currentTarget.style.borderColor = "transparent")}
+                            >
+                              <option value="">— select —</option>
+                              {RELATION_OPTIONS.map(o => <option key={o}>{o}</option>)}
+                            </select>
+                          </td>
                           <td style={{ padding: "0.6rem 0.75rem", color: MUTED, whiteSpace: "nowrap" }}>{rsvpEvents(r)}</td>
                           <td style={{ padding: "0.6rem 0.75rem", color: DIM, fontStyle: "italic", maxWidth: "160px" }}>
                             {r.message ? `"${r.message.slice(0, 50)}${r.message.length > 50 ? "…" : ""}"` : <span style={{ color: DIM }}>—</span>}
@@ -825,7 +852,18 @@ export default function RsvpManager({
                         <td style={{ padding: "0.6rem 0.75rem", color: MUTED }}>{d.email ?? <span style={{ color: DIM }}>—</span>}</td>
                         <td style={{ padding: "0.6rem 0.75rem", color: MUTED, whiteSpace: "nowrap" }}>{d.phone ?? <span style={{ color: DIM }}>—</span>}</td>
                         <td style={{ padding: "0.6rem 0.75rem", color: MUTED }}>{d.amount ?? <span style={{ color: DIM }}>—</span>}</td>
-                        <td style={{ padding: "0.6rem 0.75rem", color: MUTED }}>{d.relation ?? <span style={{ color: DIM }}>—</span>}</td>
+                        <td style={{ padding: "0.3rem 0.75rem" }}>
+                          <select
+                            value={d.relation ?? ""}
+                            onChange={e => patchDonorRelation(d.id, e.target.value)}
+                            style={{ background: "transparent", border: `1px solid transparent`, borderRadius: "4px", color: d.relation ? MUTED : DIM, fontSize: "0.82rem", cursor: "pointer", padding: "0.25rem 0.4rem", appearance: "none" as const }}
+                            onMouseEnter={e => (e.currentTarget.style.borderColor = BORDER)}
+                            onMouseLeave={e => (e.currentTarget.style.borderColor = "transparent")}
+                          >
+                            <option value="">— select —</option>
+                            {RELATION_OPTIONS.map(o => <option key={o}>{o}</option>)}
+                          </select>
+                        </td>
                         <td style={{ padding: "0.6rem 0.75rem", color: DIM, fontStyle: "italic" }}>{d.note ?? "—"}</td>
                         <td style={{ padding: "0.6rem 0.75rem" }}>{cardTypeBadge(d.attended ? "combined" : "donor")}</td>
                         <td style={{ padding: "0.6rem 0.75rem" }}>
