@@ -40,7 +40,7 @@ export default function AdminShell({ children, title }: { children: React.ReactN
       </div>
 
       {/* Page content */}
-      <div style={{ maxWidth: "900px", margin: "0 auto", padding: "2rem 1.5rem" }}>
+      <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "2rem 1.5rem" }}>
         <h1 style={{ fontFamily: "Garamond, Georgia, serif", fontSize: "1.6rem", fontWeight: 400, color: "#c8962e", marginBottom: "1.5rem" }}>
           {title}
         </h1>
