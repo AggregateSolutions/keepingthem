@@ -1323,7 +1323,14 @@ export default function RsvpManager({
                     {sendResult.sms.sent} sent
                   </div>
                   {sendResult.sms.failed > 0 && (
-                    <div style={{ fontSize: "0.75rem", color: RED, marginTop: "0.25rem" }}>{sendResult.sms.failed} failed</div>
+                    <div style={{ fontSize: "0.75rem", color: RED, marginTop: "0.25rem" }}>
+                      {sendResult.sms.failed} failed
+                      {sendResult.sms.failures?.length > 0 && (
+                        <div style={{ marginTop: "0.35rem", color: "#c07070", lineHeight: 1.6 }}>
+                          {sendResult.sms.failures.map((p, i) => <div key={i}>{p}</div>)}
+                        </div>
+                      )}
+                    </div>
                   )}
                 </div>
               )}
