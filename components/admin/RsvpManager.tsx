@@ -301,7 +301,7 @@ export default function RsvpManager({
         setDonors(d.donors ?? []);
         setLog(d.log ?? []);
         setMerged(d.merged ?? []);
-        setUnified(buildUnified(d.merged ?? [], smsData.recipients ?? [], sentPhones));
+        setUnified(buildUnified(d.merged ?? [], smsData.recipients ?? [], sentPhones).sort((a, b) => a.name.localeCompare(b.name)));
       })
       .catch(() => setError("Failed to load data"))
       .finally(() => setLoading(false));
